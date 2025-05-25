@@ -32,6 +32,7 @@ public class EtsyStokTakipApplication {
             } else {
                 logger.info("Admin user already exists. Updating password and role.");
             }
+            
             admin.setPassword(encoder.encode("admin123"));
             admin.setRole("ADMIN");
             userRepository.saveAndFlush(admin);
