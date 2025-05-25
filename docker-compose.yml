@@ -19,7 +19,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/etsystoktakip
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/etsystoktakip
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:

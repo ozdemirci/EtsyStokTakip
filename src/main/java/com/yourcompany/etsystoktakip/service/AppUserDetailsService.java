@@ -14,42 +14,75 @@ import org.slf4j.LoggerFactory;
 @Service
 public class AppUserDetailsService implements UserDetailsService {
     private static final Logger logger = LoggerFactory.getLogger(AppUserDetailsService.class);
+    
     @Autowired
     private AppUserRepository appUserRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            logger.info("Trying to load user by username: {}", username);
+            logger.debug("Authentication request received for username: {}", username);
+            writeLogToFile("Authentication request received for username: " + username);
+
+            if (username == null || username.trim().isEmpty()) {
+                String errorMsg = "Username cannot be empty";
+                logger.error(errorMsg);
+                writeLogToFile(errorMsg);
+                throw new UsernameNotFoundException(errorMsg);
+            }
+
+            logger.info("Searching for user in database: {}", username);
+            writeLogToFile("Searching for user in database: " + username);
+            
             AppUser appUser = appUserRepository.findByUsername(username)
                     .orElseThrow(() -> {
-                        logger.warn("User not found: {}", username);
-                        writeLogToFile("User not found: " + username);
-                        return new UsernameNotFoundException("Kullanıcı bulunamadı: " + username);
+                        String errorMsg = "User not found in database: " + username;
+                        logger.warn(errorMsg);
+                        writeLogToFile(errorMsg);
+                        return new UsernameNotFoundException(errorMsg);
                     });
-            logger.info("User found: {} (role: {})", appUser.getUsername(), appUser.getRole());
-            logger.info("User password hash: {}", appUser.getPassword());
-            writeLogToFile("User found: " + appUser.getUsername() + " (role: " + appUser.getRole() + ")");
-            writeLogToFile("User password hash: " + appUser.getPassword());
-            return User.withUsername(appUser.getUsername())
+
+            logger.info("User found successfully: {}", appUser.getUsername());
+            logger.debug("User details - ID: {}, Role: {}", appUser.getId(), appUser.getRole());
+            logger.debug("Password hash length: {}", appUser.getPassword().length());
+            
+            writeLogToFile("User found successfully: " + appUser.getUsername());
+            writeLogToFile("User details - Role: " + appUser.getRole());
+            writeLogToFile("Password hash present: " + (appUser.getPassword() != null && !appUser.getPassword().isEmpty()));
+
+            UserDetails userDetails = User.withUsername(appUser.getUsername())
                     .password(appUser.getPassword())
                     .roles(appUser.getRole().toUpperCase())
                     .build();
+
+            logger.info("UserDetails object created successfully for user: {}", username);
+            writeLogToFile("UserDetails object created successfully for user: " + username);
+            
+            return userDetails;
         } catch (Exception e) {
-            writeLogToFile("Exception in loadUserByUsername: " + e.getMessage());
+            String errorMsg = "Error during authentication for user '" + username + "': " + e.getMessage();
+            logger.error(errorMsg, e);
+            writeLogToFile(errorMsg);
             throw e;
         }
     }
 
     private void writeLogToFile(String log) {
         try {
+            String timestamp = java.time.LocalDateTime.now().toString();
+            String logEntry = timestamp + " - " + log + System.lineSeparator();
+            
+            java.nio.file.Path logPath = java.nio.file.Paths.get("/app/logs/auth-debug.txt");
+            java.nio.file.Files.createDirectories(logPath.getParent());
+            
             java.nio.file.Files.write(
-                java.nio.file.Paths.get("/app/logs/auth-debug.txt"),
-                (java.time.LocalDateTime.now() + " - " + log + System.lineSeparator()).getBytes(),
-                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND
+                logPath,
+                logEntry.getBytes(),
+                java.nio.file.StandardOpenOption.CREATE,
+                java.nio.file.StandardOpenOption.APPEND
             );
         } catch (Exception ex) {
-            logger.error("Failed to write log to file: {}", ex.getMessage());
+            logger.error("Failed to write log to file: {}", ex.getMessage(), ex);
         }
     }
 }
