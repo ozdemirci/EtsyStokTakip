@@ -2,59 +2,263 @@ package com.yourcompany.etsystoktakip.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    // Custom exception class (you'll need to create this)
+    public static class ResourceNotFoundException extends RuntimeException {
+        public ResourceNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    // Error response structure
+    private Map<String, Object> createErrorResponse(String error, String message, HttpStatus status) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", status.value());
+        body.put("error", error);
+        body.put("message", message);
+        return body;
+    }
+
     // Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
         logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-        Map<String, Object> body = new HashMap<>();
-        body.put("error", "Internal Server Error");
-        body.put("message", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Internal Server Error", 
+            "An unexpected error occurred. Please try again later.", 
+            HttpStatus.INTERNAL_SERVER_ERROR
+        );
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Handle specific exceptions (e.g., UsernameNotFoundException)
-    @ExceptionHandler(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
-    public ResponseEntity<Object> handleUsernameNotFoundException(org.springframework.security.core.userdetails.UsernameNotFoundException ex) {
+    // Handle authentication exceptions
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         logger.warn("Username not found: {}", ex.getMessage());
-        Map<String, Object> body = new HashMap<>();
-        body.put("error", "User Not Found");
-        body.put("message", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "User Not Found", 
+            ex.getMessage(), 
+            HttpStatus.NOT_FOUND
+        );
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    // Handle IllegalArgumentException
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("Invalid argument: {}", ex.getMessage());
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
+        logger.warn("Bad credentials: {}", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Authentication Failed", 
+            "Invalid username or password", 
+            HttpStatus.UNAUTHORIZED
+        );
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
+        logger.warn("Access denied: {}", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Access Denied", 
+            "You don't have permission to access this resource", 
+            HttpStatus.FORBIDDEN
+        );
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    // Handle validation exceptions
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        logger.warn("Validation failed: {}", ex.getMessage());
+        
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "Bad Request");
-        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("message", "Input validation failed");
+        body.put("validationErrors", errors);
+        
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle custom exceptions (e.g., ResourceNotFoundException)
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<Object> handleBindException(BindException ex) {
+        logger.warn("Binding failed: {}", ex.getMessage());
+        
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Binding Failed");
+        body.put("message", "Request binding failed");
+        body.put("validationErrors", errors);
+        
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+        logger.warn("Constraint violation: {}", ex.getMessage());
+        
+        Map<String, String> errors = ex.getConstraintViolations()
+            .stream()
+            .collect(Collectors.toMap(
+                violation -> violation.getPropertyPath().toString(),
+                ConstraintViolation::getMessage
+            ));
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Constraint Violation");
+        body.put("message", "Validation constraints violated");
+        body.put("validationErrors", errors);
+        
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle request parameter exceptions
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.warn("Invalid argument: {}", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Bad Request", 
+            ex.getMessage(), 
+            HttpStatus.BAD_REQUEST
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        logger.warn("Method argument type mismatch: {}", ex.getMessage());
+        String message = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s", 
+            ex.getValue(), ex.getName(), ex.getRequiredType().getSimpleName());
+        
+        Map<String, Object> body = createErrorResponse(
+            "Invalid Parameter Type", 
+            message, 
+            HttpStatus.BAD_REQUEST
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+        logger.warn("Missing request parameter: {}", ex.getMessage());
+        String message = String.format("Required parameter '%s' is missing", ex.getParameterName());
+        
+        Map<String, Object> body = createErrorResponse(
+            "Missing Parameter", 
+            message, 
+            HttpStatus.BAD_REQUEST
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle HTTP method exceptions
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        logger.warn("HTTP method not supported: {}", ex.getMessage());
+        String message = String.format("HTTP method '%s' is not supported for this endpoint. Supported methods: %s",
+            ex.getMethod(), String.join(", ", ex.getSupportedMethods()));
+        
+        Map<String, Object> body = createErrorResponse(
+            "Method Not Allowed", 
+            message, 
+            HttpStatus.METHOD_NOT_ALLOWED
+        );
+        return new ResponseEntity<>(body, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        logger.warn("HTTP message not readable: {}", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Malformed JSON", 
+            "Request body contains invalid JSON", 
+            HttpStatus.BAD_REQUEST
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle database exceptions
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        logger.warn("Data integrity violation: {}", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Data Integrity Violation", 
+            "The operation violates database constraints", 
+            HttpStatus.CONFLICT
+        );
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    // Handle custom exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
         logger.warn("Resource not found: {}", ex.getMessage());
-        Map<String, Object> body = new HashMap<>();
-        body.put("error", "Resource Not Found");
-        body.put("message", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Resource Not Found", 
+            ex.getMessage(), 
+            HttpStatus.NOT_FOUND
+        );
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    // Add more exception handlers as needed
+    // You can add more custom exception handlers here
+    // Example for business logic exceptions:
+    /*
+    @ExceptionHandler(BusinessLogicException.class)
+    public ResponseEntity<Object> handleBusinessLogicException(BusinessLogicException ex) {
+        logger.warn("Business logic error: {}", ex.getMessage());
+        Map<String, Object> body = createErrorResponse(
+            "Business Logic Error", 
+            ex.getMessage(), 
+            HttpStatus.UNPROCESSABLE_ENTITY
+        );
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    */
 }
