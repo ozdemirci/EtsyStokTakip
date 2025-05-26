@@ -3,6 +3,7 @@ package com.yourcompany.etsystoktakip.config;
 import com.yourcompany.etsystoktakip.controller.LoginController;
 import com.yourcompany.etsystoktakip.controller.ProductController;
 import com.yourcompany.etsystoktakip.controller.UserController;
+import com.yourcompany.etsystoktakip.exception.CustomException;
 import com.yourcompany.etsystoktakip.service.AppUserDetailsService;
 import com.yourcompany.etsystoktakip.service.AppUserService;
 import com.yourcompany.etsystoktakip.service.ProductService;
@@ -41,7 +42,7 @@ public class GlobalExceptionHandlerTest {
 
         // Mocking services to prevent NullPointerException and simulate exceptions
         when(productService.saveProduct(any())).thenThrow(new IllegalArgumentException("Mocked exception"));
-        when(appUserService.getAllUsers()).thenThrow(new UsernameNotFoundException("Mocked exception"));
+        when(appUserService.getAllUsers()).thenThrow(new CustomException("Mocked exception"));
     }
 
     @WithMockUser
