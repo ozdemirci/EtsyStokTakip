@@ -3,6 +3,7 @@ package com.yourcompany.etsystoktakip.controller;
 import com.yourcompany.etsystoktakip.model.Product;
 import com.yourcompany.etsystoktakip.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,10 @@ public class ProductController {
 
     @PostMapping("/add")
     public String addProduct(@ModelAttribute Product product) {
+        System.out.println("addProduct endpoint invoked with product: " + product);
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null");
+        }
         productService.saveProduct(product);
         return "redirect:/products";
     }
@@ -53,6 +58,11 @@ public class ProductController {
     public String deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return "redirect:/products";
-    }     
+    }    
     
+    @GetMapping("/forbidden")
+    public void simulateAccessDenied() {
+        System.out.println("Simulating AccessDeniedException");
+        throw new AccessDeniedException("You don't have permission to access this resource");
+    }
 }

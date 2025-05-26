@@ -14,13 +14,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -42,20 +41,10 @@ public class GlobalExceptionHandler {
         return body;
     }
 
-    // Handle generic exceptions
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
-        Map<String, Object> body = createErrorResponse(
-            "Internal Server Error", 
-            "An unexpected error occurred. Please try again later.", 
-            HttpStatus.INTERNAL_SERVER_ERROR
-        );
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     // Handle authentication exceptions
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        System.out.println("UsernameNotFoundException handler invoked");
         Map<String, Object> body = createErrorResponse(
             "User Not Found", 
             ex.getMessage(), 
@@ -76,6 +65,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
+        System.out.println("AccessDeniedException handler invoked"); // Debugging
+        ex.printStackTrace(); // Debugging: Print stack trace to identify the root cause
         Map<String, Object> body = createErrorResponse(
             "Access Denied", 
             "You don't have permission to access this resource", 
@@ -136,8 +127,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String message = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s", 
-            ex.getValue(), ex.getName(), ex.getRequiredType().getSimpleName());
+        String message = String.format("Invalid value '%s' for parameter '%s'.", 
+            ex.getValue(), ex.getName());
         
         Map<String, Object> body = createErrorResponse(
             "Invalid Parameter Type", 
@@ -175,6 +166,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        System.out.println("HttpMessageNotReadableException handler invoked");
+        System.out.println("HttpMessageNotReadableException handler invoked with message: " + ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Malformed JSON", 
             "Request body contains invalid JSON", 

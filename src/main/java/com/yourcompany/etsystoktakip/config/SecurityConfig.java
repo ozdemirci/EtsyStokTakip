@@ -37,25 +37,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/error", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/css/**", "/js/**", "/images/**", "/webjars/**", "/users/add").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/depo/**").hasAnyRole("ADMIN", "DEPO")
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() // Allow all requests without authentication
             )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/products", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
-            )
-            .authenticationProvider(authenticationProvider());
+            .formLogin(form -> form.disable()) // Disable form login
+            .logout(logout -> logout.disable()); // Disable logout
 
         return http.build();
     }
