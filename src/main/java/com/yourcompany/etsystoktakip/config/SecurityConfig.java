@@ -1,7 +1,5 @@
 package com.yourcompany.etsystoktakip.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +15,6 @@ import com.yourcompany.etsystoktakip.service.AppUserDetailsService;
 
 @Configuration
 public class SecurityConfig {
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     
     @Autowired
     private AppUserDetailsService appUserDetailsService;
@@ -27,7 +24,6 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(appUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
-        logger.debug("Configuring DaoAuthenticationProvider with AppUserDetailsService and BCryptPasswordEncoder");
         return provider;
     }
 
@@ -61,14 +57,12 @@ public class SecurityConfig {
             )
             .authenticationProvider(authenticationProvider());
 
-        logger.debug("Configured SecurityFilterChain with custom authentication provider");
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        logger.debug("Created new BCryptPasswordEncoder instance");
         return encoder;
     }
 }

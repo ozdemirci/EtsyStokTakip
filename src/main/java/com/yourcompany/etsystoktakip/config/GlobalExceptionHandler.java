@@ -1,7 +1,5 @@
 package com.yourcompany.etsystoktakip.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +24,6 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Custom exception class (you'll need to create this)
     public static class ResourceNotFoundException extends RuntimeException {
@@ -51,7 +45,6 @@ public class GlobalExceptionHandler {
     // Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
-        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
         Map<String, Object> body = createErrorResponse(
             "Internal Server Error", 
             "An unexpected error occurred. Please try again later.", 
@@ -63,7 +56,6 @@ public class GlobalExceptionHandler {
     // Handle authentication exceptions
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        logger.warn("Username not found: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "User Not Found", 
             ex.getMessage(), 
@@ -74,7 +66,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
-        logger.warn("Bad credentials: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Authentication Failed", 
             "Invalid username or password", 
@@ -85,7 +76,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
-        logger.warn("Access denied: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Access Denied", 
             "You don't have permission to access this resource", 
@@ -97,8 +87,6 @@ public class GlobalExceptionHandler {
     // Handle validation exceptions
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        logger.warn("Validation failed: {}", ex.getMessage());
-        
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -118,8 +106,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<Object> handleBindException(BindException ex) {
-        logger.warn("Binding failed: {}", ex.getMessage());
-        
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -137,31 +123,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
-        logger.warn("Constraint violation: {}", ex.getMessage());
-        
-        Map<String, String> errors = ex.getConstraintViolations()
-            .stream()
-            .collect(Collectors.toMap(
-                violation -> violation.getPropertyPath().toString(),
-                ConstraintViolation::getMessage
-            ));
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Constraint Violation");
-        body.put("message", "Validation constraints violated");
-        body.put("validationErrors", errors);
-        
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
     // Handle request parameter exceptions
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("Invalid argument: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Bad Request", 
             ex.getMessage(), 
@@ -172,7 +136,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        logger.warn("Method argument type mismatch: {}", ex.getMessage());
         String message = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s", 
             ex.getValue(), ex.getName(), ex.getRequiredType().getSimpleName());
         
@@ -186,7 +149,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
-        logger.warn("Missing request parameter: {}", ex.getMessage());
         String message = String.format("Required parameter '%s' is missing", ex.getParameterName());
         
         Map<String, Object> body = createErrorResponse(
@@ -200,7 +162,6 @@ public class GlobalExceptionHandler {
     // Handle HTTP method exceptions
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
-        logger.warn("HTTP method not supported: {}", ex.getMessage());
         String message = String.format("HTTP method '%s' is not supported for this endpoint. Supported methods: %s",
             ex.getMethod(), String.join(", ", ex.getSupportedMethods()));
         
@@ -214,7 +175,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        logger.warn("HTTP message not readable: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Malformed JSON", 
             "Request body contains invalid JSON", 
@@ -226,7 +186,6 @@ public class GlobalExceptionHandler {
     // Handle database exceptions
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        logger.warn("Data integrity violation: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Data Integrity Violation", 
             "The operation violates database constraints", 
@@ -238,7 +197,6 @@ public class GlobalExceptionHandler {
     // Handle custom exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        logger.warn("Resource not found: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Resource Not Found", 
             ex.getMessage(), 
