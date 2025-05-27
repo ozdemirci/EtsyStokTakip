@@ -52,11 +52,16 @@
         </dependency>
 
         <!-- Database Driver -->
-        <dependency>
+
+        <!--  PostgreSQL -->
+<!--    <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency> -->
+
+        <!--  H2 -->
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
