@@ -41,7 +41,7 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .successForwardUrl("/products") // Başarılı giriş sonrası yönlendirme
+                .defaultSuccessUrl("/products", true) // Başarılı giriş sonrası GET ile yönlendir
                 .permitAll()
             )
             .logout(logout -> logout.permitAll());
