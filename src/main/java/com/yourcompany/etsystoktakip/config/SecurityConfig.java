@@ -37,10 +37,14 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Allow all requests without authentication
+                .anyRequest().permitAll() // Gerekirse burayı özelleştir
             )
-            .formLogin(form -> form.disable()) // Disable form login
-            .logout(logout -> logout.disable()); // Disable logout
+            .formLogin(form -> form
+                .loginPage("/login")
+                .successForwardUrl("/products") // Başarılı giriş sonrası yönlendirme
+                .permitAll()
+            )
+            .logout(logout -> logout.permitAll());
 
         return http.build();
     }
