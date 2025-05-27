@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS Content (
+/* CREATE TABLE IF NOT EXISTS Content (
     id SERIAL PRIMARY KEY ,
     title varchar(255) NOT NULL,
     description text,
@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS Content (
 
 -- Insert data into 'Content (title, description, status, content_type, date_created, date_updated, url) VALUES (value1, value2);
 INSERT INTO Content (title, description, status, content_type, date_created, date_updated, url) 
-VALUES ("value1", "value2", "value3", "value4", NOW(), NOW(), "value5");
+VALUES ("value1", "value2", "value3", "value4", NOW(), NOW(), "value5"); */

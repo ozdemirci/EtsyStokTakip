@@ -12,20 +12,8 @@ import com.yourcompany.etsystoktakip.repository.AppUserRepository;
 
 
 @SpringBootApplication
-public class EtsyStokTakipApplication {
+public class EtsyStokTakipApplication {    
     
-     private final AppUserRepository appUserRepository;
-     private final PasswordEncoder passwordEncoder; 
-
-     public EtsyStokTakipApplication(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
-        this.appUserRepository = appUserRepository;
-        this.passwordEncoder = passwordEncoder;
-     }
-
-
-   
-
-
     public static void main(String[] args) {
 
         SpringApplication.run(EtsyStokTakipApplication.class, args);
@@ -38,9 +26,32 @@ public class EtsyStokTakipApplication {
      * Varsayılan admin kullanıcısını oluşturur.
      */
     @Bean
-    CommandLineRunner commandLineRunner() {
+    CommandLineRunner commandLineRunner(AppUserRepository appUserRepository, 
+                                        PasswordEncoder passwordEncoder) {
+
         return args -> {            
-            //createDefaultAdminIfNeeded();
+            
+             String adminUsername = "admin";
+        
+            // Check if admin exists
+             boolean adminExists = appUserRepository.findByUsername(adminUsername).isPresent();
+        
+         if (!adminExists) {
+            
+                 AppUser adminUser = new AppUser();
+                 adminUser.setUsername(adminUsername);
+                 String password = "admin123";
+                 adminUser.setPassword(passwordEncoder.encode(password));
+                 adminUser.setRole("ADMIN");
+            
+                 try {
+                appUserRepository.save(adminUser);
+                 } catch (Exception e) {
+                throw new RuntimeException("Admin kullanıcısı oluşturulamadı", e);
+                 }
+            } 
+
+
         };
     }
 
@@ -48,28 +59,7 @@ public class EtsyStokTakipApplication {
 
 
 
-    private void createDefaultAdminIfNeeded() {
-        String adminUsername = "admin";
-        
-        // Check if admin exists
-        boolean adminExists = appUserRepository.findByUsername(adminUsername).isPresent();
-        
-        if (!adminExists) {
-            
-            AppUser adminUser = new AppUser();
-            adminUser.setUsername(adminUsername);
-            String password = "admin123";
-            adminUser.setPassword(passwordEncoder.encode(password));
-            adminUser.setRole("ADMIN");
-            
-            try {
-                appUserRepository.save(adminUser);
-            } catch (Exception e) {
-                throw new RuntimeException("Admin kullanıcısı oluşturulamadı", e);
-            }
-        } 
-    }
-
+    
 
 
 

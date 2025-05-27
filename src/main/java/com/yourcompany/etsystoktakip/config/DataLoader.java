@@ -23,7 +23,7 @@ public class DataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        createDefaultAdminIfNeeded();
+       // createDefaultAdminIfNeeded();
     }
 
     private void createDefaultAdminIfNeeded() {
