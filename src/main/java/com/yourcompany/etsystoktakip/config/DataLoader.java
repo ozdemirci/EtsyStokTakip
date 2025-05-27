@@ -2,20 +2,23 @@ package com.yourcompany.etsystoktakip.config;
 
 import com.yourcompany.etsystoktakip.model.AppUser;
 import com.yourcompany.etsystoktakip.repository.AppUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class InitialDataConfig implements CommandLineRunner {
+public class DataLoader implements CommandLineRunner {
 
-    @Autowired
-    private AppUserRepository appUserRepository;
+     
+    private final AppUserRepository appUserRepository;   
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+
+    public DataLoader(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
+        this.appUserRepository = appUserRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @Transactional
@@ -38,7 +41,7 @@ public class InitialDataConfig implements CommandLineRunner {
             adminUser.setRole("ADMIN");
             
             try {
-                AppUser savedAdmin = appUserRepository.save(adminUser);
+                appUserRepository.save(adminUser);
             } catch (Exception e) {
                 throw new RuntimeException("Admin kullanıcısı oluşturulamadı", e);
             }

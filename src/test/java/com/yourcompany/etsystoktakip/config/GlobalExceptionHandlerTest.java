@@ -4,6 +4,7 @@ import com.yourcompany.etsystoktakip.controller.LoginController;
 import com.yourcompany.etsystoktakip.controller.ProductController;
 import com.yourcompany.etsystoktakip.controller.UserController;
 import com.yourcompany.etsystoktakip.exception.CustomException;
+import com.yourcompany.etsystoktakip.exception.GlobalExceptionHandler;
 import com.yourcompany.etsystoktakip.service.AppUserDetailsService;
 import com.yourcompany.etsystoktakip.service.AppUserService;
 import com.yourcompany.etsystoktakip.service.ProductService;

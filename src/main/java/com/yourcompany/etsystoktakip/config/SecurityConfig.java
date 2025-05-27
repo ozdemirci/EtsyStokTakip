@@ -1,6 +1,6 @@
 package com.yourcompany.etsystoktakip.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,8 +16,12 @@ import com.yourcompany.etsystoktakip.service.AppUserDetailsService;
 @Configuration
 public class SecurityConfig {
     
-    @Autowired
-    private AppUserDetailsService appUserDetailsService;
+     
+    private final AppUserDetailsService appUserDetailsService;
+
+    public SecurityConfig(AppUserDetailsService appUserDetailsService) {
+        this.appUserDetailsService = appUserDetailsService;
+    }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {

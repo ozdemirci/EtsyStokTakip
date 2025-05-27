@@ -1,4 +1,4 @@
-package com.yourcompany.etsystoktakip.config;
+package com.yourcompany.etsystoktakip.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
