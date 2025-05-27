@@ -15,9 +15,5 @@ public class LoginController {
         return "login"; // templates/login.html
     }
     
-    @PostMapping("/login")
-    public void simulateBadCredentials() {
-        System.out.println("Simulating BadCredentialsException");
-        throw new BadCredentialsException("Invalid username or password");
-    }
+    
 }
