@@ -25,7 +25,7 @@ public class EtsyStokTakipApplication {
      * Uygulama başlatıldığında çalışacak komut satırı koşucusu.
      * Varsayılan admin kullanıcısını oluşturur.
      */
-    @Bean
+   // @Bean
     CommandLineRunner commandLineRunner(AppUserRepository appUserRepository, 
                                         PasswordEncoder passwordEncoder) {
 

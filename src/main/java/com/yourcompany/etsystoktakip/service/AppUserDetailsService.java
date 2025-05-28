@@ -17,6 +17,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
         try {
             if (username == null || username.trim().isEmpty()) {
                 String errorMsg = "Username cannot be empty";
@@ -37,6 +38,7 @@ public class AppUserDetailsService implements UserDetailsService {
             return userDetails;
         } catch (Exception e) {
             throw e;
+
         }
     }
 }
