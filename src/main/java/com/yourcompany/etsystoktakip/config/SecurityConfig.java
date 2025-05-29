@@ -15,8 +15,8 @@ import com.yourcompany.etsystoktakip.service.AppUserDetailsService;
 
 @Configuration
 public class SecurityConfig {
-    
-     
+
+
     private final AppUserDetailsService appUserDetailsService;
 
     public SecurityConfig(AppUserDetailsService appUserDetailsService) {
@@ -39,16 +39,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            // Enable CSRF protection for better security
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Gerekirse burayı özelleştir
+                // Public resources that don't require authentication
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+
+                // User management endpoints - restricted to ADMIN role
+                .requestMatchers("/users/**").hasRole("ADMIN")
+
+                // Product management endpoints
+                .requestMatchers("/products").authenticated()
+                .requestMatchers("/products/add", "/products/edit/**", "/products/delete/**").hasAnyRole("ADMIN", "DEPO")
+
+                // Any other request requires authentication
+                .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/products", true) // Başarılı giriş sonrası GET ile yönlendir
+                .defaultSuccessUrl("/products", true)
+                .failureUrl("/login?error=true")
                 .permitAll()
             )
-            .logout(logout -> logout.permitAll());
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedPage("/access-denied")
+            );
 
         return http.build();
     }
