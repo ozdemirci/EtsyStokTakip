@@ -41,7 +41,7 @@ public class UserController {
     @PostMapping("/add")
     public String addUser(@ModelAttribute UserCreateDTO userCreateDTO) {
         appUserService.saveUser(userCreateDTO);
-        return "redirect:/users/list";
+        return "redirect:/users";
     }
 
     /**
@@ -51,7 +51,7 @@ public class UserController {
      * @param model the model to add attributes to
      * @return the view name
      */
-    @GetMapping("/list")
+    @GetMapping()
     public String listUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
