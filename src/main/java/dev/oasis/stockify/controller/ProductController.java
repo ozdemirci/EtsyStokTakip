@@ -27,6 +27,7 @@ public class ProductController {
      * Displays a paginated list of products
      * @param page the page number (0-based)
      * @param size the page size
+     * @param search the search query
      * @param model the model to add attributes to
      * @return the view name
      */
@@ -34,9 +35,16 @@ public class ProductController {
     public String listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
             Model model) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<ProductResponseDTO> productPage = productService.getProductsPage(pageable);
+        Page<ProductResponseDTO> productPage;
+
+        if (search != null && !search.trim().isEmpty()) {
+            productPage = productService.searchProducts(search.trim(), pageable);
+        } else {
+            productPage = productService.getProductsPage(pageable);
+        }
 
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("currentPage", productPage.getNumber());

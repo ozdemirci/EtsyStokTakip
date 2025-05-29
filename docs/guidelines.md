@@ -31,7 +31,7 @@ EtsyStokTakip/
 │   │   └── resources/
 │   │       ├── templates/            # Thymeleaf templates
 │   │       ├── application.properties # Application configuration
-│   │       └── schema.sql            # Database schema
+│   │                                     
 │   └── test/                         # Test classes
 ├── Dockerfile                        # Docker configuration
 ├── docker-compose.yml                # Docker Compose configuration

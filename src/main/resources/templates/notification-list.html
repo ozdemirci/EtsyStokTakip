@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Stok Bildirimleri</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h2>Stok Bildirimleri</h2>
+
+        <div class="notifications-container">
+            <div th:if="${notifications.empty}" class="alert alert-info">
+                Hiç bildirim bulunmuyor.
+            </div>
+
+            <div th:each="notification : ${notifications}"
+                 th:class="${'alert ' + (notification.read ? 'alert-secondary' : 'alert-warning')}"
+                 th:id="${'notification-' + notification.id}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong th:text="${notification.product.title}">Ürün Adı</strong>
+                        <p class="mb-0" th:text="${notification.message}">Bildirim mesajı</p>
+                        <small class="text-muted" th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">Tarih</small>
+                    </div>
+                    <div th:if="${!notification.read}">
+                        <button class="btn btn-sm btn-outline-secondary mark-as-read"
+                                th:data-id="${notification.id}">
+                            Okundu olarak işaretle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="script">
+        document.querySelectorAll('.mark-as-read').forEach(button => {
+            button.addEventListener('click', function() {
+                const notificationId = this.getAttribute('data-id');
+                fetch(`/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then(() => {
+                    const notification = document.getElementById(`notification-${notificationId}`);
+                    notification.classList.remove('alert-warning');
+                    notification.classList.add('alert-secondary');
+                    this.parentElement.remove();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

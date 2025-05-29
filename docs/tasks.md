@@ -1,103 +1,90 @@
-# EtsyStokTakip Improvement Tasks
+# Stockify Improvement Tasks (Advanced Version)
 
-This document contains a prioritized list of improvement tasks for the EtsyStokTakip application. Each task is marked with a checkbox that can be checked off when completed.
+> Bu belge, Stockify projesinde gerçekleştirilecek geliştirme görevlerini öncelik sırasına göre gruplandırır. Her görev açıklaması ve zorluk derecesi ile birlikte sunulmuştur.
 
-## Architecture Improvements
+---
 
-1. [ ] Implement proper layered architecture with clear separation of concerns
-2. [x] Create DTOs (Data Transfer Objects) to separate entity models from API/UI models
-3. [ ] Implement a proper exception handling strategy with custom exceptions
-4. [x] Add pagination support for product and user listings
-5. [ ] Implement caching for frequently accessed data
-6. [ ] Create environment-specific configuration files (dev, test, prod)
-7. [ ] Implement API versioning for future compatibility
-8. [ ] Add support for internationalization (i18n) and localization (l10n)
+## ✅ Architecture Improvements
 
-## Code Quality Improvements
+| ID  | Task                                                                 | Priority | Difficulty | Description |
+|-----|----------------------------------------------------------------------|----------|------------|-------------|
+| A1  | Refactor into layered architecture (Controller → Service → Repo)   | 🔴 High  | ⭐⭐⭐⭐        | Kodun okunabilirliğini ve sürdürülebilirliğini artırmak için katmanlı mimariyi netleştir. |
+| A2  | Implement global exception handler with custom exceptions          | 🔴 High  | ⭐⭐⭐         | API seviyesinde anlaşılabilir hata mesajları üret. |
+| A3  | Add caching for frequently accessed endpoints (Spring Cache)       | 🟡 Medium| ⭐⭐⭐         | Ürün ve kullanıcı listeleri gibi sık erişilen veriler için performans iyileştirmesi. |
+| A4  | Environment-specific config files (dev, test, prod)                | 🟡 Medium| ⭐⭐          | Farklı ortamlarda konfigürasyon esnekliği sağlar. |
+| A5  | Add i18n support with `messages.properties`                        | 🟢 Low   | ⭐⭐⭐         | Çok dilli destek için gerekli. Başlangıçta Türkçe ve İngilizce önerilir. |
 
-9. [ ] Replace field injection (@Autowired) with constructor injection throughout the application
-10. [ ] Use Lombok to reduce boilerplate code in model classes
-11. [ ] Implement consistent error handling across all services
-12. [ ] Replace System.out.println with proper logging using SLF4J
-13. [ ] Add validation for all input data in controllers
-14. [ ] Implement proper transaction management with @Transactional annotations
-15. [ ] Fix encoding issues in application.properties and other files
-16. [ ] Remove duplicate configurations in application.properties
-17. [ ] Organize application.properties by logical sections
-18. [ ] Convert role strings to enum for type safety
-19. [ ] Remove testing/debugging endpoints (simulateAccessDenied, simulateUserNotFound)
-20. [ ] Add proper JavaDoc comments to all classes and methods
+---
 
-## Security Improvements
+## 🧼 Code Quality Improvements
 
-21. [ ] Implement password complexity requirements
-22. [ ] Add rate limiting for authentication attempts
-23. [ ] Implement proper CSRF protection for all forms
-24. [ ] Add security headers (Content-Security-Policy, X-XSS-Protection, etc.)
-25. [ ] Implement account lockout after failed login attempts
-26. [ ] Add two-factor authentication for admin users
-27. [ ] Implement proper password reset functionality
-28. [ ] Add audit logging for security-sensitive operations
-29. [ ] Implement proper session management
-30. [ ] Conduct a security review of all endpoints
+| ID  | Task                                                         | Priority | Difficulty | Description |
+|-----|--------------------------------------------------------------|----------|------------|-------------|
+| C1  | Replace `@Autowired` fields with constructor injection       | 🔴 High  | ⭐⭐          | Bağımlılıkların yönetimini daha güvenilir hale getirir. |
+| C2  | Introduce Lombok (`@Data`, `@Builder`, vs.) for models       | 🟡 Medium| ⭐⭐          | Getter/Setter/Constructor boilerplate’ini azalt. |
+| C3  | Replace `System.out.println` with SLF4J logger               | 🟡 Medium| ⭐⭐          | Üretim ortamı için uygun loglama standardı. |
+| C4  | Add `@Valid` and Bean Validation annotations to DTOs         | 🔴 High  | ⭐⭐          | Güvenlik ve veri bütünlüğü açısından kritik. |
+| C5  | Convert roles to Enum (`Role.ADMIN`, vs.)                   | 🟢 Low   | ⭐⭐          | Tip güvenliği ve kod tamamlama kolaylığı sağlar. |
 
-## Performance Improvements
+---
 
-31. [ ] Optimize database queries with proper indexing
-32. [ ] Implement database connection pooling
-33. [ ] Add caching for static resources
-34. [ ] Optimize Thymeleaf templates for performance
-35. [ ] Implement lazy loading for entity relationships
-36. [ ] Add database query performance logging
-37. [ ] Implement asynchronous processing for non-critical operations
-38. [ ] Optimize JPA entity mappings
+## 🔐 Security Improvements
 
-## Testing Improvements
+| ID  | Task                                              | Priority | Difficulty | Description |
+|-----|---------------------------------------------------|----------|------------|-------------|
+| S1  | Password complexity validation                    | 🔴 High  | ⭐⭐          | Zayıf şifre kullanımını önle. |
+| S2  | Rate limiting for login attempts (e.g., Bucket4j) | 🔴 High  | ⭐⭐⭐         | Brute force saldırılarına karşı koruma sağlar. |
+| S3  | Add CSRF tokens to all forms                      | 🔴 High  | ⭐⭐          | Cross-site request forgery saldırılarını önle. |
+| S4  | Implement account lockout after N failed attempts | 🟡 Medium| ⭐⭐⭐         | Hesap güvenliğini artırır. |
+| S5  | Add 2FA support for admin users                   | 🟢 Low   | ⭐⭐⭐⭐        | Yönetici hesaplarının güvenliğini artırır. |
 
-39. [ ] Implement unit tests for all service classes
-40. [ ] Add integration tests for controllers
-41. [ ] Implement end-to-end tests for critical user flows
-42. [ ] Set up test coverage reporting
-43. [ ] Add performance tests for critical operations
-44. [ ] Implement database migration tests
-45. [ ] Add security vulnerability scanning in the test pipeline
-46. [ ] Implement contract tests for API endpoints
+---
 
-## Feature Improvements
+## 🚀 Feature Improvements
 
-47. [ ] Implement user profile management
-48. [ ] Add product search functionality
-49. [ ] Implement product import/export features
-50. [ ] Add reporting capabilities for stock levels and sales
-51. [ ] Implement notifications for low stock levels
-52. [ ] Add support for product images
-53. [ ] Implement product categorization with hierarchical categories
-54. [ ] Add batch operations for products (bulk update, delete)
-55. [ ] Implement order management functionality
-56. [ ] Add dashboard with key metrics
+| ID  | Task                                     | Priority | Difficulty | Description |
+|-----|------------------------------------------|----------|------------|-------------|
+| F1  | Add product import/export (CSV, Excel)   | 🟡 Medium| ⭐⭐⭐⭐        | Toplu ürün yükleme ve dışa aktarma için gerekli. |
+| F2  | Implement dashboard with metrics         | 🟡 Medium| ⭐⭐⭐         | Kullanıcı deneyimini zenginleştirir. |
+| F3  | Add product image upload & preview       | 🟡 Medium| ⭐⭐⭐         | Ürün yönetimini daha görsel hale getirir. |
+| F4  | Implement notifications for low stock    | 🔴 High  | ⭐⭐⭐         | Kritik stoğu önceden haber verir. |
+| F5  | Add search & filter to product list      | 🔴 High  | ⭐⭐          | Kullanıcılar ürünleri daha kolay bulur. |
 
-## DevOps Improvements
+---
 
-57. [ ] Set up CI/CD pipeline
-58. [ ] Implement automated testing in the CI pipeline
-59. [ ] Add Docker health checks
-60. [ ] Implement proper logging and monitoring
-61. [ ] Set up database backup and restore procedures
-62. [ ] Implement infrastructure as code for deployment
-63. [ ] Add application metrics collection
-64. [ ] Implement blue-green deployment strategy
-65. [ ] Set up alerting for application issues
-66. [ ] Implement proper secret management
+## 🧪 Testing Improvements
 
-## Documentation Improvements
+| ID  | Task                                    | Priority | Difficulty | Description |
+|-----|-----------------------------------------|----------|------------|-------------|
+| T1  | Write unit tests for all services       | 🔴 High  | ⭐⭐⭐         | İş mantığı güvenliği için temel gereksinim. |
+| T2  | Add integration tests for controllers   | 🟡 Medium| ⭐⭐⭐         | API uçlarının doğru çalıştığından emin olun. |
+| T3  | Add test coverage reports (JaCoCo)      | 🟡 Medium| ⭐⭐          | Kod kalitesi izlenebilirliği sağlar. |
 
-67. [ ] Create comprehensive API documentation
-68. [ ] Add user manual for the application
-69. [ ] Document database schema and relationships
-70. [ ] Create developer onboarding documentation
-71. [ ] Add architecture diagrams
-72. [ ] Document deployment procedures
-73. [ ] Create troubleshooting guide
-74. [ ] Add code style guidelines
-75. [ ] Document security practices
-76. [ ] Create change log for releases
+---
+
+## ⚙️ DevOps Improvements
+
+| ID  | Task                                | Priority | Difficulty | Description |
+|-----|-------------------------------------|----------|------------|-------------|
+| D1  | Set up CI/CD (e.g., GitHub Actions) | 🔴 High  | ⭐⭐⭐⭐        | Otomatik build, test ve deploy süreci. |
+| D2  | Add Docker health checks            | 🟡 Medium| ⭐⭐          | Uygulamanın canlılığını kontrol et. |
+| D3  | Add logging & monitoring (e.g., ELK) | 🟡 Medium| ⭐⭐⭐⭐        | Canlı ortamda hata ayıklamayı kolaylaştırır. |
+
+---
+
+## 📄 Documentation
+
+| ID  | Task                                  | Priority | Difficulty | Description |
+|-----|---------------------------------------|----------|------------|-------------|
+| DOC1| Create Swagger/OpenAPI documentation | 🔴 High  | ⭐⭐          | API kullanıcıları için anlaşılır dökümantasyon. |
+| DOC2| Add developer onboarding guide       | 🟡 Medium| ⭐⭐          | Yeni geliştiricilerin hızlı başlamasını sağlar. |
+| DOC3| Document database relationships      | 🟡 Medium| ⭐⭐          | Geliştiricilerin veri modelini anlamasına yardımcı olur. |
+
+---
+
+## 🔚 Sonuç
+
+Yukarıdaki görevler, projenin teknik kalitesini, güvenliğini, performansını ve kullanıcı deneyimini sistematik bir şekilde geliştirmek için yapılandırılmıştır. Tavsiyem, önce kırmızı 🔴 öncelikli görevleri tamamlamanızdır. Bu görevlerin çoğu, sonraki geliştirmeler için sağlam bir temel oluşturacaktır.
+
+---
+

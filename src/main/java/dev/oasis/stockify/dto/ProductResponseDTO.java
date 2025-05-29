@@ -11,6 +11,7 @@ public class ProductResponseDTO {
     private String category;
     private BigDecimal price;
     private int stockLevel;
+    private int lowStockThreshold;
     private String etsyProductId;
 
     // Getters and Setters
@@ -54,6 +55,18 @@ public class ProductResponseDTO {
         this.stockLevel = stockLevel;
     }
 
+    public int getLowStockThreshold() {
+        return lowStockThreshold;
+    }
+
+    public void setLowStockThreshold(int lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
+    }
+
+    public boolean isLowStock() {
+        return stockLevel <= lowStockThreshold;
+    }
+
     public String getEtsyProductId() {
         return etsyProductId;
     }
@@ -62,3 +75,4 @@ public class ProductResponseDTO {
         this.etsyProductId = etsyProductId;
     }
 }
+

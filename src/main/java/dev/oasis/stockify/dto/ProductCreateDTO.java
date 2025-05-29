@@ -23,7 +23,10 @@ public class ProductCreateDTO {
 
     @Min(value = 0, message = "Stok negatif olamaz")
     private int stockLevel;
-    
+
+    @Min(value = 1, message = "Düşük stok eşiği en az 1 olmalıdır")
+    private int lowStockThreshold = 5;
+
     private String etsyProductId;
 
     // Getters and Setters
@@ -59,6 +62,14 @@ public class ProductCreateDTO {
         this.stockLevel = stockLevel;
     }
 
+    public int getLowStockThreshold() {
+        return lowStockThreshold;
+    }
+
+    public void setLowStockThreshold(int lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
+    }
+
     public String getEtsyProductId() {
         return etsyProductId;
     }
@@ -67,3 +78,4 @@ public class ProductCreateDTO {
         this.etsyProductId = etsyProductId;
     }
 }
+

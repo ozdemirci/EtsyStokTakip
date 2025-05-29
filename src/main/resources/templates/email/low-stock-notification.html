@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .notification {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .product-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification">
+        <div class="warning">
+            <h2>Düşük Stok Uyarısı!</h2>
+            <p>Aşağıdaki ürünün stok seviyesi belirlenen eşiğin altına düşmüştür:</p>
+        </div>
+
+        <div class="product-info">
+            <h3 th:text="${product.title}">Ürün Adı</h3>
+            <p><strong>Kategori:</strong> <span th:text="${product.category}">Kategori</span></p>
+            <p><strong>Mevcut Stok:</strong> <span th:text="${product.stockLevel}">0</span></p>
+            <p><strong>Stok Eşiği:</strong> <span th:text="${product.lowStockThreshold}">5</span></p>
+            <p th:if="${product.etsyProductId}">
+                <strong>Etsy Ürün ID:</strong> <span th:text="${product.etsyProductId}">ID</span>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Bu e-posta Stockify stok takip sistemi tarafından otomatik olarak gönderilmiştir.</p>
+        </div>
+    </div>
+</body>
+</html>
+

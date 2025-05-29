@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,10 +21,14 @@ import java.util.Optional;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final StockNotificationService stockNotificationService;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
+    public ProductService(ProductRepository productRepository,
+                        ProductMapper productMapper,
+                        StockNotificationService stockNotificationService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
+        this.stockNotificationService = stockNotificationService;
     }
 
     /**
@@ -47,6 +52,18 @@ public class ProductService {
     }
 
     /**
+     * Searches for products by title or category
+     * @param searchTerm the search term to match against title or category
+     * @param pageable pagination information
+     * @return a page of matching products
+     */
+    public Page<ProductResponseDTO> searchProducts(String searchTerm, Pageable pageable) {
+        Page<Product> productPage = productRepository.search(searchTerm, pageable);
+        List<ProductResponseDTO> productDtos = productMapper.toDtoList(productPage.getContent());
+        return new PageImpl<>(productDtos, pageable, productPage.getTotalElements());
+    }
+
+    /**
      * Retrieves a product by its ID
      * @param id the ID of the product to retrieve
      * @return an Optional containing the product if found, or empty if not found
@@ -64,6 +81,7 @@ public class ProductService {
     public ProductResponseDTO saveProduct(ProductCreateDTO productCreateDTO) {
         Product product = productMapper.toEntity(productCreateDTO);
         Product savedProduct = productRepository.save(product);
+        stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
         return productMapper.toDto(savedProduct);
     }
 
@@ -77,9 +95,29 @@ public class ProductService {
         return productRepository.findById(id)
                 .map(existingProduct -> {
                     Product updatedProduct = productMapper.updateEntity(existingProduct, productCreateDTO);
-                    return productRepository.save(updatedProduct);
+                    Product saved = productRepository.save(updatedProduct);
+                    stockNotificationService.checkAndCreateLowStockNotification(saved);
+                    return saved;
                 })
                 .map(productMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    }
+
+    /**
+     * Updates the stock level of a product
+     * @param id the ID of the product
+     * @param newStockLevel the new stock level
+     * @return the updated product data
+     */
+    @Transactional
+    public ProductResponseDTO updateStockLevel(Long id, int newStockLevel) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    product.setStockLevel(newStockLevel);
+                    Product saved = productRepository.save(product);
+                    stockNotificationService.checkAndCreateLowStockNotification(saved);
+                    return productMapper.toDto(saved);
+                })
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
     }
 

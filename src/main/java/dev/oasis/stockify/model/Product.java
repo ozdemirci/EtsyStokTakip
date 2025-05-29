@@ -26,6 +26,10 @@ public class Product {
 
     @Min(value = 0, message = "Stok negatif olamaz")
     private int stockLevel;
+
+    @Min(value = 1, message = "Düşük stok eşiği en az 1 olmalıdır")
+    private int lowStockThreshold = 5; // Default value of 5
+
     private String etsyProductId;
 
     // Getters and Setters
@@ -43,6 +47,13 @@ public class Product {
 
     public int getStockLevel() { return stockLevel; }
     public void setStockLevel(int stockLevel) { this.stockLevel = stockLevel; }
+
+    public int getLowStockThreshold() { return lowStockThreshold; }
+    public void setLowStockThreshold(int lowStockThreshold) { this.lowStockThreshold = lowStockThreshold; }
+
+    public boolean isLowStock() {
+        return stockLevel <= lowStockThreshold;
+    }
 
     public String getEtsyProductId() { return etsyProductId; }
     public void setEtsyProductId(String etsyProductId) { this.etsyProductId = etsyProductId; }

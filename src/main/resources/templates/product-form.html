@@ -7,8 +7,8 @@
 </head>
 <body>
 <div class="container mt-4">
-    <h2 th:text="${product.id} != null ? 'Ürün Düzenle' : 'Yeni Ürün Ekle'"></h2>
-    <form th:action="${product.id} != null ? @{'/products/edit/' + ${product.id}} : @{/products/add}" th:object="${product}" method="post">
+    <h2 th:text="${product != null && product.title != null} ? 'Ürün Düzenle' : 'Yeni Ürün Ekle'"></h2>
+    <form th:action="@{/products/add}" th:object="${product}" method="post">
         <div class="mb-3">
             <label for="title" class="form-label">Başlık</label>
             <input type="text" class="form-control" id="title" th:field="*{title}" required>
@@ -24,6 +24,12 @@
         <div class="mb-3">
             <label for="stockLevel" class="form-label">Stok</label>
             <input type="number" class="form-control" id="stockLevel" th:field="*{stockLevel}" required>
+        </div>
+        <div class="mb-3">
+            <label for="lowStockThreshold" class="form-label">Düşük Stok Eşiği</label>
+            <input type="number" class="form-control" id="lowStockThreshold" th:field="*{lowStockThreshold}"
+                   min="1" value="5" required>
+            <div class="form-text">Bu değerin altındaki stok seviyeleri için bildirim alacaksınız.</div>
         </div>
         <button type="submit" class="btn btn-success">Kaydet</button>
         <a href="/products" class="btn btn-secondary">İptal</a>
