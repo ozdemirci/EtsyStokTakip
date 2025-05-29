@@ -35,7 +35,6 @@ public class Stockify {
              boolean adminExists = appUserRepository.findByUsername(adminUsername).isPresent();
         
          if (!adminExists) {
-            
                  AppUser adminUser = new AppUser();
                  adminUser.setUsername(adminUsername);
                  String password = "admin123";
@@ -47,19 +46,7 @@ public class Stockify {
                  } catch (Exception e) {
                 throw new RuntimeException("Admin kullanıcısı oluşturulamadı", e);
                  }
-            } 
-
-
+            }
         };
     }
-
-
-
-
-
-    
-
-
-
-
 }

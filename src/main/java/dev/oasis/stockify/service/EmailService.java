@@ -11,7 +11,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import dev.oasis.stockify.model.Product;
 
-
 @Service
 public class EmailService {
 
@@ -33,8 +32,7 @@ public class EmailService {
     }
 
     public void sendLowStockNotification(Product product) {
-
-
+        try {
             Context context = new Context();
             context.setVariable("product", product);
 
@@ -49,9 +47,8 @@ public class EmailService {
             helper.setText(emailContent, true);
 
             mailSender.send(message);
-
-
-
-
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
+        }
     }
 }

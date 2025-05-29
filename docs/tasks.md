@@ -1,90 +1,68 @@
-# Stockify Improvement Tasks (Advanced Version)
+# Stockify Development Tasks
 
-> Bu belge, Stockify projesinde gerçekleştirilecek geliştirme görevlerini öncelik sırasına göre gruplandırır. Her görev açıklaması ve zorluk derecesi ile birlikte sunulmuştur.
-
----
+This document presents development tasks aimed at improving the Spring Boot-based infrastructure and features of the Stockify project, prioritized and detailed from a Spring expert's perspective. Each task is listed with its expected impact, suggested Spring technologies, and estimated difficulty level.
 
 ## ✅ Architecture Improvements
 
-| ID  | Task                                                                 | Priority | Difficulty | Description |
-|-----|----------------------------------------------------------------------|----------|------------|-------------|
-| A1  | Refactor into layered architecture (Controller → Service → Repo)   | 🔴 High  | ⭐⭐⭐⭐        | Kodun okunabilirliğini ve sürdürülebilirliğini artırmak için katmanlı mimariyi netleştir. |
-| A2  | Implement global exception handler with custom exceptions          | 🔴 High  | ⭐⭐⭐         | API seviyesinde anlaşılabilir hata mesajları üret. |
-| A3  | Add caching for frequently accessed endpoints (Spring Cache)       | 🟡 Medium| ⭐⭐⭐         | Ürün ve kullanıcı listeleri gibi sık erişilen veriler için performans iyileştirmesi. |
-| A4  | Environment-specific config files (dev, test, prod)                | 🟡 Medium| ⭐⭐          | Farklı ortamlarda konfigürasyon esnekliği sağlar. |
-| A5  | Add i18n support with `messages.properties`                        | 🟢 Low   | ⭐⭐⭐         | Çok dilli destek için gerekli. Başlangıçta Türkçe ve İngilizce önerilir. |
-
----
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| A1 | Refactor to layered architecture (Controller → Service → Repository) | 🔴 High | ⭐⭐⭐⭐ | Clarify the layered architecture according to Spring best practices (Presentation: @RestController, Business: @Service, Data Access: @Repository annotations) to enhance code readability, testability, and maintainability. |
+| A2 | Implement global exception handler with custom exceptions | 🔴 High | ⭐⭐⭐ | Provide centralized error management for the entire API using Spring's @ControllerAdvice and @ExceptionHandler mechanisms. Create custom RuntimeException-derived exception classes for business rules to produce clear and standard error messages (with ErrorResponse DTOs). |
+| A3 | Add caching for frequently accessed endpoints (Spring Cache) | 🟡 Medium | ⭐⭐⭐ | Improve performance for frequently accessed data (e.g., product lists, category information) by using Spring Cache (@EnableCaching, @Cacheable, @CacheEvict). Integrate a suitable cache provider (e.g., Caffeine, Redis). |
+| A4 | Add i18n support with messages.properties | 🟢 Low | ⭐⭐⭐ | Implement internationalization using Spring's MessageSource and ResourceBundleMessageSource. Start with Turkish and English. |
 
 ## 🧼 Code Quality Improvements
 
-| ID  | Task                                                         | Priority | Difficulty | Description |
-|-----|--------------------------------------------------------------|----------|------------|-------------|
-| C1  | Replace `@Autowired` fields with constructor injection       | 🔴 High  | ⭐⭐          | Bağımlılıkların yönetimini daha güvenilir hale getirir. |
-| C2  | Introduce Lombok (`@Data`, `@Builder`, vs.) for models       | 🟡 Medium| ⭐⭐          | Getter/Setter/Constructor boilerplate’ini azalt. |
-| C3  | Replace `System.out.println` with SLF4J logger               | 🟡 Medium| ⭐⭐          | Üretim ortamı için uygun loglama standardı. |
-| C4  | Add `@Valid` and Bean Validation annotations to DTOs         | 🔴 High  | ⭐⭐          | Güvenlik ve veri bütünlüğü açısından kritik. |
-| C5  | Convert roles to Enum (`Role.ADMIN`, vs.)                   | 🟢 Low   | ⭐⭐          | Tip güvenliği ve kod tamamlama kolaylığı sağlar. |
-
----
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| C1 | Replace @Autowired fields with constructor injection | 🔴 High | ⭐⭐ | Switch to constructor injection for more reliable and testable dependency management. |
+| C2 | Introduce Lombok for models | 🟡 Medium | ⭐⭐ | Use Lombok annotations to reduce boilerplate code in model classes. |
+| C4 | Add @Valid and Bean Validation annotations | 🔴 High | ⭐⭐ | Use Bean Validation (JSR 380) annotations (@NotNull, @Size, @Email, @Pattern, etc.) for field validation in incoming request DTOs and trigger these validations with @Valid in Controller method parameters. Add custom handling for MethodArgumentNotValidException in the global exception handler. |
+| C5 | Convert roles to Enum | 🟢 Low | ⭐⭐ | Define user roles using Java Enum for type safety. |
 
 ## 🔐 Security Improvements
 
-| ID  | Task                                              | Priority | Difficulty | Description |
-|-----|---------------------------------------------------|----------|------------|-------------|
-| S1  | Password complexity validation                    | 🔴 High  | ⭐⭐          | Zayıf şifre kullanımını önle. |
-| S2  | Rate limiting for login attempts (e.g., Bucket4j) | 🔴 High  | ⭐⭐⭐         | Brute force saldırılarına karşı koruma sağlar. |
-| S3  | Add CSRF tokens to all forms                      | 🔴 High  | ⭐⭐          | Cross-site request forgery saldırılarını önle. |
-| S4  | Implement account lockout after N failed attempts | 🟡 Medium| ⭐⭐⭐         | Hesap güvenliğini artırır. |
-| S5  | Add 2FA support for admin users                   | 🟢 Low   | ⭐⭐⭐⭐        | Yönetici hesaplarının güvenliğini artırır. |
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| S1 | Password complexity validation | 🔴 High | ⭐⭐ | Enforce the use of strong passwords meeting defined complexity rules (minimum length, uppercase/lowercase letters, numbers, special characters, etc.) during user registration and password update processes. Perform this validation in the service layer. |
+| S2 | Rate limiting for login attempts | 🔴 High | ⭐⭐⭐ | Implement rate limiting using Bucket4j or Resilience4J. |
+| S3 | Add CSRF tokens to forms | 🔴 High | ⭐⭐ | Enable Spring Security CSRF protection for form submissions. |
+| S4 | Account lockout after failed attempts | 🟡 Medium | ⭐⭐⭐ | Implement account locking using Spring Security features. |
 
----
 
 ## 🚀 Feature Improvements
 
-| ID  | Task                                     | Priority | Difficulty | Description |
-|-----|------------------------------------------|----------|------------|-------------|
-| F1  | Add product import/export (CSV, Excel)   | 🟡 Medium| ⭐⭐⭐⭐        | Toplu ürün yükleme ve dışa aktarma için gerekli. |
-| F2  | Implement dashboard with metrics         | 🟡 Medium| ⭐⭐⭐         | Kullanıcı deneyimini zenginleştirir. |
-| F3  | Add product image upload & preview       | 🟡 Medium| ⭐⭐⭐         | Ürün yönetimini daha görsel hale getirir. |
-| F4  | Implement notifications for low stock    | 🔴 High  | ⭐⭐⭐         | Kritik stoğu önceden haber verir. |
-| F5  | Add search & filter to product list      | 🔴 High  | ⭐⭐          | Kullanıcılar ürünleri daha kolay bulur. |
-
----
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| F1 | Product Import/Export (CSV, Excel) | 🔴 High | ⭐⭐⭐⭐ | Implement bulk data operations using Apache POI or OpenCSV. |
+| F2 | Admin Dashboard with Metrics | 🔴 High | ⭐⭐⭐ | Create dashboard using Spring Boot Actuator metrics and custom analytics. Add visualization with Chart.js for key performance indicators (KPIs) like total sales, active users, and inventory value. |
+| F3 | Product image upload & preview | 🟡 Medium | ⭐⭐⭐ | Implement file upload using MultipartFile and cloud storage integration. |
+| F4 | Marketplace Integration (Etsy) | 🔴 High | ⭐⭐⭐⭐ | Create abstracted integration layer using Facade or Adapter design patterns to support different marketplace APIs (starting with Etsy). Implement product synchronization, order management, and inventory updates using Spring's RestTemplate or WebClient. |
 
 ## 🧪 Testing Improvements
 
-| ID  | Task                                    | Priority | Difficulty | Description |
-|-----|-----------------------------------------|----------|------------|-------------|
-| T1  | Write unit tests for all services       | 🔴 High  | ⭐⭐⭐         | İş mantığı güvenliği için temel gereksinim. |
-| T2  | Add integration tests for controllers   | 🟡 Medium| ⭐⭐⭐         | API uçlarının doğru çalıştığından emin olun. |
-| T3  | Add test coverage reports (JaCoCo)      | 🟡 Medium| ⭐⭐          | Kod kalitesi izlenebilirliği sağlar. |
-
----
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| T1 | Service layer unit tests | 🔴 High | ⭐⭐⭐ | Write comprehensive unit tests for all public methods in the service layer, where business logic resides, using JUnit 5 and Mockito. Ensure the code's correctness and that it exhibits the expected behavior. |
+| T2 | Controller integration tests | 🟡 Medium | ⭐⭐⭐ | Write integration tests using Spring MVC Test (MockMvc) or @SpringBootTest with TestRestTemplate to test if API endpoints are working correctly, requests are processed properly, and appropriate responses are returned. |
+| T3 | Test coverage reports (JaCoCo) | 🟡 Medium | ⭐⭐ | Generate test coverage reports using JaCoCo to measure and track how much of the code is covered by tests. Integrate these reports into the CI/CD process to continuously monitor code quality. |
 
 ## ⚙️ DevOps Improvements
 
-| ID  | Task                                | Priority | Difficulty | Description |
-|-----|-------------------------------------|----------|------------|-------------|
-| D1  | Set up CI/CD (e.g., GitHub Actions) | 🔴 High  | ⭐⭐⭐⭐        | Otomatik build, test ve deploy süreci. |
-| D2  | Add Docker health checks            | 🟡 Medium| ⭐⭐          | Uygulamanın canlılığını kontrol et. |
-| D3  | Add logging & monitoring (e.g., ELK) | 🟡 Medium| ⭐⭐⭐⭐        | Canlı ortamda hata ayıklamayı kolaylaştırır. |
-
----
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| D1 | CI/CD pipeline setup | 🔴 High | ⭐⭐⭐⭐ | Set up a CI/CD pipeline using GitHub Actions, GitLab CI, or Jenkins to automatically build, test (including unit and integration tests), and deploy code changes to selected environments (dev, staging, prod). Include steps for packaging the Spring Boot application (JAR/WAR) and creating a Docker image. |
+| D2 | Docker health checks | 🟡 Medium | ⭐⭐ | Configure container health monitoring with Spring Boot Actuator. |
+| D3 | Logging & monitoring (ELK) | 🟡 Medium | ⭐⭐⭐⭐ | Set up centralized logging and monitoring using ELK Stack (Elasticsearch, Logstash, Kibana) or Grafana Loki for log collection and analysis. Integrate Prometheus and Grafana with Spring Boot Actuator to collect and visualize application metrics. |
 
 ## 📄 Documentation
 
-| ID  | Task                                  | Priority | Difficulty | Description |
-|-----|---------------------------------------|----------|------------|-------------|
-| DOC1| Create Swagger/OpenAPI documentation | 🔴 High  | ⭐⭐          | API kullanıcıları için anlaşılır dökümantasyon. |
-| DOC2| Add developer onboarding guide       | 🟡 Medium| ⭐⭐          | Yeni geliştiricilerin hızlı başlamasını sağlar. |
-| DOC3| Document database relationships      | 🟡 Medium| ⭐⭐          | Geliştiricilerin veri modelini anlamasına yardımcı olur. |
+| ID | Task | Priority | Difficulty | Description |
+|----|------|----------|------------|-------------|
+| DOC1 | Swagger/OpenAPI documentation | 🔴 High | ⭐⭐ | Generate API documentation using Springdoc-openapi. |
+| DOC2 | Developer onboarding guide | 🟡 Medium | ⭐⭐ | Create comprehensive guide covering project setup, architecture overview, coding standards, and development workflow to help new developers quickly become productive. |
+| DOC3 | Database documentation | 🟡 Medium | ⭐⭐ | Create detailed documentation of the database schema, including entity relationships (ERD), table structures, indexes, and constraints to help developers understand the data model. |
 
----
+## 🔚 Conclusion
 
-## 🔚 Sonuç
-
-Yukarıdaki görevler, projenin teknik kalitesini, güvenliğini, performansını ve kullanıcı deneyimini sistematik bir şekilde geliştirmek için yapılandırılmıştır. Tavsiyem, önce kırmızı 🔴 öncelikli görevleri tamamlamanızdır. Bu görevlerin çoğu, sonraki geliştirmeler için sağlam bir temel oluşturacaktır.
-
----
-
+The tasks listed above are meticulously structured to systematically enhance the technical excellence, security, performance, and user experience of the Stockify project's Spring Boot-developed infrastructure. Completing the 🔴 High priority tasks will establish a solid foundation for future developments. These improvements leverage Spring ecosystem best practices and tools.
