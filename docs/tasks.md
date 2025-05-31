@@ -35,9 +35,12 @@ This document presents development tasks aimed at improving the Spring Boot-base
 | ID | Task | Priority | Difficulty | Description |
 |----|------|----------|------------|-------------|
 | F1 | Product Import/Export (CSV, Excel) | 🔴 High | ⭐⭐⭐⭐ | Implement bulk data operations using Apache POI or OpenCSV. |
-| F2 | Admin Dashboard with Metrics | 🔴 High | ⭐⭐⭐ | Create dashboard using Spring Boot Actuator metrics and custom analytics. Add visualization with Chart.js for key performance indicators (KPIs) like total sales, active users, and inventory value. |
 | F3 | Product image upload & preview | 🟡 Medium | ⭐⭐⭐ | Implement file upload using MultipartFile and cloud storage integration. |
 | F4 | Marketplace Integration (Etsy) | 🔴 High | ⭐⭐⭐⭐ | Create abstracted integration layer using Facade or Adapter design patterns to support different marketplace APIs (starting with Etsy). Implement product synchronization, order management, and inventory updates using Spring's RestTemplate or WebClient. |
+Beautiful UI with Bootstrap styling
+Description	SKU eklenmeli products a
+
+
 
 ## 🧪 Testing Improvements
 

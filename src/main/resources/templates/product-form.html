@@ -8,10 +8,19 @@
 <body>
 <div class="container mt-4">
     <h2 th:text="${product != null && product.title != null} ? 'Ürün Düzenle' : 'Yeni Ürün Ekle'"></h2>
-    <form th:action="@{/products/add}" th:object="${product}" method="post">
+    <form th:action="@{/products/add}" th:object="${product}" method="post">        <div class="mb-3">
+            <label for="sku" class="form-label">SKU</label>
+            <input type="text" class="form-control" id="sku" th:field="*{sku}" required>
+            <div class="form-text">Benzersiz ürün tanımlayıcı kodu</div>
+        </div>
         <div class="mb-3">
             <label for="title" class="form-label">Başlık</label>
             <input type="text" class="form-control" id="title" th:field="*{title}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Açıklama</label>
+            <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+            <div class="form-text">Ürün açıklamasını detaylandırın (isteğe bağlı, maksimum 1000 karakter)</div>
         </div>
         <div class="mb-3">
             <label for="category" class="form-label">Kategori</label>

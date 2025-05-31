@@ -2,14 +2,23 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
+import dev.oasis.stockify.exception.FileOperationException;
 import dev.oasis.stockify.service.ProductService;
+import dev.oasis.stockify.service.ProductImportExportService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.*;
+import java.util.List;
 
 /**
  * Controller for product management operations
@@ -18,9 +27,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/products")
 public class ProductController {
     private final ProductService productService;
+    private final ProductImportExportService importExportService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductImportExportService importExportService) {
         this.productService = productService;
+        this.importExportService = importExportService;
     }
 
     /**
@@ -105,5 +116,88 @@ public class ProductController {
         productService.deleteProduct(id);
         return "redirect:/products";
     }    
+
+    /**
+     * Handles CSV file import
+     */
+    @PostMapping("/import/csv")
+    public String importProductsFromCsv(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+        try {
+            List<ProductResponseDTO> importedProducts = importExportService.importProductsFromCsv(file);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                String.format("Successfully imported %d products", importedProducts.size()));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Error importing products: " + e.getMessage());
+        }
+        return "redirect:/products";
+    }
+
+    /**
+     * Handles Excel file import
+     */
+    @PostMapping("/import/excel")
+    public String importProductsFromExcel(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+        try {
+            List<ProductResponseDTO> importedProducts = importExportService.importProductsFromExcel(file);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                String.format("Successfully imported %d products", importedProducts.size()));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Error importing products: " + e.getMessage());
+        }
+        return "redirect:/products";
+    }
+
+    /**
+     * Exports products to CSV
+     */
+    @GetMapping("/export/csv")
+    public void exportProductsToCsv(jakarta.servlet.http.HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"products.csv\"");
+        
+        List<ProductResponseDTO> products = productService.getAllProducts();
+        importExportService.exportProductsToCsv(response.getWriter(), products);
+    }
+
+    /**
+     * Exports products to Excel
+     */
+    @GetMapping("/export/excel")
+    public void exportProductsToExcel(jakarta.servlet.http.HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"products.xlsx\"");
+        
+        List<ProductResponseDTO> products = productService.getAllProducts();
+        importExportService.exportProductsToExcel(response.getOutputStream(), products);
+    }
+
+    /**
+     * Returns the CSV template file for product imports
+     */
+    @GetMapping("/import/template/csv")
+    public void getImportTemplateCsv(HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"product_import_template.csv\"");
+        
+        // Copy template file to response
+        try (InputStream is = getClass().getResourceAsStream("/static/templates/product_import_template.csv")) {
+            if (is == null) {
+                throw new FileOperationException("CSV template file not found");
+            }
+            StreamUtils.copy(is, response.getOutputStream());
+        }
+    }
+
+    /**
+     * Returns the Excel template file for product imports
+     */
+    @GetMapping("/import/template/excel")
+    public void getImportTemplateExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"product_import_template.xlsx\"");
+        importExportService.generateExcelTemplate(response.getOutputStream());
+    }
 
 }

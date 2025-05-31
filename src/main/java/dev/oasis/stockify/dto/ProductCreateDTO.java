@@ -9,10 +9,16 @@ import java.math.BigDecimal;
 /**
  * DTO for creating or updating a product
  */
-public class ProductCreateDTO {
-    @NotBlank(message = "Başlık boş olamaz")
+public class ProductCreateDTO {    @NotBlank(message = "Başlık boş olamaz")
     @Size(min = 3, max = 50, message = "Başlık 3 ile 50 karakter arasında olmalıdır")
     private String title;
+
+    @Size(max = 1000, message = "Açıklama en fazla 1000 karakter olabilir")
+    private String description;
+
+    @NotBlank(message = "SKU boş olamaz")
+    @Size(min = 3, max = 50, message = "SKU 3 ile 50 karakter arasında olmalıdır")
+    private String sku;
 
     @NotBlank(message = "Kategori boş olamaz")
     private String category;
@@ -36,6 +42,22 @@ public class ProductCreateDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 
     public String getCategory() {

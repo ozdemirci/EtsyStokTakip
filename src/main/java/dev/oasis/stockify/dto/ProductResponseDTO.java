@@ -5,9 +5,10 @@ import java.math.BigDecimal;
 /**
  * DTO for displaying product information
  */
-public class ProductResponseDTO {
-    private Long id;
+public class ProductResponseDTO {    private Long id;
     private String title;
+    private String description;
+    private String sku;
     private String category;
     private BigDecimal price;
     private int stockLevel;
@@ -29,6 +30,22 @@ public class ProductResponseDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 
     public String getCategory() {

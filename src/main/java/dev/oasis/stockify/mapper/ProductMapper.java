@@ -22,10 +22,10 @@ public class ProductMapper {
     public Product toEntity(ProductCreateDTO productCreateDTO) {
         if (productCreateDTO == null) {
             return null;
-        }
-
-        Product product = new Product();
+        }        Product product = new Product();
         product.setTitle(productCreateDTO.getTitle());
+        product.setDescription(productCreateDTO.getDescription());
+        product.setSku(productCreateDTO.getSku());
         product.setCategory(productCreateDTO.getCategory());
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
@@ -43,9 +43,9 @@ public class ProductMapper {
     public Product updateEntity(Product product, ProductCreateDTO productCreateDTO) {
         if (productCreateDTO == null) {
             return product;
-        }
-
-        product.setTitle(productCreateDTO.getTitle());
+        }        product.setTitle(productCreateDTO.getTitle());
+        product.setDescription(productCreateDTO.getDescription());
+        product.setSku(productCreateDTO.getSku());
         product.setCategory(productCreateDTO.getCategory());
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
@@ -62,11 +62,11 @@ public class ProductMapper {
     public ProductResponseDTO toDto(Product product) {
         if (product == null) {
             return null;
-        }
-
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        }        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
         productResponseDTO.setId(product.getId());
         productResponseDTO.setTitle(product.getTitle());
+        productResponseDTO.setDescription(product.getDescription());
+        productResponseDTO.setSku(product.getSku());
         productResponseDTO.setCategory(product.getCategory());
         productResponseDTO.setPrice(product.getPrice());
         productResponseDTO.setStockLevel(product.getStockLevel());
