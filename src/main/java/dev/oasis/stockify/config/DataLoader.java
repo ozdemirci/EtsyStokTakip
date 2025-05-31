@@ -61,12 +61,12 @@ public class DataLoader implements CommandLineRunner {
         // Check if we already have products
         if (productRepository.count() == 0) {
             List<Product> defaultProducts = Arrays.asList(
-                createProduct("El Yapımı Kolye", "Takı", new BigDecimal("149.99"), 10, 3),
-                createProduct("Örgü Bebek", "Oyuncak", new BigDecimal("199.99"), 15, 5),
-                createProduct("Ahşap Tepsi", "Ev Dekorasyonu", new BigDecimal("299.99"), 8, 3),
-                createProduct("Makrome Duvar Süsü", "Ev Dekorasyonu", new BigDecimal("249.99"), 12, 4),
-                createProduct("El Yapımı Sabun Seti", "Kozmetik", new BigDecimal("89.99"), 20, 8),
-                createProduct("Keçe Çanta", "Aksesuar", new BigDecimal("179.99"), 7, 3)
+                createProduct("etsy123","El Yapımı Kolye","kolye açıklama", "Takı", new BigDecimal("149.99"), 10, 3),
+                createProduct("etsy124","Örgü Bebek"," açıklama", "Oyuncak", new BigDecimal("199.99"), 15, 5),
+                createProduct("etsy125","Ahşap Tepsi"," açıklama", "Ev Dekorasyonu", new BigDecimal("299.99"), 8, 3),
+                createProduct("etsy126","Makrome Duvar Süsü"," açıklama", "Ev Dekorasyonu", new BigDecimal("249.99"), 12, 4),
+                createProduct("etsy127","El Yapımı Sabun Seti"," açıklama", "Kozmetik", new BigDecimal("89.99"), 20, 8),
+                createProduct("etsy128","Keçe Çanta"," açıklama", "Aksesuar", new BigDecimal("179.99"), 7, 3)
             );
 
             try {
@@ -77,9 +77,11 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
-    private Product createProduct(String title, String category, BigDecimal price, int stockLevel, int lowStockThreshold) {
+    private Product createProduct(String sku,String title,String description, String category, BigDecimal price, int stockLevel, int lowStockThreshold) {
         Product product = new Product();
+        product.setSku(sku);
         product.setTitle(title);
+        product.setDescription(description);
         product.setCategory(category);
         product.setPrice(price);
         product.setStockLevel(stockLevel);
