@@ -77,9 +77,8 @@ CREATE INDEX IF NOT EXISTS idx_product_featured ON product(is_featured);
 CREATE INDEX IF NOT EXISTS idx_product_stock_level ON product(stock_level);
 CREATE INDEX IF NOT EXISTS idx_product_etsy_id ON product(etsy_product_id);
 
--- Index for low stock monitoring
-CREATE INDEX IF NOT EXISTS idx_product_low_stock ON product(stock_level, low_stock_threshold) 
-WHERE stock_level <= low_stock_threshold AND is_active = TRUE;
+-- Index for low stock monitoring (H2 compatible)
+CREATE INDEX IF NOT EXISTS idx_product_low_stock ON product(stock_level, low_stock_threshold);
 
 -- =============================================================================
 -- STOCK NOTIFICATION TABLE
@@ -116,9 +115,8 @@ CREATE INDEX IF NOT EXISTS idx_stock_notification_created ON stock_notification(
 CREATE INDEX IF NOT EXISTS idx_stock_notification_type ON stock_notification(notification_type);
 CREATE INDEX IF NOT EXISTS idx_stock_notification_priority ON stock_notification(priority);
 
--- Composite index for unread notifications
-CREATE INDEX IF NOT EXISTS idx_stock_notification_unread_by_date ON stock_notification(is_read, created_at DESC) 
-WHERE is_read = FALSE;
+-- Composite index for unread notifications (H2 compatible)
+CREATE INDEX IF NOT EXISTS idx_stock_notification_unread_by_date ON stock_notification(is_read, created_at);
 
 -- =============================================================================
 -- TENANT CONFIGURATION TABLE (Optional for future extensions)
@@ -179,7 +177,7 @@ CREATE INDEX IF NOT EXISTS idx_stock_movement_reference ON stock_movement(refere
 -- =============================================================================
 
 -- View for low stock products
-CREATE OR REPLACE VIEW v_low_stock_products AS
+CREATE VIEW v_low_stock_products AS
 SELECT 
     p.id,
     p.sku,
@@ -188,7 +186,7 @@ SELECT
     p.stock_level,
     p.low_stock_threshold,
     p.price,
-    (p.stock_level::DECIMAL / p.low_stock_threshold) * 100 AS stock_percentage,
+    (CAST(p.stock_level AS DECIMAL) / p.low_stock_threshold) * 100 AS stock_percentage,
     p.updated_at AS last_updated
 FROM product p
 WHERE p.stock_level <= p.low_stock_threshold 
@@ -196,7 +194,7 @@ WHERE p.stock_level <= p.low_stock_threshold
 ORDER BY stock_percentage ASC, p.stock_level ASC;
 
 -- View for user activity summary
-CREATE OR REPLACE VIEW v_user_activity AS
+CREATE VIEW v_user_activity AS
 SELECT 
     u.id,
     u.username,
@@ -213,7 +211,7 @@ GROUP BY u.id, u.username, u.role, u.last_login, u.is_active
 ORDER BY u.username;
 
 -- View for notification summary
-CREATE OR REPLACE VIEW v_notification_summary AS
+CREATE VIEW v_notification_summary AS
 SELECT 
     notification_type,
     priority,
@@ -226,71 +224,13 @@ GROUP BY notification_type, priority
 ORDER BY priority DESC, notification_type;
 
 -- =============================================================================
--- FUNCTIONS AND TRIGGERS
+-- H2 DATABASE COMPATIBILITY NOTES
 -- =============================================================================
-
--- Function to automatically update the updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Triggers for automatic timestamp updates
-DROP TRIGGER IF EXISTS trigger_app_user_updated_at ON app_user;
-CREATE TRIGGER trigger_app_user_updated_at
-    BEFORE UPDATE ON app_user
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-DROP TRIGGER IF EXISTS trigger_product_updated_at ON product;
-CREATE TRIGGER trigger_product_updated_at
-    BEFORE UPDATE ON product
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-DROP TRIGGER IF EXISTS trigger_tenant_config_updated_at ON tenant_config;
-CREATE TRIGGER trigger_tenant_config_updated_at
-    BEFORE UPDATE ON tenant_config
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Function to automatically create stock movement records
-CREATE OR REPLACE FUNCTION log_stock_movement()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Only log if stock_level has changed
-    IF OLD.stock_level != NEW.stock_level THEN
-        INSERT INTO stock_movement (
-            product_id,
-            movement_type,
-            quantity,
-            previous_stock,
-            new_stock,
-            created_by,
-            notes
-        ) VALUES (
-            NEW.id,
-            CASE 
-                WHEN NEW.stock_level > OLD.stock_level THEN 'IN'
-                WHEN NEW.stock_level < OLD.stock_level THEN 'OUT'
-                ELSE 'ADJUSTMENT'
-            END,
-            NEW.stock_level - OLD.stock_level,
-            OLD.stock_level,
-            NEW.stock_level,
-            NEW.updated_by,
-            'Automatic stock movement log'
-        );
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger for automatic stock movement logging
-DROP TRIGGER IF EXISTS trigger_product_stock_movement ON product;
-CREATE TRIGGER trigger_product_stock_movement
-    AFTER UPDATE ON product
-    FOR EACH ROW EXECUTE FUNCTION log_stock_movement();
+-- Note: Advanced PostgreSQL features like PL/pgSQL functions and complex triggers
+-- are not supported in H2. These features will be handled by the application layer:
+-- 1. Updated_at timestamps: handled by JPA @PreUpdate annotations
+-- 2. Stock movement logging: handled by service layer methods
+-- 3. Complex indexes with WHERE clauses: simplified for H2 compatibility
 
 -- =============================================================================
 -- INITIAL DATA SETUP (Will be handled by DataLoader)
@@ -301,9 +241,6 @@ CREATE TRIGGER trigger_product_stock_movement
 -- =============================================================================
 -- PERFORMANCE AND MAINTENANCE
 -- =============================================================================
-
--- Enable query performance monitoring (PostgreSQL specific)
--- These settings can be adjusted based on environment requirements
 
 -- Comment: This schema is designed to be replicated for each tenant
 -- The multi-tenant configuration ensures data isolation between tenants
