@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 public class StockNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "message")
     private String message;
     
     @Column(name = "notification_type")
@@ -31,8 +33,10 @@ public class StockNotification {
     @Column(name = "read_by")
     private Long readBy;
     
+    @Column(name = "priority")
     private String priority = "MEDIUM";
     
+    @Column(name = "category")
     private String category = "STOCK_ALERT";
 
     @PrePersist

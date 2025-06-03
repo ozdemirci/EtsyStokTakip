@@ -3,8 +3,6 @@ package dev.oasis.stockify.config;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
-import dev.oasis.stockify.model.AppUser;
-import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.service.AppUserService;
@@ -12,8 +10,6 @@ import dev.oasis.stockify.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,13 +23,11 @@ import java.util.List;
 
 /**
  * Multi-Tenant Data Loader Component
- * 
  * This component initializes sample data for multiple tenants in the Stockify application.
  * It creates separate schemas for each tenant and populates them with initial data including:
  * - Administrative users with proper roles
  * - Sample products with realistic inventory data
  * - Tenant-specific configurations
- * 
  * The data loader runs only in 'dev' profile and ensures complete isolation
  * between tenant data while maintaining consistent data structure.
  * 
@@ -43,7 +37,6 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@Profile("dev") // Only run in development environment
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
@@ -52,42 +45,29 @@ public class DataLoader implements CommandLineRunner {
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
     // Configuration for tenant setup
     private static final List<String> TENANT_IDS = Arrays.asList(
-        "company1", "company2", "company3", "demo", "test"
+        "company1", "company2"
     );
 
     // Sample data configurations
     private static final List<SampleUser> SAMPLE_USERS = Arrays.asList(
         new SampleUser("admin", "admin123", "ADMIN", "System Administrator"),
-        new SampleUser("manager", "manager123", "DEPO", "Warehouse Manager"),
-        new SampleUser("operator", "operator123", "USER", "Warehouse Operator"),
-        new SampleUser("viewer", "viewer123", "USER", "Read-only User")
+       new SampleUser("operator", "operator123", "USER", "Warehouse Operator")
+
     );
 
     private static final List<SampleProduct> SAMPLE_PRODUCTS = Arrays.asList(
         new SampleProduct("ETSY-001", "Handmade Ceramic Mug", "Beautiful handcrafted ceramic mug with unique design", "Ceramics", "29.99", 25, 5),
         new SampleProduct("ETSY-002", "Vintage Style Jewelry Box", "Elegant wooden jewelry box with vintage brass fittings", "Jewelry", "89.99", 12, 3),
-        new SampleProduct("ETSY-003", "Organic Cotton Tote Bag", "Eco-friendly tote bag made from 100% organic cotton", "Bags", "24.99", 50, 10),
-        new SampleProduct("ETSY-004", "Essential Oil Diffuser", "Bamboo ultrasonic essential oil diffuser with LED lights", "Home", "45.99", 18, 5),
-        new SampleProduct("ETSY-005", "Handwoven Macrame Wall Hanging", "Bohemian style macrame wall art piece", "Decor", "67.99", 8, 2),
-        new SampleProduct("ETSY-006", "Natural Soy Candle Set", "Set of 3 aromatherapy soy candles in glass containers", "Candles", "34.99", 30, 8),
-        new SampleProduct("ETSY-007", "Leather Passport Holder", "Premium leather passport holder with RFID protection", "Travel", "39.99", 22, 5),
-        new SampleProduct("ETSY-008", "Artisan Soap Collection", "Set of 5 handmade natural soap bars with essential oils", "Beauty", "42.99", 35, 10),
-        new SampleProduct("ETSY-009", "Wooden Phone Stand", "Elegant bamboo phone stand for desk organization", "Electronics", "19.99", 40, 12),
-        new SampleProduct("ETSY-010", "Personalized Name Necklace", "Custom sterling silver name necklace", "Jewelry", "59.99", 15, 3),
-        new SampleProduct("ETSY-011", "Herb Garden Starter Kit", "Complete kit with seeds, pots, and growing instructions", "Garden", "29.99", 28, 6),
-        new SampleProduct("ETSY-012", "Vintage Map Print", "High-quality reproduction of antique world map", "Art", "24.99", 20, 4),
-        new SampleProduct("ETSY-013", "Knitted Baby Blanket", "Soft organic cotton baby blanket in pastel colors", "Baby", "49.99", 16, 3),
-        new SampleProduct("ETSY-014", "Ceramic Plant Pot Set", "Set of 3 decorative ceramic planters with drainage", "Garden", "38.99", 25, 6),
-        new SampleProduct("ETSY-015", "Handcrafted Wooden Bookmark", "Laser-engraved wooden bookmark with tassel", "Books", "12.99", 60, 15)
-    );
+        new SampleProduct("ETSY-003", "Organic Cotton Tote Bag", "Eco-friendly tote bag made from 100% organic cotton", "Bags", "24.99", 50, 10)
+         );
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
+    public void run(String... args)  {
         log.info("🚀 Starting Multi-Tenant Data Loader...");
         
         try {

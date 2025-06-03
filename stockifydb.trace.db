@@ -21,3 +21,26 @@ INSERT INTO tenant_config (config_key, config_value, config_type, description) V
 2025-06-03 20:13:13.680435+03:00 jdbc[4]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "tenant_config" not found; SQL statement:
 INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES ('tenant_name', 'Test Environment', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING [42102-224]
+2025-06-03 20:15:30.390739+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2025-06-03 20:15:30.494943+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2025-06-03 20:15:30.570232+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2025-06-03 20:15:30.644401+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2025-06-03 20:15:30.770209+03:00 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "tenant_config" not found; SQL statement:
+INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES ('tenant_name', 'Artisan Crafts Co.', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING [42102-224]
+2025-06-03 20:15:30.820359+03:00 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "tenant_config" not found; SQL statement:
+INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES ('tenant_name', 'Vintage Treasures Ltd.', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING [42102-224]
+2025-06-03 20:15:30.862122+03:00 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "tenant_config" not found; SQL statement:
+INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES ('tenant_name', 'Eco-Friendly Goods Inc.', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING [42102-224]
+2025-06-03 20:15:30.910700+03:00 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "tenant_config" not found; SQL statement:
+INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES ('tenant_name', 'Demo Company', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING [42102-224]
+2025-06-03 20:15:30.957216+03:00 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "tenant_config" not found; SQL statement:
+INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES ('tenant_name', 'Test Environment', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING [42102-224]

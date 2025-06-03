@@ -1,10 +1,3 @@
--- Stockify Multi-Tenant Database Schema
--- V1__init_schema.sql
--- Author: Stockify Team
--- Description: Initial schema creation for multi-tenant stock management system
--- Each tenant will have separate schemas with identical table structures
-
--- =============================================================================
 -- APP USER TABLE
 -- =============================================================================
 -- This table stores user authentication and authorization information
@@ -17,12 +10,7 @@ CREATE TABLE IF NOT EXISTS app_user (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
-    last_login TIMESTAMP,
-    
-    -- Constraints
-    CONSTRAINT chk_username_length CHECK (LENGTH(username) >= 3),
-    CONSTRAINT chk_password_length CHECK (LENGTH(password) >= 6),
-    CONSTRAINT chk_role_valid CHECK (role IN ('ADMIN', 'DEPO', 'USER'))
+    last_login TIMESTAMP
 );
 
 -- Create index for faster username lookups
@@ -245,3 +233,4 @@ ORDER BY priority DESC, notification_type;
 -- Comment: This schema is designed to be replicated for each tenant
 -- The multi-tenant configuration ensures data isolation between tenants
 -- while maintaining consistent structure and functionality across all tenants.
+
