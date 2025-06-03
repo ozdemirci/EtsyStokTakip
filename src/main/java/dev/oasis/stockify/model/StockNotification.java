@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "stock_notification", schema = "#{T(dev.oasis.stockify.config.tenant.TenantContext).getCurrentTenant()}")
+@Table(name = "stock_notification")
 public class StockNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

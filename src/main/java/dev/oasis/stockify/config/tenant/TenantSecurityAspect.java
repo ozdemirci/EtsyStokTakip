@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TenantSecurityAspect {
 
-    @Around("execution(* dev.oasis.stockify.service.*.*(..)) && !execution(* dev.oasis.stockify.service.AppUserDetailsService.*(..))")
+    @Around("execution(* dev.oasis.stockify.service..*(..)) && !within(dev.oasis.stockify.service.AppUserDetailsService)")
     public Object enforceTenantSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         String currentTenant = TenantContext.getCurrentTenant();
         if (currentTenant == null) {
