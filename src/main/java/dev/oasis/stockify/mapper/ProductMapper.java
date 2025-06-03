@@ -22,15 +22,20 @@ public class ProductMapper {
     public Product toEntity(ProductCreateDTO productCreateDTO) {
         if (productCreateDTO == null) {
             return null;
-        }        Product product = new Product();
+        }
+
+        Product product = new Product();
         product.setTitle(productCreateDTO.getTitle());
         product.setDescription(productCreateDTO.getDescription());
         product.setSku(productCreateDTO.getSku());
         product.setCategory(productCreateDTO.getCategory());
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
+        product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());
+        product.setEtsyProductId(productCreateDTO.getEtsyProductId());
+        product.setIsActive(true);
+        product.setIsFeatured(false);
 
-        
         return product;
     }
 

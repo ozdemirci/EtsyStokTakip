@@ -15,16 +15,16 @@ public class Product {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "sku", nullable = false, unique = true)
+    @Column(name = "sku",  unique = true)
     private String sku;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title")
     private String title;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "category", nullable = false)
+    @Column(name = "category")
     private String category;
 
     @Column(name = "price")
@@ -54,10 +54,10 @@ public class Product {
 
     // Status fields
     @Column(name = "is_active")
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @Column(name = "is_featured")
-    private Boolean isFeatured = false;
+    private Boolean isFeatured;
 
     @PrePersist
     protected void onCreate() {

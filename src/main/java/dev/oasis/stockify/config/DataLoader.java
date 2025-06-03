@@ -141,9 +141,10 @@ public class DataLoader implements CommandLineRunner {
             String createSchemaSQL = String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName);
             statement.execute(createSchemaSQL);
             
-            // Set schema
-            connection.setSchema(schemaName);
-            
+            // Set schema for this connection
+            String setSchemaSQL = String.format("SET SCHEMA '%s'", schemaName);
+            statement.execute(setSchemaSQL);
+
             log.debug("🏗️ Schema ensured for tenant: {}", tenantId);
             
         } catch (SQLException e) {
