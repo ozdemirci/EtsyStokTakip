@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Entity
+@Table(name = "app_user", schema = "#{T(dev.oasis.stockify.config.tenant.TenantContext).getCurrentTenant()}")
 public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

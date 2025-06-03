@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
-@Table(name = "product")
+@Table(name = "product", schema = "#{T(dev.oasis.stockify.config.tenant.TenantContext).getCurrentTenant()}")
 public class Product {
 
     @Id

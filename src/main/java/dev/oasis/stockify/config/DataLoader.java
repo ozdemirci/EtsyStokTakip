@@ -48,7 +48,7 @@ public class DataLoader {
             for (String tenant : TENANTS) {
                 log.info("Tenant için işlemler başlatılıyor: {}", tenant);
                 try {
-                    // Şemayı oluştur
+                    // Şemayı oluştur 
                     createSchemaWithTables(tenant);
 
                     // TenantContext'i ayarla ve verileri oluştur
