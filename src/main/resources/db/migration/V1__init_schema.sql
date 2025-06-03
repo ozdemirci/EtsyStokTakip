@@ -1,6 +1,21 @@
+-- Create Tenant table
+CREATE TABLE tenant (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    schema_name VARCHAR(50) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN DEFAULT TRUE
+);
+
+-- Insert default tenants
+INSERT INTO tenant (name, schema_name) VALUES
+('Tenant 1', 'tenant1'),
+('Tenant 2', 'tenant2'),
+('Tenant 3', 'tenant3');
+
 -- Create AppUser table
 CREATE TABLE app_user (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL
@@ -8,7 +23,7 @@ CREATE TABLE app_user (
 
 -- Create Product table
 CREATE TABLE product (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
     description VARCHAR(1000),
     sku VARCHAR(50) NOT NULL UNIQUE,
@@ -21,7 +36,7 @@ CREATE TABLE product (
 
 -- Create StockNotification table
 CREATE TABLE stock_notification (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     read BOOLEAN NOT NULL DEFAULT FALSE,

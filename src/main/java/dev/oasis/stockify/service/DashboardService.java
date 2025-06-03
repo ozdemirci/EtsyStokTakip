@@ -1,6 +1,7 @@
 package dev.oasis.stockify.service;
 
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
+import dev.oasis.stockify.dto.DashboardStats;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
@@ -10,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -71,5 +73,20 @@ public class DashboardService {
     public void updateRevenue(double dailyAmount, double monthlyAmount) {
         meterRegistry.gauge("sales.daily", dailyAmount);
         meterRegistry.gauge("sales.monthly", monthlyAmount);
+    }
+
+    public DashboardStats getDashboardStats() {
+        List<Product> products = productRepository.findAll();
+
+        long totalProducts = products.size();
+        int totalStock = products.stream()
+                .mapToInt(Product::getStockLevel)
+                .sum();
+
+        long lowStockCount = products.stream()
+                .filter(Product::isLowStock)
+                .count();
+
+        return new DashboardStats(totalProducts, totalStock, lowStockCount);
     }
 }

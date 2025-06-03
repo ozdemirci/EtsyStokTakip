@@ -1,26 +1,35 @@
 package dev.oasis.stockify.config;
 
-
+import dev.oasis.stockify.config.tenant.TenantHeaderFilter;
+import dev.oasis.stockify.service.AppUserDetailsService;
+import dev.oasis.stockify.config.tenant.TenantAwareAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import dev.oasis.stockify.service.AppUserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-
     private final AppUserDetailsService appUserDetailsService;
+    private final TenantHeaderFilter tenantHeaderFilter;
+    private final TenantAwareAuthenticationSuccessHandler successHandler;
 
-    public SecurityConfig(AppUserDetailsService appUserDetailsService) {
+    public SecurityConfig(AppUserDetailsService appUserDetailsService,
+                        TenantHeaderFilter tenantHeaderFilter,
+                        TenantAwareAuthenticationSuccessHandler successHandler) {
         this.appUserDetailsService = appUserDetailsService;
+        this.tenantHeaderFilter = tenantHeaderFilter;
+        this.successHandler = successHandler;
     }
 
     @Bean
@@ -39,51 +48,35 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**")
-                .ignoringRequestMatchers("/h2/**")  // H2 konsolu için CSRF'i devre dışı bırak
-            )
-            .headers(headers -> headers
-                .frameOptions()
-                .sameOrigin()  // H2 konsolu için X-Frame-Options'ı yapılandır
-            )
+            .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Public resources that don't require authentication
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**","/h2").permitAll()
-
-
-                // User management endpoints - restricted to ADMIN role
-                .requestMatchers("/users/**").hasRole("ADMIN")
-
-                // Product management endpoints
-                .requestMatchers("/products").authenticated()
-                .requestMatchers("/products/add", "/products/edit/**", "/products/delete/**").hasAnyRole("ADMIN", "DEPO")
-
-                // Any other request requires authentication
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/error", "/h2-console/**").permitAll()
+                .requestMatchers("/login*").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/products", true)
-                .failureUrl("/login?error=true")
+                .loginProcessingUrl("/login")
+                .successHandler(successHandler)
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .logoutSuccessUrl("/login?logout")
                 .permitAll()
             )
-            .exceptionHandling(exceptions -> exceptions
+            .exceptionHandling(ex -> ex
                 .accessDeniedPage("/access-denied")
-            );
+            )
+            .headers(headers -> headers.frameOptions().disable());
 
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        return encoder;
+        return new BCryptPasswordEncoder();
     }
 }

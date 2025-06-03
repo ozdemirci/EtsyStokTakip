@@ -29,7 +29,7 @@ public class ProductMapper {
         product.setCategory(productCreateDTO.getCategory());
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
-        product.setEtsyProductId(productCreateDTO.getEtsyProductId());
+
         
         return product;
     }
@@ -57,10 +57,7 @@ public class ProductMapper {
             product.setSku(productCreateDTO.getSku());
         }
 
-        // EtsyProductId null olabilir
-        if (productCreateDTO.getEtsyProductId() != null) {
-            product.setEtsyProductId(productCreateDTO.getEtsyProductId());
-        }
+
 
         return product;
     }
@@ -83,8 +80,7 @@ public class ProductMapper {
         productResponseDTO.setPrice(product.getPrice());
         productResponseDTO.setStockLevel(product.getStockLevel());
         productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());  // Bu satırı ekledim
-        productResponseDTO.setEtsyProductId(product.getEtsyProductId());
-        
+
         return productResponseDTO;
     }
 
