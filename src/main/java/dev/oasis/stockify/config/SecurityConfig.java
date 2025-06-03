@@ -1,6 +1,7 @@
 package dev.oasis.stockify.config;
 
 import dev.oasis.stockify.config.tenant.TenantHeaderFilter;
+import dev.oasis.stockify.config.tenant.TenantSecurityFilter;
 import dev.oasis.stockify.service.AppUserDetailsService;
 import dev.oasis.stockify.config.tenant.TenantAwareAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
@@ -18,17 +19,18 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
-
-    private final AppUserDetailsService appUserDetailsService;
+public class SecurityConfig {    private final AppUserDetailsService appUserDetailsService;
     private final TenantHeaderFilter tenantHeaderFilter;
+    private final TenantSecurityFilter tenantSecurityFilter;
     private final TenantAwareAuthenticationSuccessHandler successHandler;
 
     public SecurityConfig(AppUserDetailsService appUserDetailsService,
                         TenantHeaderFilter tenantHeaderFilter,
+                        TenantSecurityFilter tenantSecurityFilter,
                         TenantAwareAuthenticationSuccessHandler successHandler) {
         this.appUserDetailsService = appUserDetailsService;
         this.tenantHeaderFilter = tenantHeaderFilter;
+        this.tenantSecurityFilter = tenantSecurityFilter;
         this.successHandler = successHandler;
     }
 
@@ -46,13 +48,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {        http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/error", "/h2-console/**").permitAll()
                 .requestMatchers("/login*").permitAll()
+                .requestMatchers("/admin/tenants/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
@@ -70,7 +73,7 @@ public class SecurityConfig {
             .exceptionHandling(ex -> ex
                 .accessDeniedPage("/access-denied")
             )
-            .headers(headers -> headers.frameOptions().disable());
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
 
         return http.build();
     }

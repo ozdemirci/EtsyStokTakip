@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Tenant - Stockify</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cubes me-2"></i>Stockify - Create Tenant
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin/tenants">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Tenants
+                </a>
+                <a class="nav-link" href="/logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Error Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>Create New Tenant
+                        </h4>
+                        <p class="text-muted mb-0">Set up a new organization with separate data isolation</p>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/tenants/create}" th:object="${tenantCreateDTO}" method="post">
+                            
+                            <!-- Company Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary">
+                                        <i class="fas fa-building me-2"></i>Company Information
+                                    </h5>
+                                    <hr>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="companyName" class="form-label">
+                                        <i class="fas fa-building me-1"></i>Company Name *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           th:class="${#fields.hasErrors('companyName')} ? 'form-control is-invalid' : 'form-control'"
+                                           id="companyName" 
+                                           th:field="*{companyName}" 
+                                           placeholder="Enter company name">
+                                    <div th:if="${#fields.hasErrors('companyName')}" class="invalid-feedback">
+                                        <span th:errors="*{companyName}"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="industry" class="form-label">
+                                        <i class="fas fa-industry me-1"></i>Industry
+                                    </label>
+                                    <select class="form-select" id="industry" th:field="*{industry}">
+                                        <option value="">Select industry</option>
+                                        <option value="retail">Retail</option>
+                                        <option value="manufacturing">Manufacturing</option>
+                                        <option value="technology">Technology</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="education">Education</option>
+                                        <option value="finance">Finance</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="contactPhone" class="form-label">
+                                        <i class="fas fa-phone me-1"></i>Contact Phone
+                                    </label>
+                                    <input type="tel" 
+                                           class="form-control" 
+                                           id="contactPhone" 
+                                           th:field="*{contactPhone}" 
+                                           placeholder="Enter contact phone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="address" class="form-label">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Address
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="address" 
+                                           th:field="*{address}" 
+                                           placeholder="Enter company address">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-align-left me-1"></i>Description
+                                </label>
+                                <textarea class="form-control" 
+                                          id="description" 
+                                          th:field="*{description}" 
+                                          rows="3" 
+                                          placeholder="Enter company description (optional)"></textarea>
+                            </div>
+
+                            <!-- Administrator Information -->
+                            <div class="row mb-4 mt-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary">
+                                        <i class="fas fa-user-shield me-2"></i>Administrator Account
+                                    </h5>
+                                    <hr>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="adminUsername" class="form-label">
+                                        <i class="fas fa-user me-1"></i>Admin Username *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           th:class="${#fields.hasErrors('adminUsername')} ? 'form-control is-invalid' : 'form-control'"
+                                           id="adminUsername" 
+                                           th:field="*{adminUsername}" 
+                                           placeholder="Enter admin username">
+                                    <div th:if="${#fields.hasErrors('adminUsername')}" class="invalid-feedback">
+                                        <span th:errors="*{adminUsername}"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="adminEmail" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>Admin Email *
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           th:class="${#fields.hasErrors('adminEmail')} ? 'form-control is-invalid' : 'form-control'"
+                                           id="adminEmail" 
+                                           th:field="*{adminEmail}" 
+                                           placeholder="Enter admin email">
+                                    <div th:if="${#fields.hasErrors('adminEmail')}" class="invalid-feedback">
+                                        <span th:errors="*{adminEmail}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="adminPassword" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Admin Password *
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           th:class="${#fields.hasErrors('adminPassword')} ? 'form-control is-invalid' : 'form-control'"
+                                           id="adminPassword" 
+                                           th:field="*{adminPassword}" 
+                                           placeholder="Enter admin password">
+                                    <div th:if="${#fields.hasErrors('adminPassword')}" class="invalid-feedback">
+                                        <span th:errors="*{adminPassword}"></span>
+                                    </div>
+                                    <div class="form-text">Password must be at least 6 characters long</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="confirmPassword" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Confirm Password *
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="confirmPassword" 
+                                           placeholder="Confirm admin password">
+                                    <div class="form-text">Re-enter the password to confirm</div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/admin/tenants" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-plus-circle me-2"></i>Create Tenant
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('adminPassword').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Passwords do not match');
+                this.classList.add('is-invalid');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('is-invalid');
+            }
+        });
+    </script>
+</body>
+</html>

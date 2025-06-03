@@ -12,11 +12,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     public WebConfig(TenantInterceptor tenantInterceptor) {
         this.tenantInterceptor = tenantInterceptor;
-    }
-
-    @Override
+    }    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tenantInterceptor)
-                .excludePathPatterns("/css/**", "/js/**", "/images/**", "/error", "/h2-console/**");
+                .excludePathPatterns("/css/**", "/js/**", "/images/**", "/error", "/h2-console/**", 
+                                   "/actuator/**", "/login", "/logout", "/admin/tenants/api/**");
     }
 }

@@ -7,9 +7,12 @@ import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.ProductService;
+import dev.oasis.stockify.service.TenantManagementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,8 @@ import java.util.List;
  */
 @Slf4j
 @Component
+@Profile("dev")
+@Order(2) // Run after SuperAdminInitializer
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
@@ -45,6 +50,7 @@ public class DataLoader implements CommandLineRunner {
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
+    private final TenantManagementService tenantManagementService;
 
 
     // Configuration for tenant setup

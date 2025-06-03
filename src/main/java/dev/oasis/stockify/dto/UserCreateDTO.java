@@ -13,10 +13,10 @@ public class UserCreateDTO {
 
     @NotBlank(message = "Şifre boş olamaz")
     @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
-    private String password;
-
-    @NotBlank(message = "Rol boş olamaz")
+    private String password;    @NotBlank(message = "Rol boş olamaz")
     private String role; // "ADMIN", "DEPO", "USER"
+
+    private String email; // Optional email field
 
     // Getters and Setters
     public String getUsername() {
@@ -37,9 +37,15 @@ public class UserCreateDTO {
 
     public String getRole() {
         return role;
+    }    public void setRole(String role) {
+        this.role = role;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
