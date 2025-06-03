@@ -1,9 +1,15 @@
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine as build
+WORKDIR /workspace/app
 
-WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
 
-COPY target/Stockify-0.0.1-SNAPSHOT.jar app.jar
+RUN chmod +x ./mvnw
+RUN ./mvnw clean package -DskipTests
 
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM eclipse-temurin:21-jre-alpine
+VOLUME /tmp
+COPY --from=build /workspace/app/target/*.jar app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]

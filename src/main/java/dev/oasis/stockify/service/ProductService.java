@@ -74,15 +74,35 @@ public class ProductService {
     }
 
     /**
+     * Checks if a SKU already exists in the database
+     * @param sku the SKU to check
+     * @return true if the SKU exists, false otherwise
+     */
+    public boolean isSkuExists(String sku) {
+        return productRepository.findBySku(sku).isPresent();
+    }
+
+    /**
      * Saves a product to the database
      * @param productCreateDTO the product data to save
      * @return the saved product data
      */
+    @Transactional
     public ProductResponseDTO saveProduct(ProductCreateDTO productCreateDTO) {
-        Product product = productMapper.toEntity(productCreateDTO);
-        Product savedProduct = productRepository.save(product);
-        stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
-        return productMapper.toDto(savedProduct);
+        validateProductData(productCreateDTO);
+
+        if (isSkuExists(productCreateDTO.getSku())) {
+            throw new IllegalArgumentException("SKU '" + productCreateDTO.getSku() + "' is already in use");
+        }
+
+        try {
+            Product product = productMapper.toEntity(productCreateDTO);
+            Product savedProduct = productRepository.save(product);
+            stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
+            return productMapper.toDto(savedProduct);
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving product: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -91,16 +111,43 @@ public class ProductService {
      * @param productCreateDTO the updated product data
      * @return the updated product data
      */
+    @Transactional
     public ProductResponseDTO updateProduct(Long id, ProductCreateDTO productCreateDTO) {
-        return productRepository.findById(id)
-                .map(existingProduct -> {
-                    Product updatedProduct = productMapper.updateEntity(existingProduct, productCreateDTO);
-                    Product saved = productRepository.save(updatedProduct);
-                    stockNotificationService.checkAndCreateLowStockNotification(saved);
-                    return saved;
-                })
-                .map(productMapper::toDto)
+        if (id == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+
+        try {
+            Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
+            validateProductData(productCreateDTO);
+            Product updatedProduct = productMapper.updateEntity(existingProduct, productCreateDTO);
+            Product saved = productRepository.saveAndFlush(updatedProduct); // Değişiklik burada
+            stockNotificationService.checkAndCreateLowStockNotification(saved);
+
+            return productMapper.toDto(saved);
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating product: " + e.getMessage(), e);
+        }
+    }
+
+    private void validateProductData(ProductCreateDTO productCreateDTO) {
+        if (productCreateDTO == null) {
+            throw new IllegalArgumentException("Product data cannot be null");
+        }
+        if (productCreateDTO.getTitle() == null || productCreateDTO.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Product title cannot be empty");
+        }
+        if (productCreateDTO.getPrice() == null || productCreateDTO.getPrice().doubleValue() < 0) {
+            throw new IllegalArgumentException("Product price must be valid");
+        }
+        if (productCreateDTO.getStockLevel() < 0) {
+            throw new IllegalArgumentException("Stock level cannot be negative");
+        }
+        if (productCreateDTO.getCategory() == null || productCreateDTO.getCategory().trim().isEmpty()) {
+            throw new IllegalArgumentException("Product category cannot be empty");
+        }
     }
 
     /**
@@ -127,5 +174,17 @@ public class ProductService {
      */
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+    }
+
+    /**
+     * Checks if a SKU exists for any product other than the one being edited
+     * @param productId the ID of the product being edited
+     * @param sku the SKU to check
+     * @return true if the SKU exists for another product, false otherwise
+     */
+    public boolean isSkuExistsForOtherProduct(Long productId, String sku) {
+        return productRepository.findBySku(sku)
+                .map(product -> !product.getId().equals(productId))
+                .orElse(false);
     }
 }

@@ -1,5 +1,5 @@
 -- Create AppUser table
-CREATE TABLE IF NOT EXISTS app_user (
+CREATE TABLE app_user (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS app_user (
 );
 
 -- Create Product table
-CREATE TABLE IF NOT EXISTS product (
+CREATE TABLE product (
     id BIGSERIAL PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
     description VARCHAR(1000),
@@ -20,10 +20,11 @@ CREATE TABLE IF NOT EXISTS product (
 );
 
 -- Create StockNotification table
-CREATE TABLE IF NOT EXISTS stock_notification (
+CREATE TABLE stock_notification (
     id BIGSERIAL PRIMARY KEY,
-    product_id BIGINT NOT NULL REFERENCES product(id),
+    product_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     read BOOLEAN NOT NULL DEFAULT FALSE,
-    message VARCHAR(255) NOT NULL
+    message VARCHAR(255) NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES product(id)
 );

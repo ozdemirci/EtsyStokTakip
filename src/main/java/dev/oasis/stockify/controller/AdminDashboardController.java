@@ -24,9 +24,5 @@ public class AdminDashboardController {
         return "admin/dashboard";
     }
 
-    @GetMapping("/metrics")
-    @ResponseBody
-    public DashboardMetricsDTO getMetrics() {
-        return dashboardService.getDashboardMetrics();
-    }
+
 }

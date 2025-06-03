@@ -12,11 +12,8 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE " +
            "LOWER(p.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.category) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.sku) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+           "LOWER(p.category) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     Page<Product> search(@Param("searchTerm") String searchTerm, Pageable pageable);
 
     Optional<Product> findBySku(String sku);
-    boolean existsBySku(String sku);
 }

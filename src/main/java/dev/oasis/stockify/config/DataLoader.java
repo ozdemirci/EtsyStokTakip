@@ -61,12 +61,12 @@ public class DataLoader implements CommandLineRunner {
         // Check if we already have products
         if (productRepository.count() == 0) {
             List<Product> defaultProducts = Arrays.asList(
-                createProduct("etsy123","El Yapımı Kolye","kolye açıklama", "Takı", new BigDecimal("149.99"), 10, 3),
-                createProduct("etsy124","Örgü Bebek"," açıklama", "Oyuncak", new BigDecimal("199.99"), 15, 5),
-                createProduct("etsy125","Ahşap Tepsi"," açıklama", "Ev Dekorasyonu", new BigDecimal("299.99"), 8, 3),
-                createProduct("etsy126","Makrome Duvar Süsü"," açıklama", "Ev Dekorasyonu", new BigDecimal("249.99"), 12, 4),
-                createProduct("etsy127","El Yapımı Sabun Seti"," açıklama", "Kozmetik", new BigDecimal("89.99"), 20, 8),
-                createProduct("etsy128","Keçe Çanta"," açıklama", "Aksesuar", new BigDecimal("179.99"), 7, 3)
+                createProduct("SKU-1","El Yapımı Kolye","kolye açıklama", "Takı", new BigDecimal("149.99"), 10, 3),
+                createProduct("SKU-2","Örgü Bebek"," açıklama", "Oyuncak", new BigDecimal("199.99"), 15, 5),
+                createProduct("SKU-3","Ahşap Tepsi"," açıklama", "Ev Dekorasyonu", new BigDecimal("299.99"), 8, 3),
+                createProduct("SKU-4","Makrome Duvar Süsü"," açıklama", "Ev Dekorasyonu", new BigDecimal("249.99"), 12, 4),
+                createProduct("SKU-5","El Yapımı Sabun Seti"," açıklama", "Kozmetik", new BigDecimal("89.99"), 20, 8),
+                createProduct("SKU-6","Keçe Çanta"," açıklama", "Aksesuar", new BigDecimal("179.99"), 7, 3)
             );
 
             try {

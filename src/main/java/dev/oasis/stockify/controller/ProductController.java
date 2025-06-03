@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -79,12 +80,52 @@ public class ProductController {
      * Processes the form submission to add a new product
      */
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute ProductCreateDTO productCreateDTO) {
-        if (productCreateDTO == null) {
-            throw new IllegalArgumentException("Product cannot be null");
+    public String addProduct(@ModelAttribute ProductCreateDTO productCreateDTO,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            // Temel validasyonlar
+            if (productCreateDTO == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Product data cannot be null");
+                return "redirect:/products/add";
+            }
+
+            if (productCreateDTO.getTitle() == null || productCreateDTO.getTitle().trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Product title cannot be empty");
+                return "redirect:/products/add";
+            }
+
+            if (productCreateDTO.getPrice() == null || productCreateDTO.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Product price must be valid");
+                return "redirect:/products/add";
+            }
+
+            if (productCreateDTO.getStockLevel() < 0) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Stock level cannot be negative");
+                return "redirect:/products/add";
+            }
+
+            if (productCreateDTO.getSku() == null || productCreateDTO.getSku().trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "SKU cannot be empty");
+                return "redirect:/products/add";
+            }
+
+            // SKU benzersizlik kontrolü
+            if (productService.isSkuExists(productCreateDTO.getSku())) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                    String.format("SKU '%s' is already in use", productCreateDTO.getSku()));
+                return "redirect:/products/add";
+            }
+
+            ProductResponseDTO savedProduct = productService.saveProduct(productCreateDTO);
+            redirectAttributes.addFlashAttribute("successMessage",
+                String.format("Product '%s' was successfully created", savedProduct.getTitle()));
+            return "redirect:/products";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                "Error creating product: " + e.getMessage());
+            return "redirect:/products/add";
         }
-        productService.saveProduct(productCreateDTO);
-        return "redirect:/products";
     }
 
     /**
@@ -103,9 +144,58 @@ public class ProductController {
      * Processes the form submission to update an existing product
      */
     @PostMapping("/edit/{id}")
-    public String editProduct(@PathVariable Long id, @ModelAttribute ProductCreateDTO productCreateDTO) {
-        productService.updateProduct(id, productCreateDTO);
-        return "redirect:/products";
+    public String editProduct(@PathVariable Long id,
+                            @ModelAttribute("product") ProductCreateDTO productCreateDTO,
+                            RedirectAttributes redirectAttributes,
+                            Model model) {
+        try {
+            // Ürünün var olup olmadığını kontrol et
+            ProductResponseDTO existingProduct = productService.getProductById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
+            // Temel validasyonlar
+            if (productCreateDTO.getTitle() == null || productCreateDTO.getTitle().trim().isEmpty()) {
+                model.addAttribute("errorMessage", "Product title cannot be empty");
+                model.addAttribute("isEdit", true);
+                return "product-form";
+            }
+
+            if (productCreateDTO.getPrice() == null || productCreateDTO.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                model.addAttribute("errorMessage", "Product price must be valid");
+                model.addAttribute("isEdit", true);
+                return "product-form";
+            }
+
+            if (productCreateDTO.getStockLevel() < 0) {
+                model.addAttribute("errorMessage", "Stock level cannot be negative");
+                model.addAttribute("isEdit", true);
+                return "product-form";
+            }
+
+            if (productCreateDTO.getSku() == null || productCreateDTO.getSku().trim().isEmpty()) {
+                model.addAttribute("errorMessage", "SKU cannot be empty");
+                model.addAttribute("isEdit", true);
+                return "product-form";
+            }
+
+            // SKU benzersizlik kontrolü (mevcut ürün hariç)
+            if (productService.isSkuExistsForOtherProduct(id, productCreateDTO.getSku())) {
+                model.addAttribute("errorMessage",
+                    String.format("SKU '%s' is already in use by another product", productCreateDTO.getSku()));
+                model.addAttribute("isEdit", true);
+                return "product-form";
+            }
+
+            ProductResponseDTO updatedProduct = productService.updateProduct(id, productCreateDTO);
+            redirectAttributes.addFlashAttribute("successMessage",
+                String.format("Product '%s' was successfully updated", updatedProduct.getTitle()));
+            return "redirect:/products";
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error updating product: " + e.getMessage());
+            model.addAttribute("isEdit", true);
+            return "product-form";
+        }
     }
 
     /**

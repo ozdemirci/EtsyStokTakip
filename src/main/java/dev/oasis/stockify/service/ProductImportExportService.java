@@ -82,8 +82,8 @@ public class ProductImportExportService {
             for (ProductResponseDTO product : products) {
                 String[] line = new String[]{
                         product.getTitle(),
-                        "", // Description is not in the DTO
-                        "", // SKU is not in the DTO
+                        product.getDescription(),
+                        product.getSku(),
                         product.getPrice().toString(),
                         String.valueOf(product.getStockLevel()),
                         product.getCategory()
@@ -172,8 +172,8 @@ public class ProductImportExportService {
                 ProductResponseDTO product = products.get(i);
 
                 row.createCell(0).setCellValue(product.getTitle());
-                row.createCell(1).setCellValue(""); // Description
-                row.createCell(2).setCellValue(""); // SKU
+                row.createCell(1).setCellValue(product.getDescription());
+                row.createCell(2).setCellValue(product.getSku());
 
                 Cell priceCell = row.createCell(3);
                 priceCell.setCellValue(product.getPrice().doubleValue());
@@ -325,6 +325,8 @@ public class ProductImportExportService {
         ProductCreateDTO product = new ProductCreateDTO();
 
         product.setTitle(getRequiredValue(line, headerMap, "name", "Product name"));
+        product.setDescription(getOptionalValue(line, headerMap, "description", ""));
+        product.setSku(getRequiredValue(line, headerMap, "sku", "SKU"));
         product.setCategory(getRequiredValue(line, headerMap, "category", "Category"));
 
         String priceStr = getRequiredValue(line, headerMap, "price", "Price");
@@ -351,6 +353,8 @@ public class ProductImportExportService {
         ProductCreateDTO product = new ProductCreateDTO();
 
         product.setTitle(getRequiredCellValue(row, headerMap, "name", "Product name"));
+        product.setDescription(getOptionalCellValue(row, headerMap, "description", ""));
+        product.setSku(getRequiredCellValue(row, headerMap, "sku", "SKU"));
         product.setCategory(getRequiredCellValue(row, headerMap, "category", "Category"));
 
         Double price = getRequiredNumericCellValue(row, headerMap, "price", "Price");
@@ -385,6 +389,15 @@ public class ProductImportExportService {
         return value;
     }
 
+    private String getOptionalValue(String[] line, Map<String, Integer> headerMap, String headerKey, String defaultValue) {
+        Integer index = headerMap.get(headerKey.toLowerCase());
+        if (index == null || index >= line.length) {
+            return defaultValue;
+        }
+        String value = line[index].trim();
+        return value.isEmpty() ? defaultValue : value;
+    }
+
     private String getRequiredCellValue(Row row, Map<String, Integer> headerMap, String headerKey, String fieldName) {
         Integer index = headerMap.get(headerKey.toLowerCase());
         if (index == null) {
@@ -405,6 +418,25 @@ public class ProductImportExportService {
             throw new FileOperationException("Empty required field: " + fieldName);
         }
         return value;
+    }
+
+    private String getOptionalCellValue(Row row, Map<String, Integer> headerMap, String headerKey, String defaultValue) {
+        Integer index = headerMap.get(headerKey.toLowerCase());
+        if (index == null) {
+            return defaultValue;
+        }
+        Cell cell = row.getCell(index);
+        if (cell == null) {
+            return defaultValue;
+        }
+
+        String value = switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            default -> defaultValue;
+        };
+
+        return value.isEmpty() ? defaultValue : value;
     }
 
     private Double getRequiredNumericCellValue(Row row, Map<String, Integer> headerMap, String headerKey, String fieldName) {

@@ -39,11 +39,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Enable CSRF protection for better security
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**")
+                .ignoringRequestMatchers("/h2/**")  // H2 konsolu için CSRF'i devre dışı bırak
+            )
+            .headers(headers -> headers
+                .frameOptions()
+                .sameOrigin()  // H2 konsolu için X-Frame-Options'ı yapılandır
+            )
             .authorizeHttpRequests(auth -> auth
                 // Public resources that don't require authentication
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**","/h2").permitAll()
+
 
                 // User management endpoints - restricted to ADMIN role
                 .requestMatchers("/users/**").hasRole("ADMIN")

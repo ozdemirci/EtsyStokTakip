@@ -43,14 +43,25 @@ public class ProductMapper {
     public Product updateEntity(Product product, ProductCreateDTO productCreateDTO) {
         if (productCreateDTO == null) {
             return product;
-        }        product.setTitle(productCreateDTO.getTitle());
+        }
+
+        product.setTitle(productCreateDTO.getTitle());
         product.setDescription(productCreateDTO.getDescription());
-        product.setSku(productCreateDTO.getSku());
         product.setCategory(productCreateDTO.getCategory());
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
-        product.setEtsyProductId(productCreateDTO.getEtsyProductId());
-        
+        product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());  // Bu satırı ekledim
+
+        // SKU değişmişse ve yeni SKU null değilse güncelle
+        if (productCreateDTO.getSku() != null && !productCreateDTO.getSku().equals(product.getSku())) {
+            product.setSku(productCreateDTO.getSku());
+        }
+
+        // EtsyProductId null olabilir
+        if (productCreateDTO.getEtsyProductId() != null) {
+            product.setEtsyProductId(productCreateDTO.getEtsyProductId());
+        }
+
         return product;
     }
 
@@ -62,7 +73,8 @@ public class ProductMapper {
     public ProductResponseDTO toDto(Product product) {
         if (product == null) {
             return null;
-        }        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        }
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
         productResponseDTO.setId(product.getId());
         productResponseDTO.setTitle(product.getTitle());
         productResponseDTO.setDescription(product.getDescription());
@@ -70,6 +82,7 @@ public class ProductMapper {
         productResponseDTO.setCategory(product.getCategory());
         productResponseDTO.setPrice(product.getPrice());
         productResponseDTO.setStockLevel(product.getStockLevel());
+        productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());  // Bu satırı ekledim
         productResponseDTO.setEtsyProductId(product.getEtsyProductId());
         
         return productResponseDTO;
@@ -90,3 +103,4 @@ public class ProductMapper {
                 .collect(Collectors.toList());
     }
 }
+
