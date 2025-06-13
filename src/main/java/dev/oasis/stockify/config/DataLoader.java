@@ -41,7 +41,7 @@ import java.util.List;
 @Slf4j
 @Component
 @Profile("dev")
-@Order(2) // Run after SuperAdminInitializer
+@Order(3) // Run after SuperAdminInitializer (1) and MultiTenantFlywayConfig (2)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
@@ -135,10 +135,8 @@ public class DataLoader implements CommandLineRunner {
             // Clear tenant context after processing
             TenantContext.clear();
         }
-    }
-
-    /**
-     * Create tenant schema if it doesn't exist
+    }    /**
+     * Create tenant schema if it doesn't exist (simplified - Flyway will handle table creation)
      */
     private void createTenantSchemaIfNotExists(String tenantId) {
         try (Connection connection = dataSource.getConnection();
@@ -146,15 +144,11 @@ public class DataLoader implements CommandLineRunner {
             
             String schemaName = tenantId.toUpperCase();
             
-            // Create schema
+            // Create schema (Flyway will handle table creation)
             String createSchemaSQL = String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName);
             statement.execute(createSchemaSQL);
-            
-            // Set schema for this connection
-            String setSchemaSQL = String.format("SET SCHEMA '%s'", schemaName);
-            statement.execute(setSchemaSQL);
 
-            log.debug("🏗️ Schema ensured for tenant: {}", tenantId);
+            log.debug("🏗️ Schema ensured for tenant: {} (tables created by Flyway)", tenantId);
             
         } catch (SQLException e) {
             log.error("❌ Failed to create schema for tenant {}: {}", tenantId, e.getMessage());

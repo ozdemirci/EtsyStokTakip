@@ -94,9 +94,19 @@ GET http://localhost:8080/products
 X-TenantId: global_trade
 
 ### Schema-based Multi-tenancy Doğrulama Checklist:
-### ✅ Her tenant için ayrı schema oluşturuluyor
+### ✅ Her tenant için ayrı schema oluşturuluyor (H2 INIT + Flyway)
+### ✅ Flyway migrations her tenant schema'ya uygulanıyor
+### ✅ Tablolar artık her tenant schema'sında ayrı ayrı mevcut
 ### ✅ Veriler tenant'lar arasında izole ediliyor
-### ✅ Aynı tablo yapısı her tenant'ta mevcut
+### ✅ Aynı tablo yapısı her tenant'ta mevcut (Flyway sayesinde)
 ### ✅ Tenant switching header ile çalışıyor
 ### ✅ Security filtreleri tenant doğrulaması yapıyor
 ### ✅ DataLoader her tenant için ayrı veri yüklüyor
+### ✅ SuperAdmin 'stockify' tenant'ında izole edilmiş
+
+### H2 Console'da Kontrol Edilecekler:
+### 1. STOCKIFY schema'sında: app_user, product, tenant_config tabloları
+### 2. ACME_CORP schema'sında: app_user, product, tenant_config tabloları  
+### 3. GLOBAL_TRADE schema'sında: app_user, product, tenant_config tabloları
+### 4. Her schema'da flyway_schema_history_[schema] tablosu
+### 5. Tablolar artık PUBLIC'te değil, kendi schema'larında

@@ -106,12 +106,14 @@ Connect to H2 Console and verify schema isolation:
 - Username: `sa` 
 - Password: (empty)
 
-You should see separate schemas:
-- `STOCKIFY` (super admin tenant)
-- `ACME_CORP` (tenant 1)
-- `GLOBAL_TRADE` (tenant 2)
-- `ARTISAN_CRAFTS` (tenant 3)
-- `TECH_SOLUTIONS` (tenant 4)
+You should see separate schemas with **tables in each schema** (not in PUBLIC):
+- `STOCKIFY` → app_user, product, tenant_config, flyway_schema_history_stockify
+- `ACME_CORP` → app_user, product, tenant_config, flyway_schema_history_acme_corp
+- `GLOBAL_TRADE` → app_user, product, tenant_config, flyway_schema_history_global_trade
+- `ARTISAN_CRAFTS` → app_user, product, tenant_config, flyway_schema_history_artisan_crafts
+- `TECH_SOLUTIONS` → app_user, product, tenant_config, flyway_schema_history_tech_solutions
+
+**Important**: Tables should NOT be in PUBLIC schema anymore. Each tenant has its own isolated table set.
 
 ### Super Admin Access
 
