@@ -50,12 +50,10 @@ public class DataLoader implements CommandLineRunner {
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
-    private final TenantManagementService tenantManagementService;
-
-
-    // Configuration for tenant setup
+    private final TenantManagementService tenantManagementService;    // Configuration for tenant setup - Real company-based tenant schemas
+    // Note: 'stockify' tenant is reserved for super admin and created by SuperAdminInitializer
     private static final List<String> TENANT_IDS = Arrays.asList(
-        "company1", "company2"
+        "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
     );
 
     // Sample data configurations
@@ -93,9 +91,7 @@ public class DataLoader implements CommandLineRunner {
             // Always clear tenant context
             TenantContext.clear();
         }
-    }
-
-    /**
+    }    /**
      * Initialize data for a specific tenant
      */
     private void initializeTenantData(String tenantId) {
@@ -107,6 +103,13 @@ public class DataLoader implements CommandLineRunner {
             
             // Ensure schema exists
             createTenantSchemaIfNotExists(tenantId);
+            
+            // Special handling for 'stockify' tenant (super admin tenant)
+            if ("stockify".equals(tenantId)) {
+                log.info("🏛️ Stockify platform tenant - super admin already created by SuperAdminInitializer");
+                initializeTenantConfig(tenantId);
+                return;
+            }
             
             // Check if data already exists to avoid duplicates
             if (isDataAlreadyLoaded(tenantId)) {
@@ -288,19 +291,19 @@ public class DataLoader implements CommandLineRunner {
             log.warn("⚠️ Could not initialize config for tenant {}: {}", tenantId, e.getMessage());
             // Non-critical error, continue processing
         }
-    }
-
-    /**
+    }    /**
      * Get display name for tenant
      */
     private String getTenantDisplayName(String tenantId) {
         return switch (tenantId.toLowerCase()) {
-            case "company1" -> "Artisan Crafts Co.";
-            case "company2" -> "Vintage Treasures Ltd.";
-            case "company3" -> "Eco-Friendly Goods Inc.";
+            case "stockify" -> "Stockify Platform (Super Admin)";
+            case "acme_corp" -> "ACME Corporation";
+            case "global_trade" -> "Global Trade Solutions";
+            case "artisan_crafts" -> "Artisan Crafts Co.";
+            case "tech_solutions" -> "Tech Solutions Inc.";
             case "demo" -> "Demo Company";
             case "test" -> "Test Environment";
-            default -> "Tenant " + tenantId;
+            default -> "Tenant " + tenantId.toUpperCase();
         };
     }
 

@@ -1,8 +1,8 @@
 package dev.oasis.stockify.service;
 
+import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.repository.AppUserRepository;
-import dev.oasis.stockify.config.tenant.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
