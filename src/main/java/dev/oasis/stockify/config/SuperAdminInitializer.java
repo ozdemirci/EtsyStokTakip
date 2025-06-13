@@ -38,6 +38,7 @@ public class SuperAdminInitializer implements CommandLineRunner {
                 log.info("🔧 Creating super admin user...");
                 
                 AppUser superAdmin = new AppUser();
+
                 superAdmin.setUsername("superadmin");
                 superAdmin.setPassword(passwordEncoder.encode("superadmin123"));
                 superAdmin.setRole("SUPER_ADMIN");
