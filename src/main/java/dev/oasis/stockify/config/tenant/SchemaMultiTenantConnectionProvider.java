@@ -37,8 +37,9 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     public Connection getConnection(String tenantIdentifier) throws SQLException {
         log.debug("Getting connection for tenant: {}", tenantIdentifier);
         Connection connection = getAnyConnection();
-        // Use Locale.ROOT to avoid Turkish locale uppercase issues (i -> İ)
-        String schemaName = tenantIdentifier.toUpperCase(Locale.ROOT);
+        // Use Locale.ROOT to avoid Turkish locale issues
+        // Schemas are created in lowercase by Flyway
+        String schemaName = tenantIdentifier.toLowerCase(Locale.ROOT);
         
         try {
             // Schema switching only - Flyway handles table creation
