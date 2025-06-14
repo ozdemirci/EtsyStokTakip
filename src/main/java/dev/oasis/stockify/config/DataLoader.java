@@ -42,7 +42,7 @@ import java.util.Locale;
  */
 @Slf4j
 @Component
-@Profile("dev")
+@Profile("dev") // Re-enabled after fixing schema case issues
 @Order(2) // Run after MultiTenantFlywayConfig (1)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
@@ -221,12 +221,12 @@ public class DataLoader implements CommandLineRunner {
     /**
      * Initialize tenant-specific configurations
      */
-    private void initializeTenantConfig(String tenantId) {
-        log.info("⚙️ Setting up configuration for tenant: {}", tenantId);
+    private void initializeTenantConfig(String tenantId) {        log.info("⚙️ Setting up configuration for tenant: {}", tenantId);
           try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             
-            String schemaName = tenantId.toUpperCase(Locale.ROOT);
+            // Use the correct schema name mapping (same as SchemaMultiTenantConnectionProvider)
+            String schemaName = mapTenantToSchema(tenantId);
             connection.setSchema(schemaName);
             
             // Insert tenant-specific configurations
@@ -273,6 +273,19 @@ public class DataLoader implements CommandLineRunner {
             default -> "Tenant " + tenantId.toUpperCase(Locale.ROOT);
         };
     }    /**
+     * Map tenant identifier to actual schema name in database
+     * This handles the difference between logical tenant names and physical schema names
+     */
+    private String mapTenantToSchema(String tenantIdentifier) {
+        if (tenantIdentifier == null) {
+            return "public";
+        }
+        
+        // All schema names in lowercase for consistency with H2 settings
+        return tenantIdentifier.toLowerCase(Locale.ROOT);
+    }
+
+    /**
      * Sample user data structure
      */
     private static class SampleUser {

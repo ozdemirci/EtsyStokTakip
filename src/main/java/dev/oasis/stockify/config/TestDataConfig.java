@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 
 @Configuration
-@Profile("dev")
+@Profile("disabled-test") // Disabled - using DataLoader instead
 public class TestDataConfig {
 
     private final DataSource dataSource;

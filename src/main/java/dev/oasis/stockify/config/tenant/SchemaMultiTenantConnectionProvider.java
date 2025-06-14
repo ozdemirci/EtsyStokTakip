@@ -52,27 +52,21 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
         }
         return connection;
     }
-    
-    /**
+      /**
      * Map tenant identifier to actual schema name in database
      * This handles the difference between logical tenant names and physical schema names
      */
     private String mapTenantToSchema(String tenantIdentifier) {
         if (tenantIdentifier == null) {
-            return "PUBLIC";
+            return "public";
         }
         
-        // Handle the default tenant/schema mapping
-        if ("PUBLIC".equalsIgnoreCase(tenantIdentifier)) {
-            return "PUBLIC"; // H2's default schema is uppercase
-        }
-        
-        // For other tenants, use lowercase (as created by Flyway)
+        // All schema names in lowercase for consistency with H2 settings
         return tenantIdentifier.toLowerCase(Locale.ROOT);
-    }@Override
+    }    @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         try {
-            // Use public schema as default
+            // Use public schema as default (lowercase for consistency)
             connection.setSchema("public");
         } finally {
             connection.close();
