@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - Super Admin - Stockify</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tenant-card {
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s;
+        }
+        .tenant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .super-admin-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .product-card {
+            border-left: 4px solid #28a745;
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .low-stock {
+            border-left-color: #dc3545 !important;
+        }
+        .medium-stock {
+            border-left-color: #ffc107 !important;
+        }
+        .high-stock {
+            border-left-color: #28a745 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/superadmin/dashboard">
+                <i class="fas fa-crown me-2"></i>
+                Stockify Super Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/superadmin/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/superadmin/tenants">
+                            <i class="fas fa-building me-1"></i>Tenants
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/superadmin/users">
+                            <i class="fas fa-users me-1"></i>All Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/superadmin/products">
+                            <i class="fas fa-boxes me-1"></i>All Products
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-crown me-1"></i>
+                            <span th:text="${currentUser}">Super Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="super-admin-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 mb-0">
+                        <i class="fas fa-boxes me-3"></i>
+                        All Products Management
+                    </h1>
+                    <p class="lead mb-0">Cross-Tenant Product Overview</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="card stat-card">
+                        <div class="card-body text-center">
+                            <h3 th:text="${#maps.size(availableTenants)}">6</h3>
+                            <small>Active Tenants</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Success Message -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Products by Tenant -->
+        <div th:if="${tenantProducts and !#maps.isEmpty(tenantProducts)}">
+            <div th:each="tenantEntry : ${tenantProducts}" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="text-primary">
+                        <i class="fas fa-building me-2"></i>
+                        <span th:text="${tenantEntry.key.toUpperCase()}">TENANT</span>
+                        <small class="text-muted">
+                            (<span th:text="${#lists.size(tenantEntry.value)}">0</span> products)
+                        </small>
+                    </h3>
+                </div>
+
+                <!-- Products Grid -->
+                <div th:if="${tenantEntry.value and !#lists.isEmpty(tenantEntry.value)}" class="row">
+                    <div th:each="product : ${tenantEntry.value}" class="col-md-6 col-lg-4 mb-3">
+                        <div class="card product-card h-100"
+                             th:classappend="${product.stockLevel <= product.lowStockThreshold} ? 'low-stock' : 
+                                           (${product.stockLevel <= product.lowStockThreshold * 2} ? 'medium-stock' : 'high-stock')">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <small class="text-muted" th:text="${product.sku}">SKU</small>
+                                <span class="badge" 
+                                      th:classappend="${product.stockLevel <= product.lowStockThreshold} ? 'bg-danger' : 
+                                                    (${product.stockLevel <= product.lowStockThreshold * 2} ? 'bg-warning' : 'bg-success')"
+                                      th:text="${product.stockLevel <= product.lowStockThreshold} ? 'Low Stock' : 
+                                              (${product.stockLevel <= product.lowStockThreshold * 2} ? 'Medium Stock' : 'In Stock'">
+                                    Stock Status
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title" th:text="${product.title}">Product Title</h6>
+                                <p class="card-text small text-muted" th:text="${product.description}">Product description</p>
+                                
+                                <div class="row text-center mt-3">
+                                    <div class="col-4">
+                                        <strong th:text="'$' + ${product.price}">$0.00</strong>
+                                        <br><small class="text-muted">Price</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong th:text="${product.stockLevel}">0</strong>
+                                        <br><small class="text-muted">Stock</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong th:text="${product.category}">Category</strong>
+                                        <br><small class="text-muted">Category</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    Low Stock Threshold: <span th:text="${product.lowStockThreshold}">5</span>
+                                </small>
+                                <br>
+                                <small class="text-muted" th:if="${product.etsyProductId}">
+                                    External ID: <span th:text="${product.etsyProductId}">EXT_ID</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Products Message -->
+                <div th:if="${tenantEntry.value == null or #lists.isEmpty(tenantEntry.value)}" class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No products found for tenant <strong th:text="${tenantEntry.key}">TENANT</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Data Message -->
+        <div th:if="${tenantProducts == null or #maps.isEmpty(tenantProducts)}" class="text-center py-5">
+            <div class="card">
+                <div class="card-body">
+                    <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Products Data Available</h4>
+                    <p class="text-muted">No products have been created across any tenants yet.</p>
+                    <a href="/superadmin/dashboard" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="/superadmin/dashboard" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Back to Dashboard
+                </a>
+                <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-crown me-2"></i>Stockify Super Admin</h5>
+                    <p class="mb-0">Multi-Tenant Inventory Management System</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small class="text-muted">
+                        © 2025 Stockify. All rights reserved.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Auto-refresh for real-time updates -->
+    <script>
+        // Auto-refresh every 30 seconds to keep data current
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

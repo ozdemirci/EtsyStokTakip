@@ -92,18 +92,19 @@ public class SuperAdminController {
     @GetMapping("/products")
     public String allProducts(Model model, Principal principal) {
         log.info("📦 Super Admin '{}' accessing all products", principal.getName());
-        
-        try {
+          try {
             Map<String, List<Product>> tenantProducts = superAdminService.getAllProductsAcrossAllTenants();
             
             model.addAttribute("tenantProducts", tenantProducts);
             model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("currentUser", principal.getName());
             
             return "superadmin/products";
             
         } catch (Exception e) {
             log.error("❌ Error loading all products: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to load products data");
+            model.addAttribute("currentUser", principal.getName());
             return "superadmin/products";
         } finally {
             superAdminService.clearTenantContext();
