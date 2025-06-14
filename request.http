@@ -1,6 +1,0 @@
-###
-GET http://localhost:8080/login
-
-
-###
-GET http://localhost:8080/admin/dashboard
