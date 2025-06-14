@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -160,10 +161,9 @@ public class TenantManagementService {
 
     /**
      * Check if tenant exists
-     */
-    public boolean tenantExists(String tenantId) {
+     */    public boolean tenantExists(String tenantId) {
         try (Connection connection = dataSource.getConnection()) {
-            String schemaName = tenantId.toUpperCase();
+            String schemaName = tenantId.toUpperCase(Locale.ROOT);
             ResultSet schemas = connection.getMetaData().getSchemas();
             while (schemas.next()) {
                 if (schemaName.equals(schemas.getString("TABLE_SCHEM"))) {
@@ -192,7 +192,7 @@ public class TenantManagementService {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             
-            String schemaName = tenantId.toUpperCase();
+            String schemaName = tenantId.toUpperCase(Locale.ROOT);
             
             // Create schema only - Flyway handles table creation
             statement.execute(String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName));
@@ -200,7 +200,7 @@ public class TenantManagementService {
         }
     }    private void setupTenantConfiguration(String tenantId, TenantCreateDTO createDTO) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String insertConfigSQL = """
                 INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES (?, ?, ?, ?)
@@ -245,11 +245,9 @@ public class TenantManagementService {
             log.error("❌ Failed to create admin user: {}", e.getMessage());
             throw new RuntimeException("Failed to create admin user", e);
         }
-    }
-
-    private void setupDefaultConfigurations(String tenantId, TenantCreateDTO createDTO) throws SQLException {
+    }    private void setupDefaultConfigurations(String tenantId, TenantCreateDTO createDTO) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String[] defaultConfigs = {
                 "('timezone', 'UTC', 'STRING', 'Default timezone')",
@@ -265,11 +263,9 @@ public class TenantManagementService {
                 }
             }
         }
-    }
-
-    private TenantDTO getTenantInfo(String tenantId) {
+    }    private TenantDTO getTenantInfo(String tenantId) {
         try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String query = """
                 SELECT config_key, config_value FROM tenant_config 
@@ -300,9 +296,8 @@ public class TenantManagementService {
         }
     }
 
-    private void updateTenantStatus(String tenantId, String status) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+    private void updateTenantStatus(String tenantId, String status) throws SQLException {        try (Connection connection = dataSource.getConnection()) {
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String updateSQL = """
                 UPDATE tenant_config SET config_value = ?, updated_at = CURRENT_TIMESTAMP 
@@ -327,7 +322,7 @@ public class TenantManagementService {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             
-            String schemaName = tenantId.toUpperCase();
+            String schemaName = tenantId.toUpperCase(Locale.ROOT);
             statement.execute(String.format("DROP SCHEMA IF EXISTS %s CASCADE", schemaName));
             log.info("🧹 Cleaned up failed tenant schema: {}", schemaName);
             

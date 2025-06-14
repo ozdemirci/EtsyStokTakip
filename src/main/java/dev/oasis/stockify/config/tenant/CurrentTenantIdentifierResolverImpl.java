@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentifierResolver {
 
     private static final Logger log = LoggerFactory.getLogger(CurrentTenantIdentifierResolverImpl.class);
-    private static final String DEFAULT_TENANT = "public";
+    private static final String DEFAULT_TENANT = "PUBLIC";
 
     @Override
     public String resolveCurrentTenantIdentifier() {

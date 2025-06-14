@@ -7,6 +7,14 @@ CREATE TABLE IF NOT EXISTS app_user (
     username VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'USER',
+    
+    -- Super Admin specific fields
+    can_manage_all_tenants BOOLEAN DEFAULT FALSE,
+    accessible_tenants VARCHAR(1000),
+    is_global_user BOOLEAN DEFAULT FALSE,
+    primary_tenant VARCHAR(50),
+    
+    -- Audit fields
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
@@ -17,6 +25,8 @@ CREATE TABLE IF NOT EXISTS app_user (
 CREATE INDEX IF NOT EXISTS idx_app_user_username ON app_user(username);
 CREATE INDEX IF NOT EXISTS idx_app_user_role ON app_user(role);
 CREATE INDEX IF NOT EXISTS idx_app_user_active ON app_user(is_active);
+CREATE INDEX IF NOT EXISTS idx_app_user_global ON app_user(is_global_user);
+CREATE INDEX IF NOT EXISTS idx_app_user_primary_tenant ON app_user(primary_tenant);
 
 -- =============================================================================
 -- PRODUCT TABLE
@@ -211,26 +221,4 @@ FROM stock_notification
 GROUP BY notification_type, priority
 ORDER BY priority DESC, notification_type;
 
--- =============================================================================
--- H2 DATABASE COMPATIBILITY NOTES
--- =============================================================================
--- Note: Advanced PostgreSQL features like PL/pgSQL functions and complex triggers
--- are not supported in H2. These features will be handled by the application layer:
--- 1. Updated_at timestamps: handled by JPA @PreUpdate annotations
--- 2. Stock movement logging: handled by service layer methods
--- 3. Complex indexes with WHERE clauses: simplified for H2 compatibility
-
--- =============================================================================
--- INITIAL DATA SETUP (Will be handled by DataLoader)
--- =============================================================================
--- Note: Initial data insertion will be handled by the DataLoader component
--- to ensure proper tenant context and data consistency
-
--- =============================================================================
--- PERFORMANCE AND MAINTENANCE
--- =============================================================================
-
--- Comment: This schema is designed to be replicated for each tenant
--- The multi-tenant configuration ensures data isolation between tenants
--- while maintaining consistent structure and functionality across all tenants.
 

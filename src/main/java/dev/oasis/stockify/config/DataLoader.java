@@ -7,7 +7,6 @@ import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.ProductService;
-import dev.oasis.stockify.service.TenantManagementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -23,16 +22,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Multi-Tenant Data Loader Component
  * This component initializes sample data for multiple tenants in the Stockify application.
- * It creates separate schemas for each tenant and populates them with initial data including:
+ * It populates existing tenant schemas (created by Flyway) with initial data including:
  * - Administrative users with proper roles
  * - Sample products with realistic inventory data
  * - Tenant-specific configurations
+ * 
  * The data loader runs only in 'dev' profile and ensures complete isolation
  * between tenant data while maintaining consistent data structure.
+ * Schema and table creation is handled by MultiTenantFlywayConfig.
  * 
  * @author Stockify Team
  * @version 1.0
@@ -41,26 +43,24 @@ import java.util.List;
 @Slf4j
 @Component
 @Profile("dev")
-@Order(3) // Run after SuperAdminInitializer (1) and MultiTenantFlywayConfig (2)
+@Order(2) // Run after MultiTenantFlywayConfig (1)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
-
+    
     private final DataSource dataSource;
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
-    private final TenantManagementService tenantManagementService;    // Configuration for tenant setup - Real company-based tenant schemas
+
+    // Configuration for tenant setup - Real company-based tenant schemas
     // Note: 'stockify' tenant is reserved for super admin and created by SuperAdminInitializer
     private static final List<String> TENANT_IDS = Arrays.asList(
         "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
-    );
-
-    // Sample data configurations
+    );    // Sample data configurations
     private static final List<SampleUser> SAMPLE_USERS = Arrays.asList(
-        new SampleUser("admin", "admin123", "ADMIN", "System Administrator"),
-       new SampleUser("operator", "operator123", "USER", "Warehouse Operator")
-
+        new SampleUser("admin", "admin123", "ADMIN"),
+       new SampleUser("operator", "operator123", "USER")
     );
 
     private static final List<SampleProduct> SAMPLE_PRODUCTS = Arrays.asList(
@@ -96,13 +96,9 @@ public class DataLoader implements CommandLineRunner {
      */
     private void initializeTenantData(String tenantId) {
         log.info("🏢 Initializing data for tenant: {}", tenantId);
-        
-        try {
+          try {
             // Set tenant context
             TenantContext.setCurrentTenant(tenantId);
-            
-            // Ensure schema exists
-            createTenantSchemaIfNotExists(tenantId);
             
             // Special handling for 'stockify' tenant (super admin tenant)
             if ("stockify".equals(tenantId)) {
@@ -136,27 +132,6 @@ public class DataLoader implements CommandLineRunner {
             TenantContext.clear();
         }
     }    /**
-     * Create tenant schema if it doesn't exist (simplified - Flyway will handle table creation)
-     */
-    private void createTenantSchemaIfNotExists(String tenantId) {
-        try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
-            
-            String schemaName = tenantId.toUpperCase();
-            
-            // Create schema (Flyway will handle table creation)
-            String createSchemaSQL = String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName);
-            statement.execute(createSchemaSQL);
-
-            log.debug("🏗️ Schema ensured for tenant: {} (tables created by Flyway)", tenantId);
-            
-        } catch (SQLException e) {
-            log.error("❌ Failed to create schema for tenant {}: {}", tenantId, e.getMessage());
-            throw new RuntimeException("Failed to create schema for tenant: " + tenantId, e);
-        }
-    }
-
-    /**
      * Check if data is already loaded for the tenant
      */
     private boolean isDataAlreadyLoaded(String tenantId) {
@@ -227,9 +202,8 @@ public class DataLoader implements CommandLineRunner {
                 productDTO.setPrice(new BigDecimal(sampleProduct.price));
                 productDTO.setStockLevel(sampleProduct.stockLevel);
                 productDTO.setLowStockThreshold(sampleProduct.lowStockThreshold);
-                
-                // Set Etsy product ID (simulate external integration)
-                productDTO.setEtsyProductId("ETSY_" + tenantId.toUpperCase() + "_" + sampleProduct.sku);
+                  // Set Etsy product ID (simulate external integration)
+                productDTO.setEtsyProductId("ETSY_" + tenantId.toUpperCase(Locale.ROOT) + "_" + sampleProduct.sku);
                 
                 // Save product through service
                 productService.saveProduct(productDTO);
@@ -249,11 +223,10 @@ public class DataLoader implements CommandLineRunner {
      */
     private void initializeTenantConfig(String tenantId) {
         log.info("⚙️ Setting up configuration for tenant: {}", tenantId);
-        
-        try (Connection connection = dataSource.getConnection();
+          try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             
-            String schemaName = tenantId.toUpperCase();
+            String schemaName = tenantId.toUpperCase(Locale.ROOT);
             connection.setSchema(schemaName);
             
             // Insert tenant-specific configurations
@@ -297,24 +270,20 @@ public class DataLoader implements CommandLineRunner {
             case "tech_solutions" -> "Tech Solutions Inc.";
             case "demo" -> "Demo Company";
             case "test" -> "Test Environment";
-            default -> "Tenant " + tenantId.toUpperCase();
+            default -> "Tenant " + tenantId.toUpperCase(Locale.ROOT);
         };
-    }
-
-    /**
+    }    /**
      * Sample user data structure
      */
     private static class SampleUser {
         final String username;
         final String password;
         final String role;
-        final String description;
 
-        SampleUser(String username, String password, String role, String description) {
+        SampleUser(String username, String password, String role) {
             this.username = username;
             this.password = password;
             this.role = role;
-            this.description = description;
         }
     }
 

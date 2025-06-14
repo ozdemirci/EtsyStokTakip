@@ -1,0 +1,39 @@
+### Test Multi-Tenant Setup After Circular Dependency Fix
+### This file tests the new JDBC-based super admin creation
+
+### Test 1: Health Check
+GET http://localhost:8080/actuator/health
+Accept: application/json
+
+### Test 2: H2 Console Access
+GET http://localhost:8080/h2-console
+
+### Test 3: Check if super admin exists in stockify schema
+GET http://localhost:8080/h2-console
+# In H2 Console, run:
+# SET SCHEMA stockify;
+# SELECT * FROM app_user WHERE username = 'superadmin';
+
+### Test 4: Verify schemas exist
+# In H2 Console, run:
+# SHOW SCHEMAS;
+
+### Test 5: Check tables in each schema
+# In H2 Console, run for each schema:
+# SET SCHEMA stockify; SHOW TABLES;
+# SET SCHEMA acme_corp; SHOW TABLES;
+# SET SCHEMA global_trade; SHOW TABLES;
+# SET SCHEMA artisan_crafts; SHOW TABLES;
+# SET SCHEMA tech_solutions; SHOW TABLES;
+
+### Test 6: Login with super admin (once app is running)
+POST http://localhost:8080/login
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: stockify
+
+username=superadmin&password=superadmin123
+
+### Test 7: Access super admin dashboard
+GET http://localhost:8080/admin/dashboard
+X-Tenant-ID: stockify
+# Include session cookies from login response

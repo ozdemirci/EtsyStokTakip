@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 /**
  * Service for validating tenant access and permissions
@@ -23,12 +24,11 @@ public class TenantValidationService {
 
     /**
      * Validate if current user has access to the current tenant
-     */
-    public boolean validateTenantAccess(String username) {
+     */    public boolean validateTenantAccess(String username) {
         String currentTenant = TenantContext.getCurrentTenant();
         
-        if (currentTenant == null || currentTenant.isEmpty() || "public".equals(currentTenant)) {
-            return true; // Allow access to public tenant
+        if (currentTenant == null || currentTenant.isEmpty() || "PUBLIC".equals(currentTenant)) {
+            return true; // Allow access to PUBLIC tenant
         }
 
         try {
@@ -42,14 +42,11 @@ public class TenantValidationService {
 
     /**
      * Check if tenant is active and accessible
-     */
-    public boolean isTenantActive(String tenantId) {
-        if ("public".equals(tenantId)) {
+     */    public boolean isTenantActive(String tenantId) {
+        if ("PUBLIC".equals(tenantId)) {
             return true;
-        }
-
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+        }        try (Connection connection = dataSource.getConnection()) {
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String query = """
                 SELECT config_value FROM tenant_config 
@@ -73,14 +70,11 @@ public class TenantValidationService {
 
     /**
      * Get tenant display name
-     */
-    public String getTenantDisplayName(String tenantId) {
-        if ("public".equals(tenantId)) {
+     */    public String getTenantDisplayName(String tenantId) {
+        if ("PUBLIC".equals(tenantId)) {
             return "Public";
-        }
-
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+        }        try (Connection connection = dataSource.getConnection()) {
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String query = """
                 SELECT config_value FROM tenant_config 
@@ -104,10 +98,9 @@ public class TenantValidationService {
     /**
      * Validate tenant exists and schema is properly set up
      */
-    public boolean validateTenantSchema(String tenantId) {
-        try (Connection connection = dataSource.getConnection()) {
+    public boolean validateTenantSchema(String tenantId) {        try (Connection connection = dataSource.getConnection()) {
             // Check if schema exists
-            connection.setSchema(tenantId.toUpperCase());
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             // Check if required tables exist
             String[] requiredTables = {"app_user", "product", "stock_notification", "tenant_config"};
@@ -127,9 +120,8 @@ public class TenantValidationService {
         }
     }
 
-    private boolean userExistsInTenant(String username, String tenantId) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase());
+    private boolean userExistsInTenant(String username, String tenantId) throws SQLException {        try (Connection connection = dataSource.getConnection()) {
+            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
             
             String query = """
                 SELECT COUNT(*) FROM app_user 
@@ -153,7 +145,7 @@ public class TenantValidationService {
     private boolean tableExists(Connection connection, String tableName) {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?")) {
-            stmt.setString(1, tableName.toUpperCase());
+            stmt.setString(1, tableName.toUpperCase(Locale.ROOT));
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {

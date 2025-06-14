@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Locale;
 
 @Component
 public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectionProvider<String> {
@@ -36,22 +37,23 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     public Connection getConnection(String tenantIdentifier) throws SQLException {
         log.debug("Getting connection for tenant: {}", tenantIdentifier);
         Connection connection = getAnyConnection();
-        String schemaName = tenantIdentifier.toUpperCase();        try {
+        // Use Locale.ROOT to avoid Turkish locale uppercase issues (i -> İ)
+        String schemaName = tenantIdentifier.toUpperCase(Locale.ROOT);
+        
+        try {
             // Schema switching only - Flyway handles table creation
             connection.setSchema(schemaName);
             
             log.debug("Successfully set connection schema to: {}", schemaName);
         } catch (SQLException e) {
             log.error("Failed to set schema for tenant: {}", schemaName, e);
-            throw new SQLException("Tenant şeması seçilemedi: " + schemaName, e);
+            throw new SQLException("Failed to set tenant schema: " + schemaName, e);
         }
         return connection;
-    }
-
-    @Override
+    }    @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         try {
-            // Türkçe'de büyük I harfi 'İ' olur, bu yüzden defaultSchema.toUpperCase() yerine doğrudan "PUBLIC" kullan
+            // Use PUBLIC schema as default, avoiding Turkish locale issues
             connection.setSchema("PUBLIC");
         } finally {
             connection.close();

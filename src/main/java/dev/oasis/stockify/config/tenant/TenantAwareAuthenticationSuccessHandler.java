@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class TenantAwareAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
-    @Override
+public class TenantAwareAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {    @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                       HttpServletResponse response,
                                       Authentication authentication) throws IOException, ServletException {
@@ -21,8 +19,13 @@ public class TenantAwareAuthenticationSuccessHandler extends SimpleUrlAuthentica
             TenantContext.setCurrentTenant(tenantId.toLowerCase());
         }
 
-        // Yönetici kullanıcıları için dashboard'a yönlendir
+        // Super Admin için özel dashboard
         if (authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"))) {
+            getRedirectStrategy().sendRedirect(request, response, "/superadmin/dashboard");
+        }
+        // Yönetici kullanıcıları için dashboard'a yönlendir
+        else if (authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             getRedirectStrategy().sendRedirect(request, response, "/admin/dashboard");
         } else {

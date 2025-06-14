@@ -23,7 +23,7 @@ public class AppUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public AppUserService(AppUserRepository appUserRepository, 
+    public AppUserService(AppUserRepository appUserRepository,
                           PasswordEncoder passwordEncoder,
                           UserMapper userMapper) {
         this.appUserRepository = appUserRepository;
@@ -33,6 +33,7 @@ public class AppUserService {
 
     /**
      * Saves a user to the database
+     *
      * @param userCreateDTO the user data to save
      * @return the saved user data
      */
@@ -44,7 +45,20 @@ public class AppUserService {
     }
 
     /**
+     * Creates a user and returns the entity (for super admin operations)
+     *
+     * @param userCreateDTO the user data to create
+     * @return the created user entity
+     */
+    public AppUser createUser(UserCreateDTO userCreateDTO) {
+        AppUser appUser = userMapper.toEntity(userCreateDTO);
+        appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
+        return appUserRepository.save(appUser);
+    }
+
+    /**
      * Retrieves all users from the database
+     *
      * @return a list of all users
      */
     public List<UserResponseDTO> getAllUsers() {
@@ -56,6 +70,7 @@ public class AppUserService {
 
     /**
      * Retrieves a page of users from the database
+     *
      * @param pageable pagination information
      * @return a page of users
      */

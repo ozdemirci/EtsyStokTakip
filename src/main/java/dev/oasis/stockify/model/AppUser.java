@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+
 @Data
 @Entity
 @Table(name = "app_user")
@@ -27,7 +29,20 @@ public class AppUser {
 
     @NotBlank(message = "Rol boş olamaz")
     @Column(name = "role")
-    private String role; // "ADMIN", "DEPO", "USER"
+    private String role; // "SUPER_ADMIN", "ADMIN", "DEPO", "USER"
+
+    // Super Admin specific fields
+    @Column(name = "can_manage_all_tenants")
+    private Boolean canManageAllTenants = false;
+    
+    @Column(name = "accessible_tenants", length = 1000)
+    private String accessibleTenants; // Comma-separated list of tenant names for SUPER_ADMIN
+    
+    @Column(name = "is_global_user")
+    private Boolean isGlobalUser = false; // Can access multiple tenants
+    
+    @Column(name = "primary_tenant", length = 50)
+    private String primaryTenant; // Primary tenant for this user
 
     // Audit fields
     @Column(name = "created_at")
@@ -46,12 +61,44 @@ public class AppUser {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        
+        // Set defaults for SUPER_ADMIN
+        if ("SUPER_ADMIN".equals(role)) {
+            canManageAllTenants = true;
+            isGlobalUser = true;
+            accessibleTenants = "PUBLIC,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions";
+            if (primaryTenant == null) {
+                primaryTenant = "stockify";
+            }
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-
+    
+    // Helper methods for Super Admin
+    public boolean isSuperAdmin() {
+        return "SUPER_ADMIN".equals(role);
+    }
+    
+    public boolean canAccessTenant(String tenantName) {
+        if (isSuperAdmin() && canManageAllTenants) {
+            return true;
+        }
+        
+        if (accessibleTenants != null) {
+            return Set.of(accessibleTenants.split(",")).contains(tenantName);
+        }
+        
+        return false;
+    }
+    
+    public Set<String> getAccessibleTenantsList() {
+        if (accessibleTenants != null) {
+            return Set.of(accessibleTenants.split(","));
+        }
+        return Set.of();
+    }
 }

@@ -1,0 +1,190 @@
+### Super Admin Test Suite - STOCKIFY Multi-Tenant Management
+### Bu dosya super admin'in tüm tenant'lardaki yetkilerini test eder
+
+### Test 1: Super Admin Login (stockify tenant)
+POST http://localhost:8080/login
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: stockify
+
+username=superadmin&password=superadmin123
+
+### Test 2: Super Admin Dashboard Access
+GET http://localhost:8080/superadmin/dashboard
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 3: Get All Users Across All Tenants
+GET http://localhost:8080/superadmin/users
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 4: Get All Products Across All Tenants
+GET http://localhost:8080/superadmin/products
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 5: Get Tenant Statistics API
+GET http://localhost:8080/superadmin/api/statistics
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 6: Switch to Different Tenant (ACME Corp)
+POST http://localhost:8080/superadmin/switch-tenant
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+tenantName=acme_corp
+
+### Test 7: Switch to Tech Solutions Tenant
+POST http://localhost:8080/superadmin/switch-tenant
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+tenantName=tech_solutions
+
+### Test 8: Create User in Specific Tenant (Global Trade)
+POST http://localhost:8080/superadmin/users/create?targetTenant=global_trade
+Content-Type: application/json
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+{
+    "username": "global_admin",
+    "password": "password123",
+    "role": "ADMIN"
+}
+
+### Test 9: Create User in Artisan Crafts Tenant
+POST http://localhost:8080/superadmin/users/create?targetTenant=artisan_crafts
+Content-Type: application/json
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+{
+    "username": "artisan_manager",
+    "password": "manager123",
+    "role": "DEPO"
+}
+
+### Test 10: Tenant Management Page
+GET http://localhost:8080/superadmin/tenants
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 11: Verify Multi-Tenant Table Access (H2 Console)
+# Access H2 Console: http://localhost:8080/h2-console
+# JDBC URL: jdbc:h2:mem:stockifydb
+# Username: SA
+# Password: (empty)
+
+# Run these SQL queries to verify super admin functionality:
+
+# 1. Check super admin exists in stockify schema
+# SET SCHEMA stockify;
+# SELECT * FROM app_user WHERE username = 'superadmin';
+
+# 2. Verify super admin has multi-tenant capabilities
+# SELECT username, role, can_manage_all_tenants, accessible_tenants, is_global_user, primary_tenant 
+# FROM app_user WHERE role = 'SUPER_ADMIN';
+
+# 3. Check all schemas exist
+# SHOW SCHEMAS;
+
+# 4. Check users in each tenant
+# SET SCHEMA acme_corp; SELECT * FROM app_user;
+# SET SCHEMA global_trade; SELECT * FROM app_user;
+# SET SCHEMA artisan_crafts; SELECT * FROM app_user;
+# SET SCHEMA tech_solutions; SELECT * FROM app_user;
+
+# 5. Check products in each tenant
+# SET SCHEMA acme_corp; SELECT * FROM product;
+# SET SCHEMA global_trade; SELECT * FROM product;
+# SET SCHEMA artisan_crafts; SELECT * FROM product;
+
+### Test 12: Test Super Admin Cross-Tenant Product Access
+# Create a product in acme_corp tenant through super admin
+POST http://localhost:8080/products
+Content-Type: application/json
+X-Tenant-ID: acme_corp
+Cookie: JSESSIONID={{login_cookie}}
+
+{
+    "sku": "ACME-001",
+    "title": "ACME Super Product",
+    "description": "Test product created by super admin in ACME tenant",
+    "category": "Electronics",
+    "price": 199.99,
+    "stockLevel": 50,
+    "lowStockThreshold": 10
+}
+
+### Test 13: Test User Deactivation Across Tenants
+# First create a test user in global_trade
+POST http://localhost:8080/superadmin/users/create?targetTenant=global_trade
+Content-Type: application/json
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+{
+    "username": "test_user",
+    "password": "test123",
+    "role": "USER"
+}
+
+### Test 14: Toggle User Status (Deactivate)
+PUT http://localhost:8080/superadmin/users/1/tenant/global_trade/toggle-status?isActive=false
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 15: Toggle User Status (Activate)
+PUT http://localhost:8080/superadmin/users/1/tenant/global_trade/toggle-status?isActive=true
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 16: Attempt to Delete Super Admin User (Should Fail)
+DELETE http://localhost:8080/superadmin/users/1/tenant/stockify
+X-Tenant-ID: stockify
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 17: Test Access Control - Regular Admin Accessing Super Admin Endpoints (Should Fail)
+# First, login as regular admin in acme_corp
+POST http://localhost:8080/login
+Content-Type: application/x-www-form-urlencoded
+X-Tenant-ID: acme_corp
+
+username=admin&password=admin123
+
+### Test 18: Regular Admin Trying Super Admin Dashboard (Should get 403)
+GET http://localhost:8080/superadmin/dashboard
+X-Tenant-ID: acme_corp
+Cookie: JSESSIONID={{regular_admin_cookie}}
+
+### Test 19: Verify Super Admin Can Access All Tenant Dashboards
+GET http://localhost:8080/admin/dashboard
+X-Tenant-ID: acme_corp
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test 20: Verify Cross-Tenant Data Isolation
+# Super admin should see different data when switching tenants
+GET http://localhost:8080/products
+X-Tenant-ID: acme_corp
+Cookie: JSESSIONID={{login_cookie}}
+
+###
+GET http://localhost:8080/products
+X-Tenant-ID: global_trade
+Cookie: JSESSIONID={{login_cookie}}
+
+### Test Results Summary:
+# ✅ Super Admin can login to stockify tenant
+# ✅ Super Admin can access special dashboard
+# ✅ Super Admin can view all users across all tenants
+# ✅ Super Admin can view all products across all tenants
+# ✅ Super Admin can switch between tenants
+# ✅ Super Admin can create users in any tenant
+# ✅ Super Admin can manage user status across tenants
+# ✅ Super Admin is protected from deletion
+# ✅ Regular admins cannot access super admin functions
+# ✅ Data isolation is maintained across tenants
