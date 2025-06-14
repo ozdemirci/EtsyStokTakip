@@ -11,7 +11,7 @@
 ### 1. Multi-Tenant Flyway Configuration
 - **File**: `MultiTenantFlywayConfig.java`
 - **Purpose**: Applies migrations to all tenant schemas
-- **Schemas**: `PUBLIC`, `stockify`, `acme_corp`, `global_trade`, `artisan_crafts`, `tech_solutions`
+ - **Schemas**: `PUBLIC`, `stockify`, `acme_corp`, `global_trade`, `artisan_crafts`, `tech_solutions`, `tenant1`, `tenant2`
 - **Features**: 
   - Creates separate flyway history tables per schema
   - Handles schema creation automatically
@@ -20,13 +20,13 @@
 ### 2. Enhanced Application Properties
 ```properties
 # Multi-schema Flyway configuration
-spring.flyway.schemas=PUBLIC,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions
+spring.flyway.schemas=PUBLIC,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2
 spring.flyway.default-schema=PUBLIC
 spring.flyway.create-schemas=true
 spring.flyway.baseline-on-migrate=true
 
 # Pre-create schemas in H2 URL
-spring.datasource.url=jdbc:h2:mem:stockifydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=true;INIT=CREATE SCHEMA IF NOT EXISTS PUBLIC\\;CREATE SCHEMA IF NOT EXISTS stockify\\;CREATE SCHEMA IF NOT EXISTS acme_corp\\;CREATE SCHEMA IF NOT EXISTS global_trade\\;CREATE SCHEMA IF NOT EXISTS artisan_crafts\\;CREATE SCHEMA IF NOT EXISTS tech_solutions
+spring.datasource.url=jdbc:h2:mem:stockifydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=true;INIT=CREATE SCHEMA IF NOT EXISTS PUBLIC\\;CREATE SCHEMA IF NOT EXISTS stockify\\;CREATE SCHEMA IF NOT EXISTS acme_corp\\;CREATE SCHEMA IF NOT EXISTS global_trade\\;CREATE SCHEMA IF NOT EXISTS artisan_crafts\\;CREATE SCHEMA IF NOT EXISTS tech_solutions\;CREATE SCHEMA IF NOT EXISTS tenant1\;CREATE SCHEMA IF NOT EXISTS tenant2
 ```
 
 ### 3. Simplified Connection Providers

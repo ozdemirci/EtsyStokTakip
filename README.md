@@ -18,6 +18,8 @@ STOCKIFY implements **schema-based multi-tenancy** where each tenant (company) g
 - `global_trade` → Global Trade Solutions  
 - `artisan_crafts` → Artisan Crafts Co.
 - `tech_solutions` → Tech Solutions Inc.
+- `tenant1` → Sample Tenant 1
+- `tenant2` → Sample Tenant 2
 
 ### How It Works
 1. **Schema Creation**: Each tenant gets its own schema with identical table structures
@@ -112,6 +114,8 @@ You should see separate schemas with **tables in each schema** (not in PUBLIC):
 - `GLOBAL_TRADE` → app_user, product, tenant_config, flyway_schema_history_global_trade
 - `ARTISAN_CRAFTS` → app_user, product, tenant_config, flyway_schema_history_artisan_crafts
 - `TECH_SOLUTIONS` → app_user, product, tenant_config, flyway_schema_history_tech_solutions
+- `TENANT1` → app_user, product, tenant_config, flyway_schema_history_tenant1
+- `TENANT2` → app_user, product, tenant_config, flyway_schema_history_tenant2
 
 **Important**: Tables should NOT be in PUBLIC schema anymore. Each tenant has its own isolated table set.
 
