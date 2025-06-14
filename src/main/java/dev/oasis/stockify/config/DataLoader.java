@@ -56,7 +56,7 @@ public class DataLoader implements CommandLineRunner {
     // Configuration for tenant setup - Real company-based tenant schemas
     // Note: 'stockify' tenant is reserved for super admin and created by SuperAdminInitializer
     private static final List<String> TENANT_IDS = Arrays.asList(
-        "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
+        "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions", "tenant1", "tenant2"
     );    // Sample data configurations
     private static final List<SampleUser> SAMPLE_USERS = Arrays.asList(
         new SampleUser("admin", "admin123", "ADMIN"),
