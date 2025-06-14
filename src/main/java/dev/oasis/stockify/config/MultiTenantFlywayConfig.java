@@ -140,6 +140,7 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
 
                     // Determine accessible tenants from configured schemas
                     String accessibleTenants = String.join(",", tenantSchemas).toLowerCase();
+                    log.debug("Using accessible tenants for super admin: {}", accessibleTenants);
                     
                     // Insert super admin user with full tenant management capabilities
                     try (PreparedStatement insertStmt = connection.prepareStatement(
@@ -149,7 +150,12 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                         insertStmt.setString(3, "SUPER_ADMIN");
                         insertStmt.setBoolean(4, true);
                         insertStmt.setBoolean(5, true); // can_manage_all_tenants
-                        insertStmt.setString(6, accessibleTenants); // accessible_tenants
+                        // Avoid unset parameter when property is empty
+                        if (accessibleTenants == null) {
+                            insertStmt.setNull(6, java.sql.Types.VARCHAR);
+                        } else {
+                            insertStmt.setString(6, accessibleTenants);
+                        }
                         insertStmt.setBoolean(7, true); // is_global_user
                         insertStmt.setString(8, "stockify"); // primary_tenant (lowercase)
                         insertStmt.setObject(9, LocalDateTime.now());
