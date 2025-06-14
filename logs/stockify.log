@@ -1,106 +1,228 @@
-2025-06-14 17:08:57 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Starting Stockify using Java 17.0.12 with PID 608 (C:\Users\ozdem\IdeaProjects\STOCKIFY\target\classes started by ozdem in C:\Users\ozdem\IdeaProjects\STOCKIFY)
-2025-06-14 17:08:57 [restartedMain] [tenant:] DEBUG dev.oasis.stockify.Stockify - Running with Spring Boot v3.2.1, Spring v6.1.2
-2025-06-14 17:08:57 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - The following 1 profile is active: "dev"
-2025-06-14 17:08:57 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-06-14 17:08:57 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-06-14 17:08:59 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-06-14 17:08:59 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 77 ms. Found 3 JPA repository interfaces.
-2025-06-14 17:09:00 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
-2025-06-14 17:09:00 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
-2025-06-14 17:09:00 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.17]
-2025-06-14 17:09:00 [restartedMain] [tenant:] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-06-14 17:09:00 [restartedMain] [tenant:] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2651 ms
-2025-06-14 17:09:00 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-06-14 17:09:01 [restartedMain] [tenant:] ERROR com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Exception during pool initialization.
-org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+2025-06-14 17:29:08 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Starting Stockify using Java 17.0.12 with PID 12332 (C:\Users\ozdem\IdeaProjects\STOCKIFY\target\classes started by ozdem in C:\Users\ozdem\IdeaProjects\STOCKIFY)
+2025-06-14 17:29:08 [restartedMain] [tenant:] DEBUG dev.oasis.stockify.Stockify - Running with Spring Boot v3.2.1, Spring v6.1.2
+2025-06-14 17:29:08 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - The following 1 profile is active: "dev"
+2025-06-14 17:29:08 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-06-14 17:29:08 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-06-14 17:29:09 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-14 17:29:09 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 81 ms. Found 3 JPA repository interfaces.
+2025-06-14 17:29:10 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-06-14 17:29:10 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-06-14 17:29:10 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.17]
+2025-06-14 17:29:11 [restartedMain] [tenant:] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-06-14 17:29:11 [restartedMain] [tenant:] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2936 ms
+2025-06-14 17:29:11 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-06-14 17:29:11 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:stockifydb user=SA
+2025-06-14 17:29:11 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-06-14 17:29:11 [restartedMain] [tenant:] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:stockifydb'
+2025-06-14 17:29:11 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantSecurityFilter - Filter 'tenantSecurityFilter' configured for use
+2025-06-14 17:29:11 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Filter 'tenantHeaderFilter' configured for use
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🗄️ Starting Flyway migrations for all tenant schemas...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: PUBLIC
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 9.22.3 by Redgate
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - See release notes here: https://rd.gt/416ObMi
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - 
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "PUBLIC"."flyway_schema_history_publıc" does not exist yet
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbValidate - Successfully validated 1 migration (execution time 00:00.017s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "PUBLIC"."flyway_schema_history_publıc" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "PUBLIC": << Empty Schema >>
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "PUBLIC", now at version v1 (execution time 00:00.047s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: PUBLIC
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: stockify
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "stockify" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "stockify"."flyway_schema_history_stockify" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "stockify": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "stockify" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "stockify", now at version v1 (execution time 00:00.026s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: stockify
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: acme_corp
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "acme_corp" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "acme_corp"."flyway_schema_history_acme_corp" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "acme_corp": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "acme_corp" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "acme_corp", now at version v1 (execution time 00:00.027s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: acme_corp
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: global_trade
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "global_trade" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "global_trade"."flyway_schema_history_global_trade" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "global_trade": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "global_trade" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "global_trade", now at version v1 (execution time 00:00.019s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: global_trade
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: artisan_crafts
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "artisan_crafts" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "artisan_crafts"."flyway_schema_history_artisan_crafts" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "artisan_crafts": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "artisan_crafts" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "artisan_crafts", now at version v1 (execution time 00:00.018s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: artisan_crafts
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tech_solutions
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tech_solutions" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tech_solutions"."flyway_schema_history_tech_solutions" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tech_solutions": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tech_solutions" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tech_solutions", now at version v1 (execution time 00:00.015s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tech_solutions
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tenant1
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tenant1" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tenant1"."flyway_schema_history_tenant1" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tenant1": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tenant1" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tenant1", now at version v1 (execution time 00:00.021s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tenant1
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tenant2
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tenant2" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tenant2"."flyway_schema_history_tenant2" ...
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tenant2": null
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tenant2" to version "1 - init schema"
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tenant2", now at version v1 (execution time 00:00.017s)
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tenant2
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Flyway migrations completed for 8 schemas
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.stockify.config.HibernateConfig - Configuring Hibernate multi-tenancy properties
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  d.o.stockify.config.HibernateConfig - Multi-tenancy configuration completed
+2025-06-14 17:29:12 [restartedMain] [tenant:] DEBUG o.s.o.j.LocalContainerEntityManagerFactoryBean - Building JPA container EntityManagerFactory for persistence unit 'default'
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-06-14 17:29:12 [restartedMain] [tenant:] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-06-14 17:29:13 [restartedMain] [tenant:] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-14 17:29:13 [restartedMain] [tenant:] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-14 17:29:14 [restartedMain] [tenant:] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-14 17:29:14 [restartedMain] [tenant:] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:14 [restartedMain] [tenant:] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:14 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.AppUserDetailsService.loadUserByUsername' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:29:15 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:29:15 [restartedMain] [tenant:] INFO  d.o.s.s.StockNotificationService - StockNotificationService initialized. Email service enabled: false
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.StockNotificationService.markAsRead' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.saveProduct' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.updateProduct' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.updateStockLevel' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.config.DataLoader.run' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.toggleUserStatus' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.createUserInTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getTenantStatistics' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getAllUsersAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getUsersByRoleAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.deleteUserFromTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getAllProductsAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.deactivateTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.activateTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.createTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:29:15 [restartedMain] [tenant:] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-14 17:29:17 [restartedMain] [tenant:] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-06-14 17:29:17 [restartedMain] [tenant:] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@5521abac, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5b3d7ba1, org.springframework.security.web.context.SecurityContextHolderFilter@453d9fd2, org.springframework.security.web.header.HeaderWriterFilter@70508974, org.springframework.web.filter.CorsFilter@6998f617, org.springframework.security.web.authentication.logout.LogoutFilter@7679300e, dev.oasis.stockify.config.tenant.TenantHeaderFilter@68e72263, dev.oasis.stockify.config.tenant.TenantSecurityFilter@2ba879a9, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@1ba97e07, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@74c121df, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@22873687, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5f30b89b, org.springframework.security.web.access.ExceptionTranslationFilter@3ea31d9c, org.springframework.security.web.access.intercept.AuthorizationFilter@295a986]
+2025-06-14 17:29:17 [restartedMain] [tenant:] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Started Stockify in 10.496 seconds (process running for 11.045)
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🔧 Checking/creating super admin user in 'stockify' schema...
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🔧 Creating super admin user in 'stockify' schema...
+2025-06-14 17:29:18 [restartedMain] [tenant:] ERROR d.o.s.config.MultiTenantFlywayConfig - ❌ Database error while creating super admin user: Parameter "#6" is not set; SQL statement:
+INSERT INTO app_user (username, password, role, is_active, can_manage_all_tenants, accessible_tenants, is_global_user, primary_tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [90012-214]
+org.h2.jdbc.JdbcSQLDataException: Parameter "#6" is not set; SQL statement:
+INSERT INTO app_user (username, password, role, is_active, can_manage_all_tenants, accessible_tenants, is_global_user, primary_tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [90012-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:646)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
 	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.engine.ConnectionInfo.getFormatException(ConnectionInfo.java:688)
-	at org.h2.engine.ConnectionInfo.readSettingsFromURL(ConnectionInfo.java:331)
-	at org.h2.engine.ConnectionInfo.<init>(ConnectionInfo.java:97)
-	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:116)
-	at org.h2.Driver.connect(Driver.java:59)
-	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
-	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
-	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
-	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
-	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
-	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
-	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
-	at org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration.getConnectionUrl(H2ConsoleAutoConfiguration.java:94)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
-	at java.base/java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-	at java.base/java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-	at java.base/java.util.stream.Sink$ChainedReference.end(Sink.java:258)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.Parameter.checkSet(Parameter.java:75)
+	at org.h2.command.Prepared.checkParameters(Prepared.java:207)
+	at org.h2.command.CommandContainer.update(CommandContainer.java:159)
+	at org.h2.command.Command.executeUpdate(Command.java:252)
+	at org.h2.jdbc.JdbcPreparedStatement.executeUpdateInternal(JdbcPreparedStatement.java:209)
+	at org.h2.jdbc.JdbcPreparedStatement.executeUpdate(JdbcPreparedStatement.java:169)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.createSuperAdminIfNotExists(MultiTenantFlywayConfig.java:154)
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.run(MultiTenantFlywayConfig.java:53)
+	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:798)
+	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:83)
+	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
+	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:88)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:806)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
+	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:782)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
 	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
 	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:575)
-	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
-	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:616)
-	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:622)
-	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:627)
-	at org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration.logDataSources(H2ConsoleAutoConfiguration.java:86)
-	at org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration.lambda$h2Console$0(H2ConsoleAutoConfiguration.java:69)
-	at org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration.withThreadContextClassLoader(H2ConsoleAutoConfiguration.java:78)
-	at org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration.h2Console(H2ConsoleAutoConfiguration.java:69)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:140)
-	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:651)
-	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:643)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1334)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1164)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:561)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:204)
-	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:210)
-	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:201)
-	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addServletContextInitializerBeans(ServletContextInitializerBeans.java:96)
-	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:85)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:266)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:240)
-	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4850)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1332)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1322)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
-	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:866)
-	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:845)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1332)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1322)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
-	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:866)
-	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:240)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
-	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:433)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
-	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:917)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
-	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:488)
-	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:126)
-	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:105)
-	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:499)
-	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:218)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:188)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:162)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:619)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:782)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:341)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
 	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
@@ -109,250 +231,74 @@ org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "j
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
 	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-2025-06-14 17:09:01 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantSecurityFilter - Filter 'tenantSecurityFilter' configured for use
-2025-06-14 17:09:01 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Filter 'tenantHeaderFilter' configured for use
-2025-06-14 17:09:02 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-06-14 17:09:03 [restartedMain] [tenant:] ERROR com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Exception during pool initialization.
-org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+2025-06-14 17:29:18 [restartedMain] [tenant:] ERROR d.o.s.config.MultiTenantFlywayConfig - ❌ Failed during multi-tenant setup: Failed to initialize super admin
+java.lang.RuntimeException: Failed to initialize super admin
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.createSuperAdminIfNotExists(MultiTenantFlywayConfig.java:175)
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.run(MultiTenantFlywayConfig.java:53)
+	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:798)
+	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:83)
+	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
+	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:88)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:806)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
+	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:782)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:782)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:341)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
+	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+Caused by: org.h2.jdbc.JdbcSQLDataException: Parameter "#6" is not set; SQL statement:
+INSERT INTO app_user (username, password, role, is_active, can_manage_all_tenants, accessible_tenants, is_global_user, primary_tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [90012-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:646)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
 	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.engine.ConnectionInfo.getFormatException(ConnectionInfo.java:688)
-	at org.h2.engine.ConnectionInfo.readSettingsFromURL(ConnectionInfo.java:331)
-	at org.h2.engine.ConnectionInfo.<init>(ConnectionInfo.java:97)
-	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:116)
-	at org.h2.Driver.connect(Driver.java:59)
-	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
-	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
-	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
-	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
-	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
-	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
-	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
-	at org.flywaydb.core.api.configuration.ClassicConfiguration.setDataSource(ClassicConfiguration.java:1094)
-	at org.flywaydb.core.api.configuration.FluentConfiguration.dataSource(FluentConfiguration.java:624)
-	at org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration$FlywayConfiguration.configureDataSource(FlywayAutoConfiguration.java:185)
-	at org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration$FlywayConfiguration.flyway(FlywayAutoConfiguration.java:172)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:140)
-	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:651)
-	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:643)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1334)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1164)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:561)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
-	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-2025-06-14 17:09:03 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🗄️ Starting Flyway migrations for all tenant schemas...
-2025-06-14 17:09:03 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: PUBLIC
-2025-06-14 17:09:03 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-06-14 17:09:04 [restartedMain] [tenant:] ERROR com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Exception during pool initialization.
-org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
-	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.engine.ConnectionInfo.getFormatException(ConnectionInfo.java:688)
-	at org.h2.engine.ConnectionInfo.readSettingsFromURL(ConnectionInfo.java:331)
-	at org.h2.engine.ConnectionInfo.<init>(ConnectionInfo.java:97)
-	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:116)
-	at org.h2.Driver.connect(Driver.java:59)
-	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
-	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
-	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
-	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
-	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
-	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
-	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
-	at org.flywaydb.core.api.configuration.ClassicConfiguration.setDataSource(ClassicConfiguration.java:1094)
-	at org.flywaydb.core.api.configuration.FluentConfiguration.dataSource(FluentConfiguration.java:624)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig.migrateSchema(MultiTenantFlywayConfig.java:93)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig$1.migrate(MultiTenantFlywayConfig.java:77)
-	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:62)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
-	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-2025-06-14 17:09:04 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 9.22.3 by Redgate
-2025-06-14 17:09:04 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - See release notes here: https://rd.gt/416ObMi
-2025-06-14 17:09:04 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - 
-2025-06-14 17:09:04 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-06-14 17:09:05 [restartedMain] [tenant:] ERROR com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Exception during pool initialization.
-org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
-	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.engine.ConnectionInfo.getFormatException(ConnectionInfo.java:688)
-	at org.h2.engine.ConnectionInfo.readSettingsFromURL(ConnectionInfo.java:331)
-	at org.h2.engine.ConnectionInfo.<init>(ConnectionInfo.java:97)
-	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:116)
-	at org.h2.Driver.connect(Driver.java:59)
-	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
-	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
-	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
-	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
-	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
-	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
-	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
-	at org.flywaydb.core.internal.jdbc.JdbcUtils.openConnection(JdbcUtils.java:48)
-	at org.flywaydb.core.internal.jdbc.JdbcConnectionFactory.<init>(JdbcConnectionFactory.java:74)
-	at org.flywaydb.core.FlywayExecutor.execute(FlywayExecutor.java:142)
-	at org.flywaydb.core.Flyway.migrate(Flyway.java:140)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig.migrateSchema(MultiTenantFlywayConfig.java:104)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig$1.migrate(MultiTenantFlywayConfig.java:77)
-	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:62)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
-	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-2025-06-14 17:09:05 [restartedMain] [tenant:] ERROR d.o.s.config.MultiTenantFlywayConfig - ❌ Failed to migrate schema PUBLIC: Unable to obtain connection from database: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SQL State  : 90046
-Error Code : 90046
-Message    : URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-
-org.flywaydb.core.internal.exception.FlywaySqlException: Unable to obtain connection from database: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SQL State  : 90046
-Error Code : 90046
-Message    : URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-
-	at org.flywaydb.core.internal.jdbc.JdbcUtils.openConnection(JdbcUtils.java:60)
-	at org.flywaydb.core.internal.jdbc.JdbcConnectionFactory.<init>(JdbcConnectionFactory.java:74)
-	at org.flywaydb.core.FlywayExecutor.execute(FlywayExecutor.java:142)
-	at org.flywaydb.core.Flyway.migrate(Flyway.java:140)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig.migrateSchema(MultiTenantFlywayConfig.java:104)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig$1.migrate(MultiTenantFlywayConfig.java:77)
-	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:62)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
-	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-Caused by: org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
-	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.engine.ConnectionInfo.getFormatException(ConnectionInfo.java:688)
-	at org.h2.engine.ConnectionInfo.readSettingsFromURL(ConnectionInfo.java:331)
-	at org.h2.engine.ConnectionInfo.<init>(ConnectionInfo.java:97)
-	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:116)
-	at org.h2.Driver.connect(Driver.java:59)
-	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
-	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
-	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
-	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
-	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
-	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
-	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
-	at org.flywaydb.core.internal.jdbc.JdbcUtils.openConnection(JdbcUtils.java:48)
-	... 31 common frames omitted
-2025-06-14 17:09:05 [restartedMain] [tenant:] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Failed to migrate schema: PUBLIC
-2025-06-14 17:09:05 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
-2025-06-14 17:09:05 [restartedMain] [tenant:] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.Parameter.checkSet(Parameter.java:75)
+	at org.h2.command.Prepared.checkParameters(Prepared.java:207)
+	at org.h2.command.CommandContainer.update(CommandContainer.java:159)
+	at org.h2.command.Command.executeUpdate(Command.java:252)
+	at org.h2.jdbc.JdbcPreparedStatement.executeUpdateInternal(JdbcPreparedStatement.java:209)
+	at org.h2.jdbc.JdbcPreparedStatement.executeUpdate(JdbcPreparedStatement.java:169)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.createSuperAdminIfNotExists(MultiTenantFlywayConfig.java:154)
+	... 26 common frames omitted
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-06-14 17:09:05 [restartedMain] [tenant:] ERROR o.s.boot.SpringApplication - Application run failed
-org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Failed to migrate schema: PUBLIC
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1773)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
-	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
+2025-06-14 17:29:18 [restartedMain] [tenant:] ERROR o.s.boot.SpringApplication - Application run failed
+java.lang.RuntimeException: Failed to complete multi-tenant setup
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.run(MultiTenantFlywayConfig.java:59)
+	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:798)
+	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:83)
+	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
+	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:88)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:806)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
+	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:782)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:782)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:341)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
 	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
@@ -361,40 +307,27 @@ org.springframework.beans.factory.BeanCreationException: Error creating bean wit
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
 	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-Caused by: java.lang.RuntimeException: Failed to migrate schema: PUBLIC
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig.migrateSchema(MultiTenantFlywayConfig.java:110)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig$1.migrate(MultiTenantFlywayConfig.java:77)
-	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:62)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769)
-	... 23 common frames omitted
-Caused by: org.flywaydb.core.internal.exception.FlywaySqlException: Unable to obtain connection from database: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-SQL State  : 90046
-Error Code : 90046
-Message    : URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-
-	at org.flywaydb.core.internal.jdbc.JdbcUtils.openConnection(JdbcUtils.java:60)
-	at org.flywaydb.core.internal.jdbc.JdbcConnectionFactory.<init>(JdbcConnectionFactory.java:74)
-	at org.flywaydb.core.FlywayExecutor.execute(FlywayExecutor.java:142)
-	at org.flywaydb.core.Flyway.migrate(Flyway.java:140)
-	at dev.oasis.stockify.config.MultiTenantFlywayConfig.migrateSchema(MultiTenantFlywayConfig.java:104)
-	... 27 common frames omitted
-Caused by: org.h2.jdbc.JdbcSQLNonTransientConnectionException: URL format error; must be "jdbc:h2:{ {.|mem:}[name] | [file:]fileName | {tcp|ssl}:[//]server[:port][,server2[:port]]/name }[;key=value...]" but is "jdbc:h2:mem:stockifydb" [90046-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+Caused by: java.lang.RuntimeException: Failed to initialize super admin
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.createSuperAdminIfNotExists(MultiTenantFlywayConfig.java:175)
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.run(MultiTenantFlywayConfig.java:53)
+	... 25 common frames omitted
+Caused by: org.h2.jdbc.JdbcSQLDataException: Parameter "#6" is not set; SQL statement:
+INSERT INTO app_user (username, password, role, is_active, can_manage_all_tenants, accessible_tenants, is_global_user, primary_tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [90012-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:646)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
 	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.engine.ConnectionInfo.getFormatException(ConnectionInfo.java:688)
-	at org.h2.engine.ConnectionInfo.readSettingsFromURL(ConnectionInfo.java:331)
-	at org.h2.engine.ConnectionInfo.<init>(ConnectionInfo.java:97)
-	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:116)
-	at org.h2.Driver.connect(Driver.java:59)
-	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
-	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
-	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
-	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
-	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
-	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
-	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
-	at org.flywaydb.core.internal.jdbc.JdbcUtils.openConnection(JdbcUtils.java:48)
-	... 31 common frames omitted
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.Parameter.checkSet(Parameter.java:75)
+	at org.h2.command.Prepared.checkParameters(Prepared.java:207)
+	at org.h2.command.CommandContainer.update(CommandContainer.java:159)
+	at org.h2.command.Command.executeUpdate(Command.java:252)
+	at org.h2.jdbc.JdbcPreparedStatement.executeUpdateInternal(JdbcPreparedStatement.java:209)
+	at org.h2.jdbc.JdbcPreparedStatement.executeUpdate(JdbcPreparedStatement.java:169)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at dev.oasis.stockify.config.MultiTenantFlywayConfig.createSuperAdminIfNotExists(MultiTenantFlywayConfig.java:154)
+	... 26 common frames omitted
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-06-14 17:29:18 [restartedMain] [tenant:] WARN  o.s.b.f.s.DisposableBeanAdapter - Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-214]
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-06-14 17:29:18 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

@@ -112,18 +112,14 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
     }    /**
      * Create super admin user in 'stockify' tenant if not exists
      * Uses direct JDBC to avoid circular dependency issues
-     */
-    private void createSuperAdminIfNotExists() {
+     */    private void createSuperAdminIfNotExists() {
         try {
             log.info("🔧 Checking/creating super admin user in 'stockify' schema...");
-            
-            // Use direct JDBC to avoid circular dependency with repositories
+              // Use direct JDBC to avoid circular dependency with repositories
             try (Connection connection = dataSource.getConnection()) {
-                
-                // Switch to stockify schema
-                try (PreparedStatement setSchemaStmt = connection.prepareStatement("SET SCHEMA stockify")) {
-                    setSchemaStmt.execute();
-                }
+                  // Switch to stockify schema using connection.setSchema() method
+                // Use lowercase schema name as created by Flyway
+                connection.setSchema("stockify");
                 
                 // Check if super admin already exists
                 boolean superAdminExists = false;
@@ -135,8 +131,7 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                             superAdminExists = true;
                         }
                     }
-                }
-                  if (!superAdminExists) {
+                }                  if (!superAdminExists) {
                     log.info("🔧 Creating super admin user in 'stockify' schema...");
                     
                     // Create BCrypt password encoder for password hashing
@@ -150,24 +145,21 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                         insertStmt.setString(2, hashedPassword);
                         insertStmt.setString(3, "SUPER_ADMIN");
                         insertStmt.setBoolean(4, true);
-                        insertStmt.setBoolean(5, true); // can_manage_all_tenants
-                        insertStmt.setString(6, "PUBLIC,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions"); // accessible_tenants
+                        insertStmt.setBoolean(5, true); // can_manage_all_tenants                        insertStmt.setString(6, "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions"); // accessible_tenants (lowercase)
                         insertStmt.setBoolean(7, true); // is_global_user
-                        insertStmt.setString(8, "stockify"); // primary_tenant
+                        insertStmt.setString(8, "stockify"); // primary_tenant (lowercase)
                         insertStmt.setObject(9, LocalDateTime.now());
                         insertStmt.setObject(10, LocalDateTime.now());
                         
                         int rowsAffected = insertStmt.executeUpdate();
-                        if (rowsAffected > 0) {
-                            log.info("✅ Super admin user created successfully in 'stockify' schema");
+                        if (rowsAffected > 0) {                            log.info("✅ Super admin user created successfully in 'stockify' schema");
                             log.info("📋 Super Admin Credentials:");
                             log.info("   Schema: stockify");
                             log.info("   Username: superadmin");
                             log.info("   Password: superadmin123");
                             log.info("   Role: SUPER_ADMIN");
                             log.info("   Can Manage All Tenants: YES");
-                            log.info("   Accessible Tenants: ALL");
-                            log.info("   Primary Tenant: stockify");
+                            log.info("   Accessible Tenants: ALL");                            log.info("   Primary Tenant: stockify");
                             log.info("⚠️  Please change the password after first login!");
                         } else {
                             log.warn("⚠️  Super admin user creation returned 0 rows affected");
