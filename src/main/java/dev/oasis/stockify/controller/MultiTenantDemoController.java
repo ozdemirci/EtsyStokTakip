@@ -153,65 +153,8 @@ public class MultiTenantDemoController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Compare data between two tenants (demonstrates isolation)
-     */
-    @GetMapping("/compare/{tenant1}/vs/{tenant2}")
-    public ResponseEntity<Map<String, Object>> compareTenants(
-            @PathVariable String tenant1, 
-            @PathVariable String tenant2) {
-        
-        log.info("⚖️ Comparing tenants: {} vs {}", tenant1, tenant2);
-        
-        Map<String, Object> comparison = new HashMap<>();
-        
-        try {
-            // Get data for tenant1
-            TenantContext.setCurrentTenant(tenant1);
-            List<AppUser> users1 = appUserRepository.findAll();
-            List<Product> products1 = productRepository.findAll();
-            
-            // Get data for tenant2
-            TenantContext.setCurrentTenant(tenant2);
-            List<AppUser> users2 = appUserRepository.findAll();
-            List<Product> products2 = productRepository.findAll();
-            
-            comparison.put("tenant1", Map.of(
-                "name", tenant1,
-                "userCount", users1.size(),
-                "productCount", products1.size(),
-                "usernames", users1.stream().map(AppUser::getUsername).toList(),
-                "productSkus", products1.stream().map(Product::getSku).toList()
-            ));
-            
-            comparison.put("tenant2", Map.of(
-                "name", tenant2,
-                "userCount", users2.size(),
-                "productCount", products2.size(),
-                "usernames", users2.stream().map(AppUser::getUsername).toList(),
-                "productSkus", products2.stream().map(Product::getSku).toList()
-            ));
-            
-            comparison.put("isolation", Map.of(
-                "usersIsolated", users1.size() != users2.size() || 
-                    !users1.stream().map(AppUser::getUsername).toList()
-                    .equals(users2.stream().map(AppUser::getUsername).toList()),
-                "productsIsolated", products1.size() != products2.size() ||
-                    !products1.stream().map(Product::getSku).toList()
-                    .equals(products2.stream().map(Product::getSku).toList())
-            ));
-            
-            log.info("✅ Comparison completed: {} vs {}", tenant1, tenant2);
-            return ResponseEntity.ok(comparison);
-            
-        } catch (Exception e) {
-            log.error("❌ Error comparing tenants: {}", e.getMessage());
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Failed to compare tenants: " + e.getMessage()));
-        } finally {
-            TenantContext.clear();
-        }
-    }
+    
+    
 
     private boolean isSystemSchema(String schemaName) {
         return schemaName.equalsIgnoreCase("INFORMATION_SCHEMA") ||
