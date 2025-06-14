@@ -116,7 +116,7 @@ public class MultiTenantDemoController {
                 if (!isSystemSchema(schemaName)) {
                     Map<String, Object> schemaInfo = new HashMap<>();
                     schemaInfo.put("name", schemaName);
-                    schemaInfo.put("isPublic", "PUBLIC".equalsIgnoreCase(schemaName));
+                    schemaInfo.put("isPublic", "public".equalsIgnoreCase(schemaName));
                     
                     // Get table count for this schema
                     try {
