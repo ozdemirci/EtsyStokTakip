@@ -137,6 +137,9 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                     // Create BCrypt password encoder for password hashing
                     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
                     String hashedPassword = passwordEncoder.encode("superadmin123");
+
+                    // Determine accessible tenants from configured schemas
+                    String accessibleTenants = String.join(",", tenantSchemas).toLowerCase();
                     
                     // Insert super admin user with full tenant management capabilities
                     try (PreparedStatement insertStmt = connection.prepareStatement(
@@ -146,7 +149,7 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                         insertStmt.setString(3, "SUPER_ADMIN");
                         insertStmt.setBoolean(4, true);
                         insertStmt.setBoolean(5, true); // can_manage_all_tenants
-                        insertStmt.setString(6, "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions"); // accessible_tenants (lowercase)
+                        insertStmt.setString(6, accessibleTenants); // accessible_tenants
                         insertStmt.setBoolean(7, true); // is_global_user
                         insertStmt.setString(8, "stockify"); // primary_tenant (lowercase)
                         insertStmt.setObject(9, LocalDateTime.now());
