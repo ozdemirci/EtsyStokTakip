@@ -1,0 +1,339 @@
+2025-06-14 18:21:42 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Starting Stockify using Java 17.0.12 with PID 11180 (C:\Users\ozdem\IdeaProjects\STOCKIFY\target\classes started by ozdem in C:\Users\ozdem\IdeaProjects\STOCKIFY)
+2025-06-14 18:21:42 [restartedMain] [tenant:] DEBUG dev.oasis.stockify.Stockify - Running with Spring Boot v3.2.1, Spring v6.1.2
+2025-06-14 18:21:42 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - The following 1 profile is active: "dev"
+2025-06-14 18:21:42 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-06-14 18:21:42 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-06-14 18:21:43 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-14 18:21:44 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 86 ms. Found 3 JPA repository interfaces.
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.17]
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2864 ms
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:stockifydb user=SA
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-06-14 18:21:45 [restartedMain] [tenant:] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:stockifydb'
+2025-06-14 18:21:46 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantSecurityFilter - Filter 'tenantSecurityFilter' configured for use
+2025-06-14 18:21:46 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Filter 'tenantHeaderFilter' configured for use
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🗄️ Starting Flyway migrations for all tenant schemas...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: PUBLIC
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 9.22.3 by Redgate
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - See release notes here: https://rd.gt/416ObMi
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - 
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "PUBLIC"."flyway_schema_history_publıc" does not exist yet
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbValidate - Successfully validated 1 migration (execution time 00:00.018s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "PUBLIC"."flyway_schema_history_publıc" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "PUBLIC": << Empty Schema >>
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "PUBLIC", now at version v1 (execution time 00:00.038s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: PUBLIC
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: stockify
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "stockify" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "stockify"."flyway_schema_history_stockify" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "stockify": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "stockify" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "stockify", now at version v1 (execution time 00:00.025s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: stockify
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: acme_corp
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "acme_corp" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "acme_corp"."flyway_schema_history_acme_corp" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "acme_corp": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "acme_corp" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "acme_corp", now at version v1 (execution time 00:00.021s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: acme_corp
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: global_trade
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "global_trade" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "global_trade"."flyway_schema_history_global_trade" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "global_trade": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "global_trade" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "global_trade", now at version v1 (execution time 00:00.020s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: global_trade
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: artisan_crafts
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "artisan_crafts" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "artisan_crafts"."flyway_schema_history_artisan_crafts" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "artisan_crafts": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "artisan_crafts" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "artisan_crafts", now at version v1 (execution time 00:00.016s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: artisan_crafts
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tech_solutions
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tech_solutions" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tech_solutions"."flyway_schema_history_tech_solutions" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tech_solutions": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tech_solutions" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tech_solutions", now at version v1 (execution time 00:00.028s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tech_solutions
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tenant1
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tenant1" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tenant1"."flyway_schema_history_tenant1" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tenant1": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tenant1" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tenant1", now at version v1 (execution time 00:00.013s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tenant1
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tenant2
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tenant2" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tenant2"."flyway_schema_history_tenant2" ...
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tenant2": null
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tenant2" to version "1 - init schema"
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tenant2", now at version v1 (execution time 00:00.017s)
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tenant2
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Flyway migrations completed for 8 schemas
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.stockify.config.HibernateConfig - Configuring Hibernate multi-tenancy properties
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  d.o.stockify.config.HibernateConfig - Multi-tenancy configuration completed
+2025-06-14 18:21:46 [restartedMain] [tenant:] DEBUG o.s.o.j.LocalContainerEntityManagerFactoryBean - Building JPA container EntityManagerFactory for persistence unit 'default'
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-14 18:21:46 [restartedMain] [tenant:] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-06-14 18:21:47 [restartedMain] [tenant:] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-06-14 18:21:47 [restartedMain] [tenant:] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-14 18:21:47 [restartedMain] [tenant:] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-14 18:21:48 [restartedMain] [tenant:] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-14 18:21:48 [restartedMain] [tenant:] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:48 [restartedMain] [tenant:] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:48 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.AppUserDetailsService.loadUserByUsername' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 18:21:49 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:49 [restartedMain] [tenant:] INFO  d.o.s.s.StockNotificationService - StockNotificationService initialized. Email service enabled: false
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.StockNotificationService.markAsRead' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.updateProduct' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.saveProduct' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.updateStockLevel' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.config.DataLoader.run' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.deleteUserFromTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getAllProductsAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getUsersByRoleAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getAllUsersAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getTenantStatistics' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.createUserInTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.toggleUserStatus' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.activateTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.createTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.deactivateTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:49 [restartedMain] [tenant:] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-14 18:21:51 [restartedMain] [tenant:] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-06-14 18:21:51 [restartedMain] [tenant:] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@73be31db, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3884552a, org.springframework.security.web.context.SecurityContextHolderFilter@34d8b32f, org.springframework.security.web.header.HeaderWriterFilter@12658d2d, org.springframework.web.filter.CorsFilter@4c7f4f13, org.springframework.security.web.authentication.logout.LogoutFilter@78f34e38, dev.oasis.stockify.config.tenant.TenantHeaderFilter@55bb5f48, dev.oasis.stockify.config.tenant.TenantSecurityFilter@e54858d, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@1ac197c4, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@489a2c14, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@759ce50e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5c2e58c9, org.springframework.security.web.access.ExceptionTranslationFilter@102660ea, org.springframework.security.web.access.intercept.AuthorizationFilter@58329195]
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Started Stockify in 10.299 seconds (process running for 10.8)
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🔧 Checking/creating super admin user in 'stockify' schema...
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🔧 Creating super admin user in 'stockify' schema...
+2025-06-14 18:21:52 [restartedMain] [tenant:] DEBUG d.o.s.config.MultiTenantFlywayConfig - Using accessible tenants for super admin: publıc,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Super admin user created successfully in 'stockify' schema
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 📋 Super Admin Credentials:
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Schema: stockify
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Username: superadmin
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Password: superadmin123
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Role: SUPER_ADMIN
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Can Manage All Tenants: YES
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Accessible Tenants: ALL
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Primary Tenant: stockify
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ⚠️  Please change the password after first login!
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Multi-tenant setup completed successfully!
+2025-06-14 18:21:52 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Creating new transaction with name [dev.oasis.stockify.config.DataLoader.run]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 18:21:52 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 18:21:52 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Opened new EntityManager [SessionImpl(1569324633<open>)] for JPA transaction
+2025-06-14 18:21:52 [restartedMain] [tenant:] DEBUG d.o.s.c.t.SchemaMultiTenantConnectionProvider - Getting connection for tenant: PUBLIC
+2025-06-14 18:21:52 [restartedMain] [tenant:] ERROR d.o.s.c.t.SchemaMultiTenantConnectionProvider - Failed to set schema for tenant: public
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "public" not found [90079-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:632)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.engine.Database.getSchema(Database.java:1546)
+	at org.h2.engine.SessionLocal.setCurrentSchemaName(SessionLocal.java:1303)
+	at org.h2.jdbc.JdbcConnection.setSchema(JdbcConnection.java:1755)
+	at com.zaxxer.hikari.pool.ProxyConnection.setSchema(ProxyConnection.java:447)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setSchema(HikariProxyConnection.java)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:46)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:1)
+	at org.hibernate.internal.ContextualJdbcConnectionAccess.obtainConnection(ContextualJdbcConnectionAccess.java:52)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:113)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getPhysicalConnection(LogicalConnectionManagedImpl.java:143)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getConnectionForTransactionManagement(LogicalConnectionManagedImpl.java:273)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:281)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232)
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:531)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:610)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:379)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:717)
+	at dev.oasis.stockify.config.DataLoader$$SpringCGLIB$$0.run(<generated>)
+	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:798)
+	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:83)
+	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
+	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:88)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:806)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
+	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:782)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:782)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:341)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
+	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+2025-06-14 18:21:52 [restartedMain] [tenant:] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 0, SQLState: null
+2025-06-14 18:21:52 [restartedMain] [tenant:] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - Failed to set tenant schema: public
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-06-14 18:21:52 [restartedMain] [tenant:] ERROR o.s.boot.SpringApplication - Application run failed
+org.springframework.transaction.CannotCreateTransactionException: Could not open JPA EntityManager for transaction
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:466)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:531)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:610)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:379)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:717)
+	at dev.oasis.stockify.config.DataLoader$$SpringCGLIB$$0.run(<generated>)
+	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:798)
+	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:83)
+	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
+	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:88)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:806)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
+	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:782)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
+	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:782)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:341)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347)
+	at dev.oasis.stockify.Stockify.main(Stockify.java:10)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+Caused by: org.hibernate.exception.GenericJDBCException: Unable to acquire JDBC Connection [Failed to set tenant schema: public] [n/a]
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:63)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:116)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getPhysicalConnection(LogicalConnectionManagedImpl.java:143)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getConnectionForTransactionManagement(LogicalConnectionManagedImpl.java:273)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:281)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232)
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	... 34 common frames omitted
+Caused by: java.sql.SQLException: Failed to set tenant schema: public
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:51)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:1)
+	at org.hibernate.internal.ContextualJdbcConnectionAccess.obtainConnection(ContextualJdbcConnectionAccess.java:52)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:113)
+	... 41 common frames omitted
+Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "public" not found [90079-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:632)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.engine.Database.getSchema(Database.java:1546)
+	at org.h2.engine.SessionLocal.setCurrentSchemaName(SessionLocal.java:1303)
+	at org.h2.jdbc.JdbcConnection.setSchema(JdbcConnection.java:1755)
+	at com.zaxxer.hikari.pool.ProxyConnection.setSchema(ProxyConnection.java:447)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setSchema(HikariProxyConnection.java)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:46)
+	... 44 common frames omitted
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-06-14 18:21:52 [restartedMain] [tenant:] WARN  o.s.b.f.s.DisposableBeanAdapter - Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-214]
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-06-14 18:21:52 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
