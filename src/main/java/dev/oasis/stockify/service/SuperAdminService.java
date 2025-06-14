@@ -28,7 +28,7 @@ public class SuperAdminService {
     private final AppUserService appUserService;
 
     private static final Set<String> ALL_TENANTS = Set.of(
-        "PUBLIC", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
+        "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
     );
 
     /**

@@ -72,8 +72,8 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     }@Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         try {
-            // Use PUBLIC schema as default, avoiding Turkish locale issues
-            connection.setSchema("PUBLIC");
+            // Use public schema as default
+            connection.setSchema("public");
         } finally {
             connection.close();
         }
