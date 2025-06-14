@@ -145,7 +145,8 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                         insertStmt.setString(2, hashedPassword);
                         insertStmt.setString(3, "SUPER_ADMIN");
                         insertStmt.setBoolean(4, true);
-                        insertStmt.setBoolean(5, true); // can_manage_all_tenants                        insertStmt.setString(6, "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions"); // accessible_tenants (lowercase)
+                        insertStmt.setBoolean(5, true); // can_manage_all_tenants
+                        insertStmt.setString(6, "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions"); // accessible_tenants (lowercase)
                         insertStmt.setBoolean(7, true); // is_global_user
                         insertStmt.setString(8, "stockify"); // primary_tenant (lowercase)
                         insertStmt.setObject(9, LocalDateTime.now());
