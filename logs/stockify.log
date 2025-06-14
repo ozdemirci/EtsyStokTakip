@@ -331,3 +331,677 @@ INSERT INTO app_user (username, password, role, is_active, can_manage_all_tenant
 2025-06-14 17:35:38 [restartedMain] [tenant:] WARN  o.s.b.f.s.DisposableBeanAdapter - Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-214]
 2025-06-14 17:35:38 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
 2025-06-14 17:35:38 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-06-14 17:50:33 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Starting Stockify using Java 17.0.12 with PID 17364 (C:\Users\ozdem\IdeaProjects\STOCKIFY\target\classes started by ozdem in C:\Users\ozdem\IdeaProjects\STOCKIFY)
+2025-06-14 17:50:33 [restartedMain] [tenant:] DEBUG dev.oasis.stockify.Stockify - Running with Spring Boot v3.2.1, Spring v6.1.2
+2025-06-14 17:50:33 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - The following 1 profile is active: "dev"
+2025-06-14 17:50:33 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-06-14 17:50:33 [restartedMain] [tenant:] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-06-14 17:50:34 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-14 17:50:35 [restartedMain] [tenant:] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 79 ms. Found 3 JPA repository interfaces.
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.17]
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2715 ms
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:stockifydb user=SA
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:stockifydb'
+2025-06-14 17:50:36 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantSecurityFilter - Filter 'tenantSecurityFilter' configured for use
+2025-06-14 17:50:36 [restartedMain] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Filter 'tenantHeaderFilter' configured for use
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🗄️ Starting Flyway migrations for all tenant schemas...
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: PUBLIC
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - Flyway Community Edition 9.22.3 by Redgate
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - See release notes here: https://rd.gt/416ObMi
+2025-06-14 17:50:36 [restartedMain] [tenant:] INFO  o.f.c.i.license.VersionPrinter - 
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "PUBLIC"."flyway_schema_history_publıc" does not exist yet
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbValidate - Successfully validated 1 migration (execution time 00:00.015s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "PUBLIC"."flyway_schema_history_publıc" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "PUBLIC": << Empty Schema >>
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "PUBLIC" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "PUBLIC", now at version v1 (execution time 00:00.041s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: PUBLIC
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: stockify
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "stockify" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "stockify"."flyway_schema_history_stockify" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "stockify": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "stockify" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "stockify", now at version v1 (execution time 00:00.021s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: stockify
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: acme_corp
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "acme_corp" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "acme_corp"."flyway_schema_history_acme_corp" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "acme_corp": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "acme_corp" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "acme_corp", now at version v1 (execution time 00:00.037s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: acme_corp
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: global_trade
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "global_trade" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "global_trade"."flyway_schema_history_global_trade" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "global_trade": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "global_trade" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "global_trade", now at version v1 (execution time 00:00.030s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: global_trade
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: artisan_crafts
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "artisan_crafts" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "artisan_crafts"."flyway_schema_history_artisan_crafts" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "artisan_crafts": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "artisan_crafts" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "artisan_crafts", now at version v1 (execution time 00:00.060s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: artisan_crafts
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tech_solutions
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tech_solutions" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tech_solutions"."flyway_schema_history_tech_solutions" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tech_solutions": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tech_solutions" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tech_solutions", now at version v1 (execution time 00:00.017s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tech_solutions
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tenant1
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tenant1" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tenant1"."flyway_schema_history_tenant1" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tenant1": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tenant1" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tenant1", now at version v1 (execution time 00:00.013s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tenant1
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🏗️ Migrating schema: tenant2
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:stockifydb (H2 2.1)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.internal.database.base.Schema - Creating schema "tenant2" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "tenant2"."flyway_schema_history_tenant2" ...
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "tenant2": null
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Migrating schema "tenant2" to version "1 - init schema"
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "tenant2", now at version v1 (execution time 00:00.012s)
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Successfully migrated schema: tenant2
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Flyway migrations completed for 8 schemas
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.stockify.config.HibernateConfig - Configuring Hibernate multi-tenancy properties
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  d.o.stockify.config.HibernateConfig - Multi-tenancy configuration completed
+2025-06-14 17:50:37 [restartedMain] [tenant:] DEBUG o.s.o.j.LocalContainerEntityManagerFactoryBean - Building JPA container EntityManagerFactory for persistence unit 'default'
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-06-14 17:50:37 [restartedMain] [tenant:] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-06-14 17:50:38 [restartedMain] [tenant:] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-14 17:50:38 [restartedMain] [tenant:] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-14 17:50:39 [restartedMain] [tenant:] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-14 17:50:39 [restartedMain] [tenant:] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:39 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:39 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.AppUserDetailsService.loadUserByUsername' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG o.s.o.j.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler - Creating new EntityManager for shared EntityManager invocation
+2025-06-14 17:50:40 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:40 [restartedMain] [tenant:] INFO  d.o.s.s.StockNotificationService - StockNotificationService initialized. Email service enabled: false
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.StockNotificationService.markAsRead' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.saveProduct' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.updateProduct' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.ProductService.updateStockLevel' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.config.DataLoader.run' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getAllProductsAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getTenantStatistics' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.deleteUserFromTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getAllUsersAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.getUsersByRoleAcrossAllTenants' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.createUserInTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.SuperAdminService.toggleUserStatus' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.createTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.deactivateTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] TRACE o.s.t.a.AnnotationTransactionAttributeSource - Adding transactional method 'dev.oasis.stockify.service.TenantManagementService.activateTenant' with attribute: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:40 [restartedMain] [tenant:] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-14 17:50:41 [restartedMain] [tenant:] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-06-14 17:50:41 [restartedMain] [tenant:] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@60888c92, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@45dd4640, org.springframework.security.web.context.SecurityContextHolderFilter@c81ac40, org.springframework.security.web.header.HeaderWriterFilter@5971e701, org.springframework.web.filter.CorsFilter@12bb476d, org.springframework.security.web.authentication.logout.LogoutFilter@3e416fa2, dev.oasis.stockify.config.tenant.TenantHeaderFilter@2024b347, dev.oasis.stockify.config.tenant.TenantSecurityFilter@21f8139f, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@6c36f3c6, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@66ee165c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@206f1035, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7174aa9a, org.springframework.security.web.access.ExceptionTranslationFilter@72e863ac, org.springframework.security.web.access.intercept.AuthorizationFilter@77a6533a]
+2025-06-14 17:50:42 [restartedMain] [tenant:] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-06-14 17:50:42 [restartedMain] [tenant:] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2025-06-14 17:50:42 [restartedMain] [tenant:] INFO  dev.oasis.stockify.Stockify - Started Stockify in 9.885 seconds (process running for 10.428)
+2025-06-14 17:50:42 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...
+2025-06-14 17:50:42 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🔧 Checking/creating super admin user in 'stockify' schema...
+2025-06-14 17:50:42 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 🔧 Creating super admin user in 'stockify' schema...
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Super admin user created successfully in 'stockify' schema
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - 📋 Super Admin Credentials:
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Schema: stockify
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Username: superadmin
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Password: superadmin123
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Role: SUPER_ADMIN
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Can Manage All Tenants: YES
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Accessible Tenants: ALL
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig -    Primary Tenant: stockify
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ⚠️  Please change the password after first login!
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.o.s.config.MultiTenantFlywayConfig - ✅ Multi-tenant setup completed successfully!
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Creating new transaction with name [dev.oasis.stockify.config.DataLoader.run]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Opened new EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG d.o.s.c.t.SchemaMultiTenantConnectionProvider - Getting connection for tenant: PUBLIC
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG d.o.s.c.t.SchemaMultiTenantConnectionProvider - Successfully set connection schema to: PUBLIC
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@6a361f09]
+2025-06-14 17:50:43 [restartedMain] [tenant:] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.config.DataLoader.run]
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🚀 Starting Multi-Tenant Data Loader...
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: stockify
+2025-06-14 17:50:43 [restartedMain] [tenant:stockify] INFO  d.oasis.stockify.config.DataLoader - 🏛️ Stockify platform tenant - super admin already created by SuperAdminInitializer
+2025-06-14 17:50:43 [restartedMain] [tenant:stockify] INFO  d.oasis.stockify.config.DataLoader - ⚙️ Setting up configuration for tenant: stockify
+2025-06-14 17:50:43 [restartedMain] [tenant:stockify] WARN  d.oasis.stockify.config.DataLoader - ⚠️ Could not initialize config for tenant stockify: Schema "STOCKIFY" not found [90079-214]
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - 👥 Creating users for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - insert into app_user (accessible_tenants,can_manage_all_tenants,created_at,is_active,is_global_user,last_login,password,primary_tenant,role,updated_at,username,id) values (?,?,?,?,?,?,?,?,?,?,?,default)
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ✅ Created user: admin with role: ADMIN for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - insert into app_user (accessible_tenants,can_manage_all_tenants,created_at,is_active,is_global_user,last_login,password,primary_tenant,role,updated_at,username,id) values (?,?,?,?,?,?,?,?,?,?,?,default)
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ✅ Created user: operator with role: USER for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - 📦 Creating products for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findBySku]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select p1_0.id,p1_0.category,p1_0.created_at,p1_0.created_by,p1_0.description,p1_0.etsy_product_id,p1_0.is_active,p1_0.is_featured,p1_0.low_stock_threshold,p1_0.price,p1_0.sku,p1_0.stock_level,p1_0.title,p1_0.updated_at,p1_0.updated_by from product p1_0 where p1_0.sku=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.service.ProductService.saveProduct]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findBySku]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select p1_0.id,p1_0.category,p1_0.created_at,p1_0.created_by,p1_0.description,p1_0.etsy_product_id,p1_0.is_active,p1_0.is_featured,p1_0.low_stock_threshold,p1_0.price,p1_0.sku,p1_0.stock_level,p1_0.title,p1_0.updated_at,p1_0.updated_by from product p1_0 where p1_0.sku=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - insert into product (category,created_at,created_by,description,etsy_product_id,is_active,is_featured,low_stock_threshold,price,sku,stock_level,title,updated_at,updated_by,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.service.ProductService.saveProduct]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ✅ Created product: Handmade Ceramic Mug for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findBySku]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select p1_0.id,p1_0.category,p1_0.created_at,p1_0.created_by,p1_0.description,p1_0.etsy_product_id,p1_0.is_active,p1_0.is_featured,p1_0.low_stock_threshold,p1_0.price,p1_0.sku,p1_0.stock_level,p1_0.title,p1_0.updated_at,p1_0.updated_by from product p1_0 where p1_0.sku=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.service.ProductService.saveProduct]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findBySku]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select p1_0.id,p1_0.category,p1_0.created_at,p1_0.created_by,p1_0.description,p1_0.etsy_product_id,p1_0.is_active,p1_0.is_featured,p1_0.low_stock_threshold,p1_0.price,p1_0.sku,p1_0.stock_level,p1_0.title,p1_0.updated_at,p1_0.updated_by from product p1_0 where p1_0.sku=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - insert into product (category,created_at,created_by,description,etsy_product_id,is_active,is_featured,low_stock_threshold,price,sku,stock_level,title,updated_at,updated_by,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.service.ProductService.saveProduct]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ✅ Created product: Vintage Style Jewelry Box for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findBySku]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select p1_0.id,p1_0.category,p1_0.created_at,p1_0.created_by,p1_0.description,p1_0.etsy_product_id,p1_0.is_active,p1_0.is_featured,p1_0.low_stock_threshold,p1_0.price,p1_0.sku,p1_0.stock_level,p1_0.title,p1_0.updated_at,p1_0.updated_by from product p1_0 where p1_0.sku=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.service.ProductService.saveProduct]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findBySku]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - select p1_0.id,p1_0.category,p1_0.created_at,p1_0.created_by,p1_0.description,p1_0.etsy_product_id,p1_0.is_active,p1_0.is_featured,p1_0.low_stock_threshold,p1_0.price,p1_0.sku,p1_0.stock_level,p1_0.title,p1_0.updated_at,p1_0.updated_by from product p1_0 where p1_0.sku=?
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG org.hibernate.SQL - insert into product (category,created_at,created_by,description,etsy_product_id,is_active,is_featured,low_stock_threshold,price,sku,stock_level,title,updated_at,updated_by,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Found thread-bound EntityManager [SessionImpl(598174361<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] DEBUG o.s.orm.jpa.JpaTransactionManager - Participating in existing transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.service.StockNotificationService.checkAndCreateLowStockNotification]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.service.ProductService.saveProduct]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ✅ Created product: Organic Cotton Tote Bag for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ⚙️ Setting up configuration for tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] WARN  d.oasis.stockify.config.DataLoader - ⚠️ Could not initialize config for tenant acme_corp: Schema "ACME_CORP" not found [90079-214]
+2025-06-14 17:50:43 [restartedMain] [tenant:acme_corp] INFO  d.oasis.stockify.config.DataLoader - ✨ Successfully initialized tenant: acme_corp
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: global_trade
+2025-06-14 17:50:43 [restartedMain] [tenant:global_trade] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:global_trade] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:global_trade] INFO  d.oasis.stockify.config.DataLoader - 📋 Data already exists for tenant: global_trade, skipping initialization
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: artisan_crafts
+2025-06-14 17:50:43 [restartedMain] [tenant:artisan_crafts] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:artisan_crafts] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:artisan_crafts] INFO  d.oasis.stockify.config.DataLoader - 📋 Data already exists for tenant: artisan_crafts, skipping initialization
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: tech_solutions
+2025-06-14 17:50:43 [restartedMain] [tenant:tech_solutions] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:tech_solutions] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:tech_solutions] INFO  d.oasis.stockify.config.DataLoader - 📋 Data already exists for tenant: tech_solutions, skipping initialization
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: tenant1
+2025-06-14 17:50:43 [restartedMain] [tenant:tenant1] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:tenant1] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:tenant1] INFO  d.oasis.stockify.config.DataLoader - 📋 Data already exists for tenant: tenant1, skipping initialization
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 🏢 Initializing data for tenant: tenant2
+2025-06-14 17:50:43 [restartedMain] [tenant:tenant2] TRACE o.s.t.i.TransactionInterceptor - No need to create transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.findByUsername]: This method is not transactional.
+2025-06-14 17:50:43 [restartedMain] [tenant:tenant2] DEBUG org.hibernate.SQL - select au1_0.id,au1_0.accessible_tenants,au1_0.can_manage_all_tenants,au1_0.created_at,au1_0.is_active,au1_0.is_global_user,au1_0.last_login,au1_0.password,au1_0.primary_tenant,au1_0.role,au1_0.updated_at,au1_0.username from app_user au1_0 where au1_0.username=?
+2025-06-14 17:50:43 [restartedMain] [tenant:tenant2] INFO  d.oasis.stockify.config.DataLoader - 📋 Data already exists for tenant: tenant2, skipping initialization
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - ✅ Multi-Tenant Data Loader completed successfully!
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 📊 Initialized 7 tenants with sample data
+2025-06-14 17:50:43 [restartedMain] [tenant:] INFO  d.oasis.stockify.config.DataLoader - 👥 Each tenant has 2 users and 3 products
+2025-06-14 17:50:43 [restartedMain] [tenant:] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [dev.oasis.stockify.config.DataLoader.run]
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Initiating transaction commit
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Committing JPA transaction on EntityManager [SessionImpl(598174361<open>)]
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Closing JPA EntityManager [SessionImpl(598174361<open>)] after transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Creating new transaction with name [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: PUBLIC (from context: null)
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Opened new EntityManager [SessionImpl(2019873417<open>)] for JPA transaction
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG d.o.s.c.t.SchemaMultiTenantConnectionProvider - Getting connection for tenant: PUBLIC
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG d.o.s.c.t.SchemaMultiTenantConnectionProvider - Successfully set connection schema to: PUBLIC
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Exposing JPA transaction as JDBC [org.springframework.orm.jpa.vendor.HibernateJpaDialect$HibernateConnectionHandle@11aeffba]
+2025-06-14 17:50:43 [restartedMain] [tenant:] TRACE o.s.t.i.TransactionInterceptor - Getting transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG org.hibernate.SQL - insert into product (category,created_at,created_by,description,etsy_product_id,is_active,is_featured,low_stock_threshold,price,sku,stock_level,title,updated_at,updated_by,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+2025-06-14 17:50:43 [restartedMain] [tenant:] TRACE o.s.t.i.TransactionInterceptor - Completing transaction for [org.springframework.data.jpa.repository.support.SimpleJpaRepository.save]
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Initiating transaction commit
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Committing JPA transaction on EntityManager [SessionImpl(2019873417<open>)]
+2025-06-14 17:50:43 [restartedMain] [tenant:] DEBUG o.s.orm.jpa.JpaTransactionManager - Closing JPA EntityManager [SessionImpl(2019873417<open>)] after transaction
+2025-06-14 17:51:32 [http-nio-8080-exec-1] [tenant:] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-06-14 17:51:32 [http-nio-8080-exec-1] [tenant:] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-06-14 17:51:32 [http-nio-8080-exec-1] [tenant:] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2025-06-14 17:51:32 [http-nio-8080-exec-1] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:32 [http-nio-8080-exec-1] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:32 [http-nio-8080-exec-2] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:32 [http-nio-8080-exec-2] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:51:32 [http-nio-8080-exec-2] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:32 [http-nio-8080-exec-2] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:51:33 [http-nio-8080-exec-2] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:33 [http-nio-8080-exec-2] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:33 [http-nio-8080-exec-3] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:33 [http-nio-8080-exec-3] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:33 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:33 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:51:33 [http-nio-8080-exec-4] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:33 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:51:33 [http-nio-8080-exec-4] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:33 [http-nio-8080-exec-4] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:40 [http-nio-8080-exec-7] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:40 [http-nio-8080-exec-7] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:40 [http-nio-8080-exec-1] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:40 [http-nio-8080-exec-1] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:51:40 [http-nio-8080-exec-1] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:40 [http-nio-8080-exec-1] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:51:40 [http-nio-8080-exec-1] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:40 [http-nio-8080-exec-1] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:42 [http-nio-8080-exec-3] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:42 [http-nio-8080-exec-3] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:42 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:42 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:51:42 [http-nio-8080-exec-4] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:42 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:51:42 [http-nio-8080-exec-4] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:42 [http-nio-8080-exec-4] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:44 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:44 [http-nio-8080-exec-4] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:51:44 [http-nio-8080-exec-10] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:51:44 [http-nio-8080-exec-10] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:51:44 [http-nio-8080-exec-10] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:44 [http-nio-8080-exec-10] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:51:44 [http-nio-8080-exec-10] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:51:44 [http-nio-8080-exec-10] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:12 [http-nio-8080-exec-7] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:12 [http-nio-8080-exec-7] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:12 [http-nio-8080-exec-9] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:12 [http-nio-8080-exec-9] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:52:12 [http-nio-8080-exec-9] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:12 [http-nio-8080-exec-9] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:52:12 [http-nio-8080-exec-9] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:12 [http-nio-8080-exec-9] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:13 [http-nio-8080-exec-2] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:13 [http-nio-8080-exec-2] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:13 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:13 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:52:13 [http-nio-8080-exec-4] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:13 [http-nio-8080-exec-4] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:52:13 [http-nio-8080-exec-4] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:13 [http-nio-8080-exec-4] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Login request detected, using tenant_id from form parameter: stockify
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: stockify
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] DEBUG o.s.orm.jpa.JpaTransactionManager - Creating new transaction with name [dev.oasis.stockify.service.AppUserDetailsService.loadUserByUsername]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,readOnly
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: stockify (from context: stockify)
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] DEBUG o.s.orm.jpa.JpaTransactionManager - Opened new EntityManager [SessionImpl(331113780<open>)] for JPA transaction
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] DEBUG d.o.s.c.t.SchemaMultiTenantConnectionProvider - Getting connection for tenant: stockify
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] ERROR d.o.s.c.t.SchemaMultiTenantConnectionProvider - Failed to set schema for tenant: STOCKIFY
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "STOCKIFY" not found [90079-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:632)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.engine.Database.getSchema(Database.java:1546)
+	at org.h2.engine.SessionLocal.setCurrentSchemaName(SessionLocal.java:1303)
+	at org.h2.jdbc.JdbcConnection.setSchema(JdbcConnection.java:1755)
+	at com.zaxxer.hikari.pool.ProxyConnection.setSchema(ProxyConnection.java:447)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setSchema(HikariProxyConnection.java)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:45)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:1)
+	at org.hibernate.internal.ContextualJdbcConnectionAccess.obtainConnection(ContextualJdbcConnectionAccess.java:52)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:113)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getPhysicalConnection(LogicalConnectionManagedImpl.java:143)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:164)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:531)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:610)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:379)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:717)
+	at dev.oasis.stockify.service.AppUserDetailsService$$SpringCGLIB$$0.loadUserByUsername(<generated>)
+	at org.springframework.security.authentication.dao.DaoAuthenticationProvider.retrieveUser(DaoAuthenticationProvider.java:103)
+	at org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider.authenticate(AbstractUserDetailsAuthenticationProvider.java:133)
+	at org.springframework.security.authentication.ProviderManager.authenticate(ProviderManager.java:182)
+	at org.springframework.security.authentication.ProviderManager.authenticate(ProviderManager.java:201)
+	at org.springframework.security.authentication.ObservationAuthenticationManager.lambda$authenticate$1(ObservationAuthenticationManager.java:54)
+	at io.micrometer.observation.Observation.observe(Observation.java:565)
+	at org.springframework.security.authentication.ObservationAuthenticationManager.authenticate(ObservationAuthenticationManager.java:53)
+	at org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.attemptAuthentication(UsernamePasswordAuthenticationFilter.java:85)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:231)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at dev.oasis.stockify.config.tenant.TenantHeaderFilter.doFilterInternal(TenantHeaderFilter.java:51)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:225)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:340)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 0, SQLState: null
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - Failed to set tenant schema: STOCKIFY
+2025-06-14 17:52:27 [http-nio-8080-exec-10] [tenant:stockify] ERROR o.s.s.w.a.UsernamePasswordAuthenticationFilter - An internal error occurred while trying to authenticate the user.
+org.springframework.security.authentication.InternalAuthenticationServiceException: Could not open JPA EntityManager for transaction
+	at org.springframework.security.authentication.dao.DaoAuthenticationProvider.retrieveUser(DaoAuthenticationProvider.java:118)
+	at org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider.authenticate(AbstractUserDetailsAuthenticationProvider.java:133)
+	at org.springframework.security.authentication.ProviderManager.authenticate(ProviderManager.java:182)
+	at org.springframework.security.authentication.ProviderManager.authenticate(ProviderManager.java:201)
+	at org.springframework.security.authentication.ObservationAuthenticationManager.lambda$authenticate$1(ObservationAuthenticationManager.java:54)
+	at io.micrometer.observation.Observation.observe(Observation.java:565)
+	at org.springframework.security.authentication.ObservationAuthenticationManager.authenticate(ObservationAuthenticationManager.java:53)
+	at org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.attemptAuthentication(UsernamePasswordAuthenticationFilter.java:85)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:231)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:221)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at dev.oasis.stockify.config.tenant.TenantHeaderFilter.doFilterInternal(TenantHeaderFilter.java:51)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:225)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:340)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: org.springframework.transaction.CannotCreateTransactionException: Could not open JPA EntityManager for transaction
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:466)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:531)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.createTransactionIfNecessary(TransactionAspectSupport.java:610)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:379)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:717)
+	at dev.oasis.stockify.service.AppUserDetailsService$$SpringCGLIB$$0.loadUserByUsername(<generated>)
+	at org.springframework.security.authentication.dao.DaoAuthenticationProvider.retrieveUser(DaoAuthenticationProvider.java:103)
+	... 96 common frames omitted
+Caused by: org.hibernate.exception.GenericJDBCException: Unable to acquire JDBC Connection [Failed to set tenant schema: STOCKIFY] [n/a]
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:63)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:116)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getPhysicalConnection(LogicalConnectionManagedImpl.java:143)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:164)
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420)
+	... 106 common frames omitted
+Caused by: java.sql.SQLException: Failed to set tenant schema: STOCKIFY
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:50)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:1)
+	at org.hibernate.internal.ContextualJdbcConnectionAccess.obtainConnection(ContextualJdbcConnectionAccess.java:52)
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:113)
+	... 109 common frames omitted
+Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "STOCKIFY" not found [90079-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:632)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.engine.Database.getSchema(Database.java:1546)
+	at org.h2.engine.SessionLocal.setCurrentSchemaName(SessionLocal.java:1303)
+	at org.h2.jdbc.JdbcConnection.setSchema(JdbcConnection.java:1755)
+	at com.zaxxer.hikari.pool.ProxyConnection.setSchema(ProxyConnection.java:447)
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setSchema(HikariProxyConnection.java)
+	at dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider.getConnection(SchemaMultiTenantConnectionProvider.java:45)
+	... 112 common frames omitted
+2025-06-14 17:52:27 [http-nio-8080-exec-5] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:27 [http-nio-8080-exec-5] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:52:27 [http-nio-8080-exec-5] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:27 [http-nio-8080-exec-5] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:52:27 [http-nio-8080-exec-5] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:27 [http-nio-8080-exec-5] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:27 [http-nio-8080-exec-6] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:27 [http-nio-8080-exec-6] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
+2025-06-14 17:52:27 [http-nio-8080-exec-3] [tenant:public] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Set tenant context to: public
+2025-06-14 17:52:27 [http-nio-8080-exec-3] [tenant:public] DEBUG d.o.s.c.tenant.TenantInterceptor - 🏢 Using default tenant: public
+2025-06-14 17:52:27 [http-nio-8080-exec-3] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Opening JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:27 [http-nio-8080-exec-3] [tenant:public] DEBUG d.o.s.c.t.CurrentTenantIdentifierResolverImpl - Resolving tenant identifier: public (from context: public)
+2025-06-14 17:52:27 [http-nio-8080-exec-3] [tenant:public] DEBUG o.s.o.j.s.OpenEntityManagerInViewInterceptor - Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
+2025-06-14 17:52:27 [http-nio-8080-exec-3] [tenant:] DEBUG d.o.s.c.tenant.TenantHeaderFilter - Cleared tenant context after non-login request
