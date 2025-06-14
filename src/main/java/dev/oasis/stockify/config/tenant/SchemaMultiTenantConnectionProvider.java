@@ -37,9 +37,9 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     public Connection getConnection(String tenantIdentifier) throws SQLException {
         log.debug("Getting connection for tenant: {}", tenantIdentifier);
         Connection connection = getAnyConnection();
-        // Use Locale.ROOT to avoid Turkish locale issues
-        // Schemas are created in lowercase by Flyway
-        String schemaName = tenantIdentifier.toLowerCase(Locale.ROOT);
+        
+        // Map tenant identifier to actual schema name
+        String schemaName = mapTenantToSchema(tenantIdentifier);
         
         try {
             // Schema switching only - Flyway handles table creation
@@ -51,7 +51,25 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
             throw new SQLException("Failed to set tenant schema: " + schemaName, e);
         }
         return connection;
-    }    @Override
+    }
+    
+    /**
+     * Map tenant identifier to actual schema name in database
+     * This handles the difference between logical tenant names and physical schema names
+     */
+    private String mapTenantToSchema(String tenantIdentifier) {
+        if (tenantIdentifier == null) {
+            return "PUBLIC";
+        }
+        
+        // Handle the default tenant/schema mapping
+        if ("PUBLIC".equalsIgnoreCase(tenantIdentifier)) {
+            return "PUBLIC"; // H2's default schema is uppercase
+        }
+        
+        // For other tenants, use lowercase (as created by Flyway)
+        return tenantIdentifier.toLowerCase(Locale.ROOT);
+    }@Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         try {
             // Use PUBLIC schema as default, avoiding Turkish locale issues
