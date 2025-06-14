@@ -181,14 +181,16 @@ public class TenantManagementService {
 
     private String generateTenantId(String companyName) {
         // Generate tenant ID based on company name
-        String baseId = companyName.toLowerCase()
-                .replaceAll("[^a-zA-Z0-9]", "")
-                .substring(0, Math.min(companyName.length(), 10));
-        
+        String sanitized = companyName.toLowerCase()
+                .replaceAll("[^a-zA-Z0-9]", "");
+        String baseId = sanitized.substring(0, Math.min(sanitized.length(), 10));
+
         // Add random suffix to ensure uniqueness
         String suffix = UUID.randomUUID().toString().substring(0, 4);
         return baseId + "_" + suffix;
-    }    private void createTenantSchema(String tenantId) throws SQLException {
+    }
+
+    private void createTenantSchema(String tenantId) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             
@@ -198,7 +200,9 @@ public class TenantManagementService {
             statement.execute(String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName));
             log.debug("🏗️ Created schema: {} (tables will be created by Flyway)", schemaName);
         }
-    }    private void setupTenantConfiguration(String tenantId, TenantCreateDTO createDTO) throws SQLException {
+    }
+
+    private void setupTenantConfiguration(String tenantId, TenantCreateDTO createDTO) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             connection.setSchema(tenantId.toUpperCase());
             
