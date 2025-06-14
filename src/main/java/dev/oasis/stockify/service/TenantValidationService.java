@@ -27,8 +27,8 @@ public class TenantValidationService {
      */    public boolean validateTenantAccess(String username) {
         String currentTenant = TenantContext.getCurrentTenant();
         
-        if (currentTenant == null || currentTenant.isEmpty() || "PUBLIC".equals(currentTenant)) {
-            return true; // Allow access to PUBLIC tenant
+        if (currentTenant == null || currentTenant.isEmpty() || "public".equalsIgnoreCase(currentTenant)) {
+            return true; // Allow access to public tenant
         }
 
         try {
@@ -43,10 +43,10 @@ public class TenantValidationService {
     /**
      * Check if tenant is active and accessible
      */    public boolean isTenantActive(String tenantId) {
-        if ("PUBLIC".equals(tenantId)) {
+        if ("public".equalsIgnoreCase(tenantId)) {
             return true;
         }        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
+            connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
             String query = """
                 SELECT config_value FROM tenant_config 
@@ -71,10 +71,10 @@ public class TenantValidationService {
     /**
      * Get tenant display name
      */    public String getTenantDisplayName(String tenantId) {
-        if ("PUBLIC".equals(tenantId)) {
+        if ("public".equalsIgnoreCase(tenantId)) {
             return "Public";
         }        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
+            connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
             String query = """
                 SELECT config_value FROM tenant_config 
@@ -100,7 +100,7 @@ public class TenantValidationService {
      */
     public boolean validateTenantSchema(String tenantId) {        try (Connection connection = dataSource.getConnection()) {
             // Check if schema exists
-            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
+            connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
             // Check if required tables exist
             String[] requiredTables = {"app_user", "product", "stock_notification", "tenant_config"};
@@ -121,7 +121,7 @@ public class TenantValidationService {
     }
 
     private boolean userExistsInTenant(String username, String tenantId) throws SQLException {        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toUpperCase(Locale.ROOT));
+            connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
             String query = """
                 SELECT COUNT(*) FROM app_user 

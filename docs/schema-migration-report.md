@@ -2,7 +2,7 @@
 
 ## ✅ Problem Solved
 
-**Previous Issue**: Tables were being created only in PUBLIC schema, not in individual tenant schemas.
+**Previous Issue**: Tables were being created only in public schema, not in individual tenant schemas.
 
 **Root Cause**: Manual table creation in connection providers instead of proper Flyway migration to all schemas.
 
@@ -11,7 +11,7 @@
 ### 1. Multi-Tenant Flyway Configuration
 - **File**: `MultiTenantFlywayConfig.java`
 - **Purpose**: Applies migrations to all tenant schemas
- - **Schemas**: `PUBLIC`, `stockify`, `acme_corp`, `global_trade`, `artisan_crafts`, `tech_solutions`, `tenant1`, `tenant2`
+ - **Schemas**: `public`, `stockify`, `acme_corp`, `global_trade`, `artisan_crafts`, `tech_solutions`, `tenant1`, `tenant2`
 - **Features**: 
   - Creates separate flyway history tables per schema
   - Handles schema creation automatically
@@ -20,13 +20,13 @@
 ### 2. Enhanced Application Properties
 ```properties
 # Multi-schema Flyway configuration
-spring.flyway.schemas=PUBLIC,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2
-spring.flyway.default-schema=PUBLIC
+spring.flyway.schemas=public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2
+spring.flyway.default-schema=public
 spring.flyway.create-schemas=true
 spring.flyway.baseline-on-migrate=true
 
 # Pre-create schemas in H2 URL
-spring.datasource.url=jdbc:h2:mem:stockifydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=true;INIT=CREATE SCHEMA IF NOT EXISTS PUBLIC\\;CREATE SCHEMA IF NOT EXISTS stockify\\;CREATE SCHEMA IF NOT EXISTS acme_corp\\;CREATE SCHEMA IF NOT EXISTS global_trade\\;CREATE SCHEMA IF NOT EXISTS artisan_crafts\\;CREATE SCHEMA IF NOT EXISTS tech_solutions\;CREATE SCHEMA IF NOT EXISTS tenant1\;CREATE SCHEMA IF NOT EXISTS tenant2
+spring.datasource.url=jdbc:h2:mem:stockifydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=true;INIT=CREATE SCHEMA IF NOT EXISTS public\\;CREATE SCHEMA IF NOT EXISTS stockify\\;CREATE SCHEMA IF NOT EXISTS acme_corp\\;CREATE SCHEMA IF NOT EXISTS global_trade\\;CREATE SCHEMA IF NOT EXISTS artisan_crafts\\;CREATE SCHEMA IF NOT EXISTS tech_solutions\;CREATE SCHEMA IF NOT EXISTS tenant1\;CREATE SCHEMA IF NOT EXISTS tenant2
 ```
 
 ### 3. Simplified Connection Providers
@@ -62,7 +62,7 @@ Database Schemas:
 │   └── flyway_schema_history_global_trade
 └── ... (other tenant schemas)
 
-PUBLIC Schema:
+public Schema:
 └── (empty - no longer used for tenant data)
 ```
 
@@ -86,8 +86,8 @@ SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'STOCKIFY'
 -- Check if tables exist in ACME_CORP schema  
 SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'ACME_CORP';
 
--- Verify PUBLIC schema is empty (except flyway history)
-SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC';
+-- Verify public schema is empty (except flyway history)
+SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public';
 ```
 
 ### 4. Test Multi-Tenant API
@@ -109,7 +109,7 @@ GET http://localhost:8080/api/demo/tenant/global_trade/data
 
 ## ⚠️ Important Notes
 
-- **Breaking Change**: Existing data in PUBLIC schema will no longer be accessible
+- **Breaking Change**: Existing data in public schema will no longer be accessible
 - **Migration Required**: For production, existing tenant data must be migrated to proper schemas
 - **Schema Naming**: All schemas use UPPERCASE in H2 (stockify → STOCKIFY)
 - **Flyway History**: Each schema has its own migration history table

@@ -35,7 +35,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MultiTenantFlywayConfig implements CommandLineRunner {
 
-    @Value("${spring.flyway.schemas:PUBLIC,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2}")
+    @Value("${spring.flyway.schemas:public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2}")
     private String[] tenantSchemas;
 
     @Value("${spring.flyway.locations:classpath:db/migration}")
