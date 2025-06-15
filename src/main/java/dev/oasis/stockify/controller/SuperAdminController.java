@@ -66,20 +66,20 @@ public class SuperAdminController {
     @GetMapping("/users")
     public String allUsers(Model model, Principal principal) {
         log.info("👥 Super Admin '{}' accessing all users", principal.getName());
-        
-        try {
+          try {
             Map<String, List<AppUser>> tenantUsers = superAdminService.getAllUsersAcrossAllTenants();
             Map<String, Map<String, List<AppUser>>> usersByRole = superAdminService.getUsersByRoleAcrossAllTenants();
             
             model.addAttribute("tenantUsers", tenantUsers);
-            model.addAttribute("usersByRole", usersByRole);
-            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("usersByRole", usersByRole);            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("currentUser", principal.getName());
             
             return "superadmin/users";
             
         } catch (Exception e) {
             log.error("❌ Error loading all users: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to load users data");
+            model.addAttribute("currentUser", principal.getName());
             return "superadmin/users";
         } finally {
             superAdminService.clearTenantContext();

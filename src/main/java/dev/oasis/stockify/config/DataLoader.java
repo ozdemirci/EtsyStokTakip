@@ -294,24 +294,23 @@ public class DataLoader implements CommandLineRunner {
             // Use the correct schema name mapping (same as SchemaMultiTenantConnectionProvider)
             String schemaName = mapTenantToSchema(tenantId);
             connection.setSchema(schemaName);
-            
-            // Insert tenant-specific configurations
+              // Insert tenant-specific configurations using H2-compatible MERGE syntax
             String[] configInserts = {
-                String.format("INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
-                    "('tenant_name', '%s', 'STRING', 'Display name for the tenant') ON CONFLICT (config_key) DO NOTHING", 
+                String.format("MERGE INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
+                    "('tenant_name', '%s', 'STRING', 'Display name for the tenant')", 
                     getTenantDisplayName(tenantId)),
                     
-                "INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
-                    "('low_stock_email_enabled', 'true', 'BOOLEAN', 'Enable email notifications for low stock') ON CONFLICT (config_key) DO NOTHING",
+                "MERGE INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
+                    "('low_stock_email_enabled', 'true', 'BOOLEAN', 'Enable email notifications for low stock')",
                     
-                "INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
-                    "('default_low_stock_threshold', '5', 'INTEGER', 'Default threshold for low stock alerts') ON CONFLICT (config_key) DO NOTHING",
+                "MERGE INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
+                    "('default_low_stock_threshold', '5', 'INTEGER', 'Default threshold for low stock alerts')",
                     
-                "INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
-                    "('currency', 'USD', 'STRING', 'Default currency for pricing') ON CONFLICT (config_key) DO NOTHING",
+                "MERGE INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
+                    "('currency', 'USD', 'STRING', 'Default currency for pricing')",
                     
-                "INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
-                    "('timezone', 'UTC', 'STRING', 'Default timezone for the tenant') ON CONFLICT (config_key) DO NOTHING"
+                "MERGE INTO tenant_config (config_key, config_value, config_type, description) VALUES " +
+                    "('timezone', 'UTC', 'STRING', 'Default timezone for the tenant')"
             };
             
             for (String configSQL : configInserts) {
