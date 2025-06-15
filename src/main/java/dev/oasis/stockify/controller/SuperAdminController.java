@@ -275,6 +275,27 @@ public class SuperAdminController {
     }
 
     /**
+     * Tenant statistics page
+     */
+    @GetMapping("/statistics")
+    public String statisticsPage(Model model, Principal principal) {
+        log.info("📊 Super Admin '{}' accessing statistics page", principal.getName());
+
+        try {
+            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("currentUser", principal.getName());
+            return "superadmin/statistics";
+
+        } catch (Exception e) {
+            log.error("❌ Error loading statistics page: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to load statistics page");
+            return "superadmin/statistics";
+        } finally {
+            superAdminService.clearTenantContext();
+        }
+    }
+
+    /**
      * Get tenant statistics API
      */
     @GetMapping("/api/statistics")
