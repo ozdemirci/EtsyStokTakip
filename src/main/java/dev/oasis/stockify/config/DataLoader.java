@@ -165,23 +165,21 @@ public class DataLoader implements CommandLineRunner {
             // Set tenant context to check in the correct schema
             TenantContext.setCurrentTenant(tenantId);
             log.debug("🔍 Checking if data already loaded for tenant: {}", tenantId);
-            
+
+            boolean productsExist = productRepository.count() > 0;
+
             // For public tenant, check both superadmin and admin users
             if ("public".equals(tenantId)) {
                 boolean superAdminExists = appUserRepository.findByUsername("superadmin").isPresent();
                 boolean adminExists = appUserRepository.findByUsername("admin").isPresent();
-                
-                if (superAdminExists && adminExists) {
-                    log.debug("🔍 SuperAdmin and Admin users already exist for public tenant");
-                    return true;
-                }
-                log.debug("🔍 Public tenant users - SuperAdmin: {}, Admin: {}", superAdminExists, adminExists);
-                return false;
+                boolean loaded = superAdminExists && adminExists && productsExist;
+                log.debug("🔍 Public tenant users - SuperAdmin: {}, Admin: {}, Products: {}", superAdminExists, adminExists, productsExist);
+                return loaded;
             } else {
-                // For other tenants, check if admin user exists
+                // For other tenants, check if admin user exists and products exist
                 boolean adminExists = appUserRepository.findByUsername("admin").isPresent();
-                log.debug("🔍 Tenant {} - Admin user exists: {}", tenantId, adminExists);
-                return adminExists;
+                log.debug("🔍 Tenant {} - Admin user exists: {}, Products exist: {}", tenantId, adminExists, productsExist);
+                return adminExists && productsExist;
             }
             
         } catch (Exception e) {
