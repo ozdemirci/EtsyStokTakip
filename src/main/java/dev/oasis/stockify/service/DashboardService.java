@@ -1,5 +1,6 @@
 package dev.oasis.stockify.service;
 
+import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
 import dev.oasis.stockify.dto.DashboardStats;
 import dev.oasis.stockify.model.Product;
@@ -29,15 +30,30 @@ public class DashboardService {
     }
 
     public DashboardMetricsDTO getDashboardMetrics() {
+        // Get tenant-specific counts
+        long tenantUserCount = getTenantUserCount();
+        
         return DashboardMetricsDTO.builder()
                 .totalProducts(productRepository.count())
-                .totalUsers(userRepository.count())
+                .totalUsers(tenantUserCount)
                 .totalInventoryValue(calculateTotalInventoryValue())
                 .lowStockProducts(countLowStockProducts())
                 .activeNotifications(notificationRepository.count())
                 .monthlyRevenue(getMonthlyRevenue())
                 .dailyRevenue(getDailyRevenue())
                 .build();
+    }
+
+    private long getTenantUserCount() {
+        // Count users in current tenant context
+        String currentTenant = TenantContext.getCurrentTenant();
+        if (currentTenant == null || currentTenant.isEmpty()) {
+            return userRepository.count(); // Fallback to total count
+        }
+        
+        // For tenant-specific counting, we'll count all users since they're already filtered by tenant context
+        // The repository operations are automatically scoped to the current tenant
+        return userRepository.count();
     }
 
     private double calculateTotalInventoryValue() {

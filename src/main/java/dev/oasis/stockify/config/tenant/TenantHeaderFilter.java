@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.NonNull;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,46 +22,50 @@ public class TenantHeaderFilter extends OncePerRequestFilter {
     private static final String TENANT_HEADER = "X-TenantId";
     private static final String TENANT_PARAM = "tenant_id";
     private static final String DEFAULT_TENANT = "public";
-    private final AntPathRequestMatcher loginRequestMatcher = new AntPathRequestMatcher("/login", "POST");
+    private final AntPathRequestMatcher loginRequestMatcher = new AntPathRequestMatcher("/login", "POST");    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                  @NonNull FilterChain filterChain) throws ServletException, IOException {        try {
+            String tenantId = null;
+            
+            // 1. Try to get tenant from header first
+            tenantId = request.getHeader(TENANT_HEADER);
+            logger.debug("Tenant from header: {}", tenantId);
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                  FilterChain filterChain) throws ServletException, IOException {
-        try {
-            // Tenant ID'yi header'dan al
-            String tenantId = request.getHeader(TENANT_HEADER);
-
-            // Eğer header'da yoksa, form parametresinden al (login işlemi için)
+            // 2. If not in header and this is a login request, get from form parameter
             if ((tenantId == null || tenantId.isEmpty()) && loginRequestMatcher.matches(request)) {
                 tenantId = request.getParameter(TENANT_PARAM);
-                logger.debug("Login request detected, using tenant_id from form parameter: {}", tenantId);
+                logger.debug("Login request - tenant from form parameter: {}", tenantId);
+            }
+            
+            // 3. If still not found, try to get from session (login sets this)
+            if (tenantId == null || tenantId.isEmpty()) {
+                tenantId = (String) request.getSession().getAttribute("tenantId");
+                logger.debug("Tenant from session: {}", tenantId);
             }
 
-            // Tenant ID boşsa veya null ise varsayılan tenant'ı kullan
+            // 4. If still not found, use default
             if (tenantId == null || tenantId.isEmpty()) {
                 tenantId = DEFAULT_TENANT;
+                logger.debug("Using default tenant: {}", tenantId);
             }
 
-            // Tenant ID'yi küçük harfe çevir
+            // Set tenant context
             tenantId = tenantId.toLowerCase();
-
-            // TenantContext'e tenant bilgisini set et
             TenantContext.setCurrentTenant(tenantId);
             logger.debug("Set tenant context to: {}", tenantId);
+            
+            // Add tenant to response header for debugging
+            response.setHeader("X-Current-Tenant", tenantId);
 
             filterChain.doFilter(request, response);
         } finally {
-            // İşlem bittikten sonra TenantContext'i temizle
-            // Login işlemi için TenantContext'i temizleme, çünkü AppUserDetailsService'in kullanması gerekiyor
-            if (!loginRequestMatcher.matches(request)) {
-                TenantContext.clear();
-                logger.debug("Cleared tenant context after non-login request");
-            }
+            // Context'i her zaman temizle, ancak authentication sonrası biraz daha fazla sakla
+            // TenantContext.clear();
+            // Note: Clearing context commented out because it can cause issues after login
+            // when redirecting to dashboard. Let each controller handle their own context.
         }
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    }    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/css/") ||
                path.startsWith("/js/") ||

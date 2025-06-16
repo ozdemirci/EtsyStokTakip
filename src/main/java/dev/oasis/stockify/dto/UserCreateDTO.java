@@ -13,12 +13,15 @@ import lombok.Data;
 public class UserCreateDTO {
     @NotBlank(message = "Kullanıcı adı boş olamaz")
     @Size(min = 3, max = 20, message = "Kullanıcı adı 3 ile 20 karakter arasında olmalıdır")
-    private String username;    @NotBlank(message = "Şifre boş olamaz")
+    private String username;
+    
+    @NotBlank(message = "Şifre boş olamaz")
     @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
-    private String password;    
+    private String password;
     
     @NotNull(message = "Rol boş olamaz")
     private Role role; // SUPER_ADMIN, ADMIN, USER
+      private String email; // Optional email field
     
-    private String email; // Optional email field
+    private Boolean isActive = true; // Default to active
 }
