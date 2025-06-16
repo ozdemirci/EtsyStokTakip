@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Stockify</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .navbar-brand { font-weight: bold; }
+        .sidebar { height: 100vh; background-color: #f8f9fa; }
+        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
+        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
+        .sidebar .nav-link.active { background-color: #007bff; color: white; }
+        .main-content { padding: 20px; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
+        .stats-card { border-left: 4px solid #007bff; }
+        .chart-card { min-height: 300px; }
+        .quick-action-btn { margin: 5px 0; }
+        .recent-activity { max-height: 300px; overflow-y: auto; }
+        .activity-item { border-left: 3px solid transparent; padding-left: 15px; }
+        .activity-item.new { border-left-color: #28a745; }
+        .activity-item.warning { border-left-color: #ffc107; }
+        .activity-item.danger { border-left-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/user/dashboard">
+                <i class="bi bi-boxes"></i> Stockify User
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-building"></i> 
+                    <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
+                </span>
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle"></i> 
+                    Welcome, <span th:text="${currentUser}">User</span>
+                </span>
+                <a class="nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/user/dashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/products">
+                                <i class="bi bi-box-seam"></i> Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/products/low-stock">
+                                <i class="bi bi-exclamation-triangle"></i> Low Stock
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto main-content">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-speedometer2"></i> User Dashboard
+                    </h1>
+                    <div class="text-muted">
+                        <small>Last updated: <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}">16 Jun 2025 20:30</span></small>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Total Products</h6>
+                                        <h3 class="mb-0" th:text="${totalProducts ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-primary">
+                                        <i class="bi bi-box-seam" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Active Products</h6>
+                                        <h3 class="mb-0" th:text="${activeProducts ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-success">
+                                        <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Low Stock</h6>
+                                        <h3 class="mb-0" th:text="${lowStockProducts ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-warning">
+                                        <i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Total Value</h6>
+                                        <h3 class="mb-0">₺<span th:text="${totalInventoryValue ?: '0.00'}">0.00</span></h3>
+                                    </div>
+                                    <div class="text-info">
+                                        <i class="bi bi-currency-dollar" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-lightning"></i> Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <a href="/user/products" class="btn btn-outline-primary w-100 quick-action-btn">
+                                            <i class="bi bi-box-seam"></i> View Products
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="/user/products/low-stock" class="btn btn-outline-warning w-100 quick-action-btn">
+                                            <i class="bi bi-exclamation-triangle"></i> Check Low Stock
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="/user/notifications" class="btn btn-outline-info w-100 quick-action-btn">
+                                            <i class="bi bi-bell"></i> View Notifications
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-secondary w-100 quick-action-btn" onclick="refreshData()">
+                                            <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <!-- Product Status Chart -->
+                    <div class="col-md-6">
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-pie-chart"></i> Product Status Overview
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="productStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Levels Chart -->
+                    <div class="col-md-6">
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-bar-chart"></i> Stock Level Distribution
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="stockLevelsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-clock-history"></i> Recent Activity
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="recent-activity">
+                                    <div class="activity-item new mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <strong>System Update</strong>
+                                                <p class="mb-1 text-muted">Dashboard data refreshed successfully</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 
+                                                    <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">20:30</span>
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-success">System</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="activity-item warning mb-3" th:if="${lowStockProducts > 0}">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <strong>Low Stock Alert</strong>
+                                                <p class="mb-1 text-muted">
+                                                    <span th:text="${lowStockProducts}">0</span> products are running low on stock
+                                                </p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 
+                                                    <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">20:25</span>
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-warning">Alert</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="activity-item mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <strong>Welcome!</strong>
+                                                <p class="mb-1 text-muted">Welcome to your Stockify dashboard</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> Today
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-info">Info</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tenant Info -->
+                <div class="row mt-4" th:if="${currentTenant}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-building"></i> Tenant Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Tenant ID:</strong> <span th:text="${currentTenant.name}">N/A</span></p>
+                                        <p><strong>Status:</strong> 
+                                            <span class="badge bg-success" th:text="${currentTenant.status}">Active</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Database:</strong> <span th:text="${currentTenant.databaseName}">N/A</span></p>
+                                        <p><strong>Created:</strong> 
+                                            <span th:text="${currentTenant.createdAt != null ? #temporals.format(currentTenant.createdAt, 'dd MMM yyyy') : 'N/A'}">N/A</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Product Status Chart
+        const productStatusCtx = document.getElementById('productStatusChart').getContext('2d');
+        const productStatusChart = new Chart(productStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active Products', 'Low Stock', 'Out of Stock'],
+                datasets: [{
+                    data: [
+                        parseInt('[[${activeProducts}]]') || 0,
+                        parseInt('[[${lowStockProducts}]]') || 0,
+                        parseInt('[[${outOfStockProducts}]]') || 0
+                    ],
+                    backgroundColor: [
+                        '#28a745',
+                        '#ffc107',
+                        '#dc3545'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Stock Levels Chart
+        const stockLevelsCtx = document.getElementById('stockLevelsChart').getContext('2d');
+        const stockLevelsChart = new Chart(stockLevelsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Products', 'Active', 'Low Stock', 'Out of Stock'],
+                datasets: [{
+                    label: 'Count',
+                    data: [
+                        parseInt('[[${totalProducts}]]') || 0,
+                        parseInt('[[${activeProducts}]]') || 0,
+                        parseInt('[[${lowStockProducts}]]') || 0,
+                        parseInt('[[${outOfStockProducts}]]') || 0
+                    ],
+                    backgroundColor: [
+                        '#007bff',
+                        '#28a745',
+                        '#ffc107',
+                        '#dc3545'
+                    ],
+                    borderColor: [
+                        '#0056b3',
+                        '#1e7e34',
+                        '#d39e00',
+                        '#c82333'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        // Refresh data function
+        function refreshData() {
+            location.reload();
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(function() {
+            refreshData();
+        }, 300000);
+    </script>
+</body>
+</html>

@@ -45,11 +45,10 @@ public class TenantAwareAuthenticationSuccessHandler extends SimpleUrlAuthentica
         else if (authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             logger.info("👨‍💼 Admin login for tenant: {} - redirecting to /admin/dashboard", tenantId);
-            getRedirectStrategy().sendRedirect(request, response, "/admin/dashboard");
-        } else {
-            // Normal kullanıcılar için ürün listesine yönlendir
-            logger.info("👤 User login for tenant: {} - redirecting to /products", tenantId);
-            getRedirectStrategy().sendRedirect(request, response, "/products");
+            getRedirectStrategy().sendRedirect(request, response, "/admin/dashboard");        } else {
+            // Normal kullanıcılar için user dashboard'a yönlendir
+            logger.info("👤 User login for tenant: {} - redirecting to /user/dashboard", tenantId);
+            getRedirectStrategy().sendRedirect(request, response, "/user/dashboard");
         }
     }
 }

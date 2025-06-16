@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Stockify User</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-brand { font-weight: bold; }
+        .sidebar { height: 100vh; background-color: #f8f9fa; }
+        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
+        .sidebar .nav-link:hover { background-color: #e9ecef; color: #28a745; }
+        .sidebar .nav-link.active { background-color: #28a745; color: white; }
+        .main-content { padding: 20px; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
+        .product-image { max-width: 300px; height: 300px; object-fit: cover; border-radius: 8px; }
+        .badge-low-stock { background-color: #ffc107; color: #000; }
+        .badge-out-of-stock { background-color: #dc3545; }
+        .badge-in-stock { background-color: #28a745; }
+        .info-card { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/user/dashboard">
+                <i class="bi bi-boxes"></i> Stockify User
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-building"></i> 
+                    <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
+                </span>
+                <a class="nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/dashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/user/products">
+                                <i class="bi bi-box-seam"></i> Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/products/low-stock">
+                                <i class="bi bi-exclamation-triangle"></i> Low Stock
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto main-content">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-eye"></i> Product Details
+                    </h1>
+                    <div>
+                        <a href="/user/products" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Products
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="row" th:if="${product}">
+                    <!-- Product Image -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <img th:if="${product.imageUrl}" 
+                                     th:src="${product.imageUrl}" 
+                                     th:alt="${product.title}"
+                                     class="product-image img-fluid">
+                                <div th:unless="${product.imageUrl}" class="product-image d-flex align-items-center justify-content-center bg-light">
+                                    <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Information -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title mb-0" th:text="${product.title}">Product Title</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5>Basic Information</h5>
+                                        <div class="info-card p-3 rounded mb-3">
+                                            <p><strong>SKU:</strong> <code th:text="${product.sku}">SKU001</code></p>
+                                            <p><strong>Category:</strong> 
+                                                <span class="badge bg-secondary" th:text="${product.category ?: 'No Category'}">Category</span>
+                                            </p>
+                                            <p><strong>Price:</strong> 
+                                                <span class="h5 text-success">₺<span th:text="${#numbers.formatDecimal(product.price, 0, 2)}">0.00</span></span>
+                                            </p>
+                                            <p><strong>Unit:</strong> <span th:text="${product.unit ?: 'N/A'}">piece</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>Stock Information</h5>
+                                        <div class="info-card p-3 rounded mb-3">
+                                            <p><strong>Current Stock:</strong> 
+                                                <span class="h5" th:text="${product.quantity}">0</span>
+                                                <span th:if="${product.unit}" class="text-muted" th:text="${product.unit}">unit</span>
+                                            </p>
+                                            <p><strong>Status:</strong>
+                                                <span th:if="${product.quantity == 0}" class="badge badge-out-of-stock">
+                                                    <i class="bi bi-x-circle"></i> Out of Stock
+                                                </span>
+                                                <span th:if="${product.quantity > 0 and product.quantity <= 10}" class="badge badge-low-stock">
+                                                    <i class="bi bi-exclamation-triangle"></i> Low Stock
+                                                </span>
+                                                <span th:if="${product.quantity > 10}" class="badge badge-in-stock">
+                                                    <i class="bi bi-check-circle"></i> In Stock
+                                                </span>
+                                            </p>
+                                            <p><strong>Total Value:</strong> 
+                                                <span class="h6 text-info">₺<span th:text="${#numbers.formatDecimal(product.price * product.quantity, 0, 2)}">0.00</span></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="row" th:if="${product.description}">
+                                    <div class="col-12">
+                                        <h5>Description</h5>
+                                        <div class="info-card p-3 rounded">
+                                            <p th:text="${product.description}" class="mb-0">Product description goes here...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="row mt-4" th:if="${product}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-info-circle"></i> Additional Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p><strong>Product ID:</strong> <span th:text="${product.id}">1</span></p>
+                                        <p><strong>Created:</strong> 
+                                            <span th:text="${product.createdAt != null ? #temporals.format(product.createdAt, 'dd MMM yyyy HH:mm') : 'N/A'}">N/A</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Last Updated:</strong> 
+                                            <span th:text="${product.updatedAt != null ? #temporals.format(product.updatedAt, 'dd MMM yyyy HH:mm') : 'N/A'}">N/A</span>
+                                        </p>
+                                        <p><strong>Tenant:</strong> 
+                                            <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Stock Level Warning -->
+                                        <div th:if="${product.quantity <= 10}" class="alert alert-warning mb-0">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <strong>Low Stock Warning!</strong>
+                                            <br>
+                                            <small>This product is running low on stock.</small>
+                                        </div>
+                                        <div th:if="${product.quantity == 0}" class="alert alert-danger mb-0">
+                                            <i class="bi bi-x-circle me-2"></i>
+                                            <strong>Out of Stock!</strong>
+                                            <br>
+                                            <small>This product is currently out of stock.</small>
+                                        </div>
+                                        <div th:if="${product.quantity > 10}" class="alert alert-success mb-0">
+                                            <i class="bi bi-check-circle me-2"></i>
+                                            <strong>Good Stock Level</strong>
+                                            <br>
+                                            <small>This product has adequate stock.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Actions -->
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <a href="/user/products" class="btn btn-secondary me-2">
+                            <i class="bi bi-arrow-left"></i> Back to Products
+                        </a>
+                        <a href="/user/dashboard" class="btn btn-outline-primary">
+                            <i class="bi bi-house"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

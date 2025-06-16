@@ -3,6 +3,8 @@ package dev.oasis.stockify.dto;
 import dev.oasis.stockify.model.Role;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * DTO for displaying user information
  * Excludes sensitive information like passwords
@@ -14,4 +16,6 @@ public class UserResponseDTO {
     private Role role;
     private String email;
     private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

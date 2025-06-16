@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bildirimler - Stockify Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-brand { font-weight: bold; }
+        .sidebar { height: 100vh; background-color: #f8f9fa; }
+        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
+        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
+        .sidebar .nav-link.active { background-color: #007bff; color: white; }
+        .main-content { padding: 20px; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
+        .notification-item { border-left: 4px solid transparent; transition: all 0.3s ease; }
+        .notification-item:hover { background-color: #f8f9fa; }
+        .notification-item.warning { border-left-color: #ffc107; }
+        .notification-item.success { border-left-color: #28a745; }
+        .notification-item.info { border-left-color: #17a2b8; }
+        .notification-item.danger { border-left-color: #dc3545; }
+        .notification-item.primary { border-left-color: #007bff; }
+        .stats-card { border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/dashboard">
+                <i class="bi bi-boxes"></i> Stockify Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-building"></i> 
+                    <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
+                </span>                <a class="nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/dashboard">
+                                <i class="bi bi-speedometer2"></i> Gösterge Paneli
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/products">
+                                <i class="bi bi-box-seam"></i> Ürünler
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="bi bi-people"></i> Kullanıcılar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/products/low-stock">
+                                <i class="bi bi-exclamation-triangle"></i> Düşük Stok
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/notifications">
+                                <i class="bi bi-bell"></i> Bildirimler
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto main-content">
+                <!-- Header -->                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-bell"></i> Bildirimler ve Uyarılar
+                    </h1>
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm me-2" onclick="sendTestNotification()">
+                            <i class="bi bi-send"></i> Test Gönder
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="markAllAsRead()">
+                            <i class="bi bi-check-all"></i> Tümünü Okundu İşaretle
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Toplam Bildirim</h6>
+                                        <h3 class="mb-0" id="totalNotifications">12</h3>
+                                    </div>
+                                    <div class="text-primary">
+                                        <i class="bi bi-bell" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Okunmamış</h6>
+                                        <h3 class="mb-0" id="unreadNotifications">3</h3>
+                                    </div>
+                                    <div class="text-warning">
+                                        <i class="bi bi-bell-fill" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Kritik Uyarılar</h6>
+                                        <h3 class="mb-0" id="criticalAlerts">2</h3>
+                                    </div>
+                                    <div class="text-danger">
+                                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body">                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Sistem Durumu</h6>
+                                        <h3 class="mb-0"><span class="badge bg-success">Çevrimiçi</span></h3>
+                                    </div>
+                                    <div class="text-success">
+                                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Filters -->
+                <div class="row mb-3">
+                    <div class="col-md-8">                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="notificationFilter" id="allNotifications" checked>
+                            <label class="btn btn-outline-primary" for="allNotifications">Tüm Bildirimler</label>
+
+                            <input type="radio" class="btn-check" name="notificationFilter" id="unreadOnly">
+                            <label class="btn btn-outline-warning" for="unreadOnly">Sadece Okunmamış</label>
+
+                            <input type="radio" class="btn-check" name="notificationFilter" id="criticalOnly">
+                            <label class="btn btn-outline-danger" for="criticalOnly">Sadece Kritik</label>
+
+                            <input type="radio" class="btn-check" name="notificationFilter" id="systemOnly">
+                            <label class="btn btn-outline-info" for="systemOnly">Sadece Sistem</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createNotificationModal">
+                            <i class="bi bi-plus-circle"></i> Bildirim Oluştur
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications List -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-inbox"></i> Bildirim Merkezi
+                                </h5>
+                            </div>
+                            <div class="card-body" id="notificationsList">
+                                <!-- Critical Alert -->                                <div class="notification-item danger p-3 mb-3 rounded" data-type="critical">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                                                Kritik: Birden Fazla Ürün Stokta Yok
+                                            </h6>
+                                            <p class="mb-1">5 ürün tamamen stokta yok ve hemen yeniden stoklanması gerekiyor.</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> 
+                                                <span th:text="${#temporals.format(#temporals.createNow().minusMinutes(15), 'dd MMM yyyy HH:mm')}">16 Haz 2025 20:15</span>
+                                                <span class="ms-3"><i class="bi bi-eye-slash"></i> Okunmadı</span>
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-danger">Kritik</span>
+                                            <div class="btn-group ms-2" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" title="Detayları Görüntüle" onclick="viewNotificationDetails(1)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-success" title="Okundu işaretle" onclick="markAsRead(this)">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteNotification(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Low Stock Warning -->                                <div class="notification-item warning p-3 mb-3 rounded" data-type="warning">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                                Düşük Stok Uyarısı: 12 Ürün Dikkat Gerektiriyor
+                                            </h6>
+                                            <p class="mb-1">Birkaç ürünün stoğu azalmış durumda ve yakında yeniden stoklanması gerekebilir.</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> 
+                                                <span th:text="${#temporals.format(#temporals.createNow().minusMinutes(45), 'dd MMM yyyy HH:mm')}">16 Haz 2025 19:45</span>
+                                                <span class="ms-3"><i class="bi bi-eye-slash"></i> Okunmadı</span>
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-warning">Uyarı</span>
+                                            <div class="btn-group ms-2" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" title="Detayları Görüntüle" onclick="viewNotificationDetails(2)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-success" title="Okundu işaretle" onclick="markAsRead(this)">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteNotification(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- User Activity -->                                <div class="notification-item primary p-3 mb-3 rounded" data-type="user" style="opacity: 0.8;">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-person-plus text-primary me-2"></i>
+                                                Yeni Kullanıcı Kaydı
+                                            </h6>
+                                            <p class="mb-1">Yeni bir kullanıcı "mehmet.yilmaz" sisteme kayıt oldu.</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> 
+                                                <span th:text="${#temporals.format(#temporals.createNow().minusHours(2), 'dd MMM yyyy HH:mm')}">16 Haz 2025 18:30</span>
+                                                <span class="ms-3"><i class="bi bi-eye"></i> Okundu</span>
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-primary">Kullanıcı Aktivitesi</span>
+                                            <div class="btn-group ms-2" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" title="Detayları Görüntüle" onclick="viewNotificationDetails(3)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteNotification(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- System Update -->                                <div class="notification-item info p-3 mb-3 rounded" data-type="system" style="opacity: 0.8;">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-gear text-info me-2"></i>
+                                                Sistem Bakımı Tamamlandı
+                                            </h6>
+                                            <p class="mb-1">Planlanan sistem bakımı başarıyla tamamlandı. Tüm hizmetler çalışır durumda.</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> 
+                                                <span th:text="${#temporals.format(#temporals.createNow().minusHours(4), 'dd MMM yyyy HH:mm')}">16 Haz 2025 16:30</span>
+                                                <span class="ms-3"><i class="bi bi-eye"></i> Okundu</span>
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-info">Sistem</span>
+                                            <div class="btn-group ms-2" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" title="Detayları Görüntüle" onclick="viewNotificationDetails(4)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteNotification(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Success Notification -->                                <div class="notification-item success p-3 mb-3 rounded" data-type="success" style="opacity: 0.8;">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-check-circle text-success me-2"></i>
+                                                Envanter Güncelleme Başarılı
+                                            </h6>
+                                            <p class="mb-1">25 ürün için toplu envanter güncellemesi başarıyla tamamlandı.</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> 
+                                                <span th:text="${#temporals.format(#temporals.createNow().minusHours(6), 'dd MMM yyyy HH:mm')}">16 Haz 2025 14:30</span>
+                                                <span class="ms-3"><i class="bi bi-eye"></i> Okundu</span>
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-success">Başarılı</span>
+                                            <div class="btn-group ms-2" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" title="Detayları Görüntüle" onclick="viewNotificationDetails(5)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteNotification(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-gear"></i> Admin Bildirim Ayarları
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">                                    <div class="col-md-4">
+                                        <h6>Stok Uyarıları</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="lowStockAlerts" checked>
+                                            <label class="form-check-label" for="lowStockAlerts">
+                                                <i class="bi bi-exclamation-triangle text-warning me-1"></i>
+                                                Düşük Stok Uyarıları
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="outOfStockAlerts" checked>
+                                            <label class="form-check-label" for="outOfStockAlerts">
+                                                <i class="bi bi-x-circle text-danger me-1"></i>
+                                                Stok Tükendi Uyarıları
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="stockThresholdAlerts" checked>
+                                            <label class="form-check-label" for="stockThresholdAlerts">
+                                                <i class="bi bi-graph-down text-info me-1"></i>
+                                                Stok Eşik Uyarıları
+                                            </label>
+                                        </div>
+                                    </div>                                    <div class="col-md-4">
+                                        <h6>Kullanıcı Aktiviteleri</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="userRegistrations" checked>
+                                            <label class="form-check-label" for="userRegistrations">
+                                                <i class="bi bi-person-plus text-primary me-1"></i>
+                                                Yeni Kullanıcı Kayıtları
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="userLoginAttempts">
+                                            <label class="form-check-label" for="userLoginAttempts">
+                                                <i class="bi bi-shield-check text-secondary me-1"></i>
+                                                Başarısız Giriş Denemeleri
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="userActivities">
+                                            <label class="form-check-label" for="userActivities">
+                                                <i class="bi bi-activity text-success me-1"></i>
+                                                Kullanıcı Aktiviteleri
+                                            </label>
+                                        </div>
+                                    </div>                                    <div class="col-md-4">
+                                        <h6>Sistem Bildirimleri</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="systemUpdates" checked>
+                                            <label class="form-check-label" for="systemUpdates">
+                                                <i class="bi bi-gear text-info me-1"></i>
+                                                Sistem Güncellemeleri
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="maintenanceAlerts" checked>
+                                            <label class="form-check-label" for="maintenanceAlerts">
+                                                <i class="bi bi-tools text-warning me-1"></i>
+                                                Bakım Uyarıları
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="securityAlerts" checked>
+                                            <label class="form-check-label" for="securityAlerts">
+                                                <i class="bi bi-shield-exclamation text-danger me-1"></i>
+                                                Güvenlik Uyarıları
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">                                    <div class="col-md-6">
+                                        <h6>Teslimat Yöntemleri</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="browserNotifications" checked>
+                                            <label class="form-check-label" for="browserNotifications">
+                                                <i class="bi bi-browser-chrome text-success me-1"></i>
+                                                Tarayıcı Bildirimleri
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                            <label class="form-check-label" for="emailNotifications">
+                                                <i class="bi bi-envelope text-secondary me-1"></i>
+                                                E-posta Bildirimleri
+                                            </label>
+                                        </div>
+                                    </div>                                    <div class="col-md-6">
+                                        <h6>Öncelik Ayarları</h6>
+                                        <div class="mb-2">
+                                            <label for="lowStockThreshold" class="form-label">Düşük Stok Eşiği</label>
+                                            <input type="number" class="form-control" id="lowStockThreshold" value="10" min="1">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label for="criticalStockThreshold" class="form-label">Kritik Stok Eşiği</label>
+                                            <input type="number" class="form-control" id="criticalStockThreshold" value="5" min="0">
+                                        </div>
+                                    </div>
+                                </div>                                <div class="mt-3">
+                                    <button class="btn btn-primary me-2" onclick="saveNotificationSettings()">
+                                        <i class="bi bi-save"></i> Ayarları Kaydet
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="resetNotificationSettings()">
+                                        <i class="bi bi-arrow-clockwise"></i> Varsayılana Sıfırla
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Create Notification Modal -->
+    <div class="modal fade" id="createNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle"></i> Yeni Bildirim Oluştur
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createNotificationForm">                        <div class="mb-3">
+                            <label for="notificationType" class="form-label">Bildirim Tipi</label>
+                            <select class="form-select" id="notificationType" required>
+                                <option value="">Tip seçin...</option>
+                                <option value="info">Bilgi</option>
+                                <option value="warning">Uyarı</option>
+                                <option value="danger">Kritik</option>
+                                <option value="success">Başarılı</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationTitle" class="form-label">Başlık</label>
+                            <input type="text" class="form-control" id="notificationTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationMessage" class="form-label">Mesaj</label>
+                            <textarea class="form-control" id="notificationMessage" rows="3" required></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendImmediately" checked>
+                            <label class="form-check-label" for="sendImmediately">
+                                Hemen gönder
+                            </label>
+                        </div>
+                    </form>
+                </div>                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="createNotification()">
+                        <i class="bi bi-send"></i> Oluştur ve Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter notifications
+        document.querySelectorAll('input[name="notificationFilter"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                filterNotifications(this.id);
+            });
+        });
+
+        function filterNotifications(filterType) {
+            const notifications = document.querySelectorAll('.notification-item');
+            
+            notifications.forEach(notification => {
+                const type = notification.getAttribute('data-type');
+                const isUnread = notification.style.opacity !== '0.8';
+                
+                switch(filterType) {
+                    case 'allNotifications':
+                        notification.style.display = 'block';
+                        break;
+                    case 'unreadOnly':
+                        notification.style.display = isUnread ? 'block' : 'none';
+                        break;
+                    case 'criticalOnly':
+                        notification.style.display = type === 'critical' ? 'block' : 'none';
+                        break;
+                    case 'systemOnly':
+                        notification.style.display = type === 'system' ? 'block' : 'none';
+                        break;
+                }
+            });
+        }
+
+        function markAllAsRead() {
+            document.querySelectorAll('.notification-item').forEach(function(item) {
+                item.style.opacity = '0.8';
+                const unreadSpan = item.querySelector('[data-unread]') || item.querySelector('small span:last-child');
+                if (unreadSpan && unreadSpan.innerHTML.includes('Unread')) {
+                    unreadSpan.innerHTML = '<i class="bi bi-eye"></i> Read';
+                }
+            });
+            
+            // Update counters
+            document.getElementById('unreadNotifications').textContent = '0';
+            
+            showToast('Tüm bildirimler okundu olarak işaretlendi!', 'success');
+        }
+
+        function markAsRead(button) {
+            const notificationItem = button.closest('.notification-item');
+            notificationItem.style.opacity = '0.8';
+            
+            const unreadSpan = notificationItem.querySelector('small span:last-child');
+            if (unreadSpan) {
+                unreadSpan.innerHTML = '<i class="bi bi-eye"></i> Read';
+            }
+            
+            // Update counter
+            const currentUnread = parseInt(document.getElementById('unreadNotifications').textContent);
+            document.getElementById('unreadNotifications').textContent = Math.max(0, currentUnread - 1);
+            
+            showToast('Bildirim okundu olarak işaretlendi', 'success');
+        }        function deleteNotification(button) {
+            if (confirm('Bu bildirimi silmek istediğinizden emin misiniz?')) {
+                const notificationItem = button.closest('.notification-item');
+                notificationItem.remove();
+                
+                // Update counters
+                const currentTotal = parseInt(document.getElementById('totalNotifications').textContent);
+                document.getElementById('totalNotifications').textContent = Math.max(0, currentTotal - 1);
+                
+                showToast('Bildirim silindi', 'info');
+            }
+        }        function viewNotificationDetails(id) {
+            // This would typically open a detailed view or navigate to relevant page
+            showToast('Bildirim detayları açılıyor...', 'info');
+            
+            // Example: Navigate to related page based on notification type
+            if (id === 1 || id === 2) {
+                // Navigate to products page for stock-related notifications
+                window.open('/admin/products/low-stock', '_blank');
+            }
+        }
+
+        function sendTestNotification() {
+            const testNotification = `
+                <div class="notification-item info p-3 mb-3 rounded" data-type="test">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>                            <h6 class="mb-1">
+                                <i class="bi bi-info-circle text-info me-2"></i>
+                                Test Bildirimi
+                            </h6>
+                            <p class="mb-1">Bu, sistemin doğru çalıştığını doğrulamak için test bildirimidir.</p>
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> 
+                                ${new Date().toLocaleString('tr-TR')}
+                                <span class="ms-3"><i class="bi bi-eye-slash"></i> Okunmadı</span>
+                            </small>
+                        </div>
+                        <div>                            <span class="badge bg-info">Test</span>
+                            <div class="btn-group ms-2" role="group">
+                                <button class="btn btn-sm btn-outline-success" title="Okundu işaretle" onclick="markAsRead(this)">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" title="Sil" onclick="deleteNotification(this)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('notificationsList').insertAdjacentHTML('afterbegin', testNotification);
+            
+            // Update counters
+            const currentTotal = parseInt(document.getElementById('totalNotifications').textContent);
+            const currentUnread = parseInt(document.getElementById('unreadNotifications').textContent);
+            document.getElementById('totalNotifications').textContent = currentTotal + 1;
+            document.getElementById('unreadNotifications').textContent = currentUnread + 1;
+            
+            showToast('Test bildirimi gönderildi!', 'success');
+        }        function createNotification() {
+            const form = document.getElementById('createNotificationForm');
+            const formData = new FormData(form);
+            
+            if (form.checkValidity()) {
+                // This would typically send data to server
+                showToast('Bildirim başarıyla oluşturuldu!', 'success');
+                
+                // Close modal and reset form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createNotificationModal'));
+                modal.hide();
+                form.reset();
+            } else {
+                form.reportValidity();
+            }
+        }        function saveNotificationSettings() {
+            showToast('Bildirim ayarları başarıyla kaydedildi!', 'success');
+        }
+
+        function resetNotificationSettings() {
+            if (confirm('Tüm bildirim ayarlarını varsayılana sıfırlamak istediğinizden emin misiniz?')) {
+                // Reset all checkboxes and inputs to default values
+                document.getElementById('lowStockThreshold').value = '10';
+                document.getElementById('criticalStockThreshold').value = '5';
+                
+                showToast('Bildirim ayarları varsayılana sıfırlandı', 'info');
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <i class="bi bi-check-circle me-2"></i>${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }        // Auto-refresh notifications every 30 seconds
+        setInterval(function() {
+            // This would typically fetch new notifications from server
+            console.log('Yeni bildirimler kontrol ediliyor...');
+        }, 30000);
+    </script>
+</body>
+</html>

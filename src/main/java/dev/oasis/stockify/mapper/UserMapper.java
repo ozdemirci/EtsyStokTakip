@@ -63,6 +63,7 @@ public class UserMapper {
         userResponseDTO.setRole(appUser.getRole());
         userResponseDTO.setEmail(appUser.getEmail());
         userResponseDTO.setIsActive(appUser.getIsActive());
+        userResponseDTO.setCreatedAt(appUser.getCreatedAt());
         
         return userResponseDTO;
     }

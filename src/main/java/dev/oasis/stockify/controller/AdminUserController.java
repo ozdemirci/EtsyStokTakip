@@ -73,10 +73,20 @@ public class AdminUserController {
         // Debug log
         log.debug("🔍 Users page - Total: {}, Content size: {}, Page: {}/{}", 
                 userPage.getTotalElements(), userPage.getContent().size(), 
-                userPage.getNumber(), userPage.getTotalPages());
-        
-        // Get all roles for filtering (excluding SUPER_ADMIN for regular admins)
+                userPage.getNumber(), userPage.getTotalPages());        // Get all roles for filtering (excluding SUPER_ADMIN for regular admins)
         List<Role> availableRoles = List.of(Role.ADMIN, Role.USER);
+        
+        // Calculate user statistics from all users (not just current page)
+        List<UserResponseDTO> allUsersForStats = appUserService.getAllUsers();
+        long activeUsersCount = allUsersForStats.stream()
+                .filter(user -> user.getIsActive() != null && user.getIsActive())
+                .count();
+        long adminUsersCount = allUsersForStats.stream()
+                .filter(user -> user.getRole() != null && user.getRole() == Role.ADMIN)
+                .count();
+        long regularUsersCount = allUsersForStats.stream()
+                .filter(user -> user.getRole() != null && user.getRole() == Role.USER)
+                .count();
         
         // Add model attributes
         model.addAttribute("users", userPage.getContent());
@@ -89,6 +99,11 @@ public class AdminUserController {
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("availableRoles", availableRoles);
         model.addAttribute("currentTenantId", currentTenantId);
+        
+        // Add user statistics
+        model.addAttribute("activeUsersCount", activeUsersCount);
+        model.addAttribute("adminUsersCount", adminUsersCount);
+        model.addAttribute("regularUsersCount", regularUsersCount);
         
         return "admin/users";
     }

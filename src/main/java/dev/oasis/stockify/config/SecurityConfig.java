@@ -49,13 +49,13 @@ public class SecurityConfig {    private final AppUserDetailsService appUserDeta
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {        http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/error", "/h2-console/**").permitAll()
+            .csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/register", "/css/**", "/js/**", "/images/**", "/error", "/h2-console/**").permitAll()
                 .requestMatchers("/login*").permitAll()
                 .requestMatchers("/superadmin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/admin/tenants/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/user/**").hasRole("USER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

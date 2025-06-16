@@ -127,7 +127,7 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Active Users</h6>
-                                        <h3 class="mb-0" th:text="${users != null ? #lists.size(#lists.select(users, user, user != null and user.isActive != null and user.isActive)) : 0}">0</h3>
+                                        <h3 class="mb-0" th:text="${activeUsersCount ?: 0}">0</h3>
                                     </div>
                                     <div class="text-success">
                                         <i class="bi bi-person-check-fill display-6"></i>
@@ -135,14 +135,13 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
+                    </div>                    <div class="col-md-3">
                         <div class="card stats-card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Admin Users</h6>
-                                        <h3 class="mb-0" th:text="${users != null ? #lists.size(#lists.select(users, user, user != null and user.role != null and user.role.toString() == 'ADMIN')) : 0}">0</h3>
+                                        <h3 class="mb-0" th:text="${adminUsersCount ?: 0}">0</h3>
                                     </div>
                                     <div class="text-danger">
                                         <i class="bi bi-shield-fill-check display-6"></i>
@@ -150,14 +149,13 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
+                    </div>                    <div class="col-md-3">
                         <div class="card stats-card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Regular Users</h6>
-                                        <h3 class="mb-0" th:text="${users != null ? #lists.size(#lists.select(users, user, user != null and user.role != null and user.role.toString() == 'USER')) : 0}">0</h3>
+                                        <h3 class="mb-0" th:text="${regularUsersCount ?: 0}">0</h3>
                                     </div>
                                     <div class="text-info">
                                         <i class="bi bi-person-fill display-6"></i>
@@ -229,16 +227,13 @@
                                                          style="width: 40px; height: 40px;">
                                                         <i class="bi bi-person-fill"></i>
                                                     </div>
-                                                </div>
-                                                <div>
+                                                </div>                                                <div>
                                                     <div class="fw-bold" th:text="${user.username ?: 'N/A'}">Username</div>
-                                                    <small class="text-muted" th:text="'ID: ' + ${user.id ?: 'N/A'}">ID: 1</small>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td>
-                                            <span th:text="${user.email ?: 'N/A'}">user@example.com</span>
                                         </td>                                        <td>
+                                            <span th:text="${user.email ?: ''}">user@example.com</span>
+                                        </td><td>
                                             <span th:if="${user.role != null}" 
                                                   th:class="${user.role.toString() == 'ADMIN'} ? 'badge role-admin' : 'badge role-user'" 
                                                   th:text="${user.role.toString()}">USER</span>
@@ -251,10 +246,10 @@
                                             <span th:unless="${user.isActive != null and user.isActive}" class="badge bg-secondary">
                                                 <i class="bi bi-pause-circle"></i> Inactive
                                             </span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${user.createdAt}" th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2024</span>
-                                            <span th:unless="${user.createdAt}" class="text-muted">-</span>
+                                        </td>                                        <td>
+                                            <span th:if="${user.createdAt != null}" 
+                                                  th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2024</span>
+                                            <span th:unless="${user.createdAt != null}" class="text-muted">-</span>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
