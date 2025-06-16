@@ -29,10 +29,9 @@ public class SuperAdminService {
 
     private static final Set<String> ALL_TENANTS = Set.of(
         "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
-    );
-
-    /**
+    );    /**
      * Get all users across all tenants (SUPER_ADMIN only)
+     * Note: SUPER_ADMIN users are only shown for the 'public' tenant
      */
     @Transactional(readOnly = true)
     public Map<String, List<AppUser>> getAllUsersAcrossAllTenants() {
@@ -44,8 +43,18 @@ public class SuperAdminService {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 List<AppUser> users = appUserRepository.findAll();
+                
+                // Filter out SUPER_ADMIN users from non-public tenants
+                if (!"public".equals(tenant)) {
+                    users = users.stream()
+                            .filter(user -> !"SUPER_ADMIN".equals(user.getRole()))
+                            .collect(Collectors.toList());
+                    log.debug("📊 Tenant '{}': Filtered out SUPER_ADMIN users, showing {} users", tenant, users.size());
+                } else {
+                    log.debug("📊 Tenant '{}' (public): Showing all {} users including SUPER_ADMIN", tenant, users.size());
+                }
+                
                 tenantUsers.put(tenant, users);
-                log.debug("📊 Tenant '{}': Found {} users", tenant, users.size());
             } catch (Exception e) {
                 log.warn("⚠️ Failed to fetch users for tenant '{}': {}", tenant, e.getMessage());
                 tenantUsers.put(tenant, new ArrayList<>());
@@ -54,7 +63,7 @@ public class SuperAdminService {
             }
         }
         
-        log.info("✅ Successfully retrieved users from {} tenants", tenantUsers.size());
+        log.info("✅ Successfully retrieved users from {} tenants (SUPER_ADMIN only in public)", tenantUsers.size());
         return tenantUsers;
     }
 
@@ -147,10 +156,9 @@ public class SuperAdminService {
         
         log.info("🔄 Super Admin: Switching to tenant context '{}'", targetTenant);
         TenantContext.setCurrentTenant(targetTenant);
-    }
-
-    /**
+    }    /**
      * Get tenant statistics (SUPER_ADMIN only)
+     * Note: SUPER_ADMIN users are only counted for the 'public' tenant
      */
     @Transactional(readOnly = true)
     public Map<String, Map<String, Object>> getTenantStatistics() {
@@ -163,14 +171,35 @@ public class SuperAdminService {
                 TenantContext.setCurrentTenant(tenant);
                 
                 Map<String, Object> stats = new HashMap<>();
-                stats.put("userCount", appUserRepository.count());
+                
+                // Calculate user count excluding SUPER_ADMIN for non-public tenants
+                long userCount;
+                long activeUserCount;
+                  if (!"public".equals(tenant)) {
+                    // For non-public tenants, exclude SUPER_ADMIN users from count
+                    List<AppUser> users = appUserRepository.findAll();
+                    userCount = users.stream()
+                            .filter(user -> !"SUPER_ADMIN".equals(user.getRole()))
+                            .count();
+                    activeUserCount = users.stream()
+                            .filter(user -> !"SUPER_ADMIN".equals(user.getRole()) && Boolean.TRUE.equals(user.getIsActive()))
+                            .count();
+                    log.debug("📊 Tenant '{}': Filtered user count {} (excluding SUPER_ADMIN)", tenant, userCount);
+                } else {
+                    // For public tenant, include all users including SUPER_ADMIN
+                    userCount = appUserRepository.count();
+                    activeUserCount = appUserRepository.countByIsActive(true);
+                    log.debug("📊 Tenant '{}' (public): All user count {} (including SUPER_ADMIN)", tenant, userCount);
+                }
+                
+                stats.put("userCount", userCount);
                 stats.put("productCount", productRepository.count());
-                stats.put("activeUserCount", appUserRepository.countByIsActive(true));
+                stats.put("activeUserCount", activeUserCount);
                 stats.put("totalStockValue", calculateTotalStockValue());
                 stats.put("lowStockProductCount", productRepository.countLowStockProducts());
                 
                 tenantStats.put(tenant, stats);
-                log.debug("📈 Tenant '{}' stats: {} users, {} products", tenant, stats.get("userCount"), stats.get("productCount"));
+                log.debug("📈 Tenant '{}' stats: {} users, {} products", tenant, userCount, stats.get("productCount"));
                 
             } catch (Exception e) {
                 log.warn("⚠️ Failed to calculate stats for tenant '{}': {}", tenant, e.getMessage());
@@ -182,7 +211,7 @@ public class SuperAdminService {
             }
         }
         
-        log.info("✅ Generated statistics for {} tenants", tenantStats.size());
+        log.info("✅ Generated statistics for {} tenants (SUPER_ADMIN only counted in public)", tenantStats.size());
         return tenantStats;
     }
 

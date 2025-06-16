@@ -40,7 +40,7 @@ public class TenantInterceptor implements HandlerInterceptor {
             return tenantId.trim().toLowerCase();
         }
 
-        // 2. Subdomain'den tenant ID'yi al (örn: tenant1.yourapp.com)
+        // 2. Subdomain'den tenant ID'yi al (örn: company.yourapp.com)
         String serverName = request.getServerName();
         if (serverName != null && serverName.contains(".")) {
             String[] parts = serverName.split("\\.");

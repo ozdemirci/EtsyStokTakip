@@ -41,10 +41,8 @@ public class GlobalExceptionHandler {
         return body;
     }
 
-    // Handle authentication exceptions
-    @ExceptionHandler(UsernameNotFoundException.class)
+    // Handle authentication exceptions    @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        System.out.println("UsernameNotFoundException handler invoked");
         Map<String, Object> body = createErrorResponse(
             "User Not Found", 
             ex.getMessage(), 
@@ -61,12 +59,8 @@ public class GlobalExceptionHandler {
             HttpStatus.UNAUTHORIZED
         );
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
+    }    @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
-        System.out.println("AccessDeniedException handler invoked"); // Debugging
-        ex.printStackTrace(); // Debugging: Print stack trace to identify the root cause
         Map<String, Object> body = createErrorResponse(
             "Access Denied", 
             "You don't have permission to access this resource", 
@@ -162,12 +156,8 @@ public class GlobalExceptionHandler {
             HttpStatus.METHOD_NOT_ALLOWED
         );
         return new ResponseEntity<>(body, HttpStatus.METHOD_NOT_ALLOWED);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
+    }    @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        System.out.println("HttpMessageNotReadableException handler invoked");
-        System.out.println("HttpMessageNotReadableException handler invoked with message: " + ex.getMessage());
         Map<String, Object> body = createErrorResponse(
             "Malformed JSON", 
             "Request body contains invalid JSON", 

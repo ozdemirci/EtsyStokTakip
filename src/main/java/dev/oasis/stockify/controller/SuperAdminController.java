@@ -56,9 +56,7 @@ public class SuperAdminController {
         } finally {
             superAdminService.clearTenantContext();
         }
-    }
-
-    /**
+    }    /**
      * All Users Management - View users across all tenants
      */
     @GetMapping("/users")
