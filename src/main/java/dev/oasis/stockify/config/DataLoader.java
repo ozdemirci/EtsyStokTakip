@@ -194,12 +194,12 @@ public class DataLoader implements CommandLineRunner {
                     log.debug("👤 User {} already exists for tenant {}, skipping", sampleUser.getUsername(), tenantId);
                     continue;
                 }
-                
-                // Use the DTO directly (create a copy to avoid modifying the original)
+                  // Use the DTO directly (create a copy to avoid modifying the original)
                 UserCreateDTO userDTO = new UserCreateDTO();
                 userDTO.setUsername(sampleUser.getUsername());
                 userDTO.setPassword(sampleUser.getPassword());
                 userDTO.setRole(sampleUser.getRole());
+                userDTO.setPrimaryTenant(tenantId); // Set the tenant ID
                 
                 log.debug("💾 Saving user: {} with role: {} for tenant: {}", 
                     sampleUser.getUsername(), sampleUser.getRole(), tenantId);
@@ -234,9 +234,7 @@ public class DataLoader implements CommandLineRunner {
                 if (productRepository.findBySku(sampleProduct.getSku()).isPresent()) {
                     log.debug("📦 Product {} already exists for tenant {}, skipping", sampleProduct.getSku(), tenantId);
                     continue;
-                }
-                
-                // Use the DTO directly (create a copy to avoid modifying the original)
+                }                // Use the DTO directly (create a copy to avoid modifying the original)
                 ProductCreateDTO productDTO = new ProductCreateDTO();
                 productDTO.setSku(sampleProduct.getSku());
                 productDTO.setTitle(sampleProduct.getTitle());
@@ -245,6 +243,7 @@ public class DataLoader implements CommandLineRunner {
                 productDTO.setPrice(sampleProduct.getPrice());
                 productDTO.setStockLevel(sampleProduct.getStockLevel());
                 productDTO.setLowStockThreshold(sampleProduct.getLowStockThreshold());
+                // productDTO.setTenantId(tenantId); // Commented out until database migration
                 
                 // Set external product ID (simulate external integration)
                 productDTO.setEtsyProductId("EXT_" + tenantId.toUpperCase(Locale.ROOT) + "_" + sampleProduct.getSku());

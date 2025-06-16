@@ -30,6 +30,7 @@ public class AdminDashboardController {
     private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
     private final AppUserService appUserService;    @GetMapping
+
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
         String currentTenantId = getCurrentTenantId(request, authentication);
@@ -42,14 +43,23 @@ public class AdminDashboardController {
         } catch (Exception e) {
             log.warn("Could not get tenant info for: {}, error: {}", currentTenantId, e.getMessage());
         }
-        
-        // Get dashboard metrics
+          // Get dashboard metrics
         DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();
         
         // Get all users in current tenant
         List<UserResponseDTO> tenantUsers = appUserService.getAllUsers();
         log.debug("Found {} users for tenant: {}", tenantUsers.size(), currentTenantId);
+          // Add individual metrics for template
+        model.addAttribute("totalProducts", metrics.getTotalProducts());
+        model.addAttribute("activeProducts", Math.max(0, metrics.getTotalProducts() - metrics.getLowStockProducts()));
+        model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
+        model.addAttribute("outOfStockProducts", 0L); // TODO: Add to DashboardMetricsDTO
+        model.addAttribute("totalUsers", tenantUsers.size());
+        model.addAttribute("adminUsers", tenantUsers.stream().mapToInt(u -> 
+            u.getRole() != null && "ADMIN".equals(u.getRole().toString()) ? 1 : 0).sum());
+        model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));
         
+        // Add collections
         model.addAttribute("metrics", metrics);
         model.addAttribute("currentTenant", currentTenant);
         model.addAttribute("tenantUsers", tenantUsers);

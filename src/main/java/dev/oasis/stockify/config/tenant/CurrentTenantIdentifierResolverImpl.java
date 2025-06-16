@@ -9,13 +9,11 @@ import org.springframework.stereotype.Component;
 public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentifierResolver {
 
     private static final Logger log = LoggerFactory.getLogger(CurrentTenantIdentifierResolverImpl.class);
-    private static final String DEFAULT_TENANT = "public";
-
-    @Override
+    private static final String DEFAULT_TENANT = "public";    @Override
     public String resolveCurrentTenantIdentifier() {
         String tenant = TenantContext.getCurrentTenant();
         String resolved = tenant != null ? tenant : DEFAULT_TENANT;
-        log.debug("Resolving tenant identifier: {} (from context: {})", resolved, tenant);
+        log.info("🔍 Hibernate resolving tenant identifier: '{}' (from context: '{}')", resolved, tenant);
         return resolved;
     }
 

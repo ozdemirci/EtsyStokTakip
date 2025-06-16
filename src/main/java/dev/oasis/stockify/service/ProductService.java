@@ -1,10 +1,12 @@
 package dev.oasis.stockify.service;
 
+import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.mapper.ProductMapper;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import java.util.Optional;
  * Service for managing product operations
  */
 @Service
+@Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -29,14 +32,15 @@ public class ProductService {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.stockNotificationService = stockNotificationService;
-    }
-
-    /**
+    }    /**
      * Retrieves all products from the database
      * @return a list of all products
      */
     public List<ProductResponseDTO> getAllProducts() {
+        String currentTenant = TenantContext.getCurrentTenant();
         List<Product> products = productRepository.findAll();
+        log.debug("📦 Getting all products for tenant: {} - Found {} products", 
+                 currentTenant, products.size());
         return productMapper.toDtoList(products);
     }
 

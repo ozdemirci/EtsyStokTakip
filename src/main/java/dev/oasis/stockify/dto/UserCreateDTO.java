@@ -18,10 +18,11 @@ public class UserCreateDTO {
     @NotBlank(message = "Şifre boş olamaz")
     @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
     private String password;
-    
-    @NotNull(message = "Rol boş olamaz")
+      @NotNull(message = "Rol boş olamaz")
     private Role role; // SUPER_ADMIN, ADMIN, USER
       private String email; // Optional email field
     
     private Boolean isActive = true; // Default to active
+    
+    private String primaryTenant; // Primary tenant for this user
 }

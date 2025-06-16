@@ -5,6 +5,7 @@ import dev.oasis.stockify.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,4 +25,14 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     
     @Query("SELECT u FROM AppUser u WHERE u.isGlobalUser = true")
     List<AppUser> findGlobalUsers();
+    
+    // Tenant-aware queries (fallback if multi-tenant schema doesn't work)
+    @Query("SELECT u FROM AppUser u WHERE u.primaryTenant = :tenantId")
+    List<AppUser> findByPrimaryTenant(@Param("tenantId") String tenantId);
+    
+    @Query("SELECT COUNT(u) FROM AppUser u WHERE u.primaryTenant = :tenantId")
+    long countByPrimaryTenant(@Param("tenantId") String tenantId);
+    
+    @Query("SELECT COUNT(u) FROM AppUser u WHERE u.primaryTenant = :tenantId AND u.isActive = :isActive")
+    long countByPrimaryTenantAndIsActive(@Param("tenantId") String tenantId, @Param("isActive") Boolean isActive);
 }

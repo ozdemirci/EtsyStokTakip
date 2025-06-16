@@ -10,12 +10,14 @@ import dev.oasis.stockify.repository.StockNotificationRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DashboardService {
     private final ProductRepository productRepository;
     private final AppUserRepository userRepository;
@@ -27,14 +29,19 @@ public class DashboardService {
         // Initialize metrics with default values
         meterRegistry.gauge("sales.monthly", 0.0);
         meterRegistry.gauge("sales.daily", 0.0);
-    }
-
-    public DashboardMetricsDTO getDashboardMetrics() {
+    }    public DashboardMetricsDTO getDashboardMetrics() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("🏢 Getting dashboard metrics for tenant: {}", currentTenant);
+        
         // Get tenant-specific counts
         long tenantUserCount = getTenantUserCount();
+        long productCount = getTenantProductCount();
+        
+        log.debug("📊 Dashboard metrics - Tenant: {}, Users: {}, Products: {}", 
+                 currentTenant, tenantUserCount, productCount);
         
         return DashboardMetricsDTO.builder()
-                .totalProducts(productRepository.count())
+                .totalProducts(productCount)
                 .totalUsers(tenantUserCount)
                 .totalInventoryValue(calculateTotalInventoryValue())
                 .lowStockProducts(countLowStockProducts())
@@ -43,28 +50,71 @@ public class DashboardService {
                 .dailyRevenue(getDailyRevenue())
                 .build();
     }
-
-    private long getTenantUserCount() {
-        // Count users in current tenant context
+      private long getTenantProductCount() {
         String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("📦 Counting products for tenant: {}", currentTenant);
+        
         if (currentTenant == null || currentTenant.isEmpty()) {
-            return userRepository.count(); // Fallback to total count
+            log.warn("⚠️ No tenant context set, returning total product count");
+            return productRepository.count();
         }
         
-        // For tenant-specific counting, we'll count all users since they're already filtered by tenant context
-        // The repository operations are automatically scoped to the current tenant
-        return userRepository.count();
-    }
-
-    private double calculateTotalInventoryValue() {
-        return productRepository.findAll().stream()
+        // Try both approaches: automatic multi-tenant filtering and manual tenant filtering
+        long autoCount = productRepository.count();
+        // Temporarily disable manual count until database migration is done
+        // long manualCount = productRepository.countByTenantId(currentTenant);
+        long manualCount = 0;
+        
+        log.debug("📦 Product count comparison for tenant {}: auto={}, manual={}", 
+                 currentTenant, autoCount, manualCount);
+        
+        // Use auto count for now
+        long finalCount = autoCount;
+        log.debug("📦 Final product count for tenant: {} = {}", currentTenant, finalCount);
+        
+        return finalCount;
+    }private long getTenantUserCount() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("👥 Counting users for tenant: {}", currentTenant);
+        
+        if (currentTenant == null || currentTenant.isEmpty()) {
+            log.warn("⚠️ No tenant context set, returning total user count");
+            return userRepository.count();
+        }
+        
+        // Try both approaches: automatic multi-tenant filtering and manual tenant filtering
+        long autoCount = userRepository.count();
+        // Temporarily disable manual count until database migration is done
+        // long manualCount = userRepository.countByPrimaryTenant(currentTenant);
+        long manualCount = 0;
+        
+        log.debug("👥 User count comparison for tenant {}: auto={}, manual={}", 
+                 currentTenant, autoCount, manualCount);
+        
+        // Use auto count for now
+        long finalCount = autoCount;
+        log.debug("👥 Final user count for tenant: {} = {}", currentTenant, finalCount);
+        
+        return finalCount;
+    }private double calculateTotalInventoryValue() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        List<Product> products = productRepository.findAll();
+        log.debug("📦 Calculating inventory value for tenant: {} - Found {} products", 
+                 currentTenant, products.size());
+        
+        return products.stream()
                 .map(product -> product.getPrice().multiply(BigDecimal.valueOf(product.getStockLevel())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .doubleValue();
     }
 
     private long countLowStockProducts() {
-        return productRepository.findAll().stream()
+        String currentTenant = TenantContext.getCurrentTenant();
+        List<Product> products = productRepository.findAll();
+        log.debug("📦 Counting low stock products for tenant: {} - Total products: {}", 
+                 currentTenant, products.size());
+        
+        return products.stream()
                 .filter(product -> product.getStockLevel() < product.getLowStockThreshold())
                 .count();
     }

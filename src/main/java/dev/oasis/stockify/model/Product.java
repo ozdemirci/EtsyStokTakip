@@ -34,10 +34,8 @@ public class Product {
     private Integer stockLevel;
 
     @Column(name = "low_stock_threshold")
-    private Integer lowStockThreshold;
-
-    @Column(name = "etsy_product_id")
-    private String etsyProductId;
+    private Integer lowStockThreshold;    @Column(name = "etsy_product_id")
+    private String etsyProductId;    // Tenant information will be added after database migration
 
     // Audit fields
     @Column(name = "created_at")
@@ -57,12 +55,12 @@ public class Product {
     private Boolean isActive;
 
     @Column(name = "is_featured")
-    private Boolean isFeatured;
-
-    @PrePersist
+    private Boolean isFeatured;    @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        
+        // Tenant ID will be set after database migration is added
     }
 
     @PreUpdate

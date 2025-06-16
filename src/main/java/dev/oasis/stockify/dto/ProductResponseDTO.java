@@ -10,10 +10,11 @@ public class ProductResponseDTO {    private Long id;
     private String description;
     private String sku;
     private String category;
-    private BigDecimal price;
-    private int stockLevel;
+    private BigDecimal price;    private int stockLevel;
     private int lowStockThreshold;
     private String etsyProductId;
+    private Boolean isActive;
+    private Boolean isFeatured;
 
     // Getters and Setters
     public Long getId() {
@@ -86,10 +87,24 @@ public class ProductResponseDTO {    private Long id;
 
     public String getEtsyProductId() {
         return etsyProductId;
+    }    public void setEtsyProductId(String etsyProductId) {
+        this.etsyProductId = etsyProductId;
     }
 
-    public void setEtsyProductId(String etsyProductId) {
-        this.etsyProductId = etsyProductId;
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public Boolean getIsFeatured() {
+        return isFeatured;
+    }
+
+    public void setIsFeatured(Boolean isFeatured) {
+        this.isFeatured = isFeatured;
     }
 }
 

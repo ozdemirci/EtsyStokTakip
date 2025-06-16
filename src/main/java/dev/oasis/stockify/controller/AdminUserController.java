@@ -6,6 +6,7 @@ import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.service.AppUserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
+@Slf4j
 public class AdminUserController {
     
     private final AppUserService appUserService;
@@ -48,7 +50,7 @@ public class AdminUserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size,
             @RequestParam(defaultValue = "") String search,
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "username") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             Model model, HttpServletRequest request) {
         
@@ -60,14 +62,18 @@ public class AdminUserController {
             ? Sort.by(sortBy).descending() 
             : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        
-        // Get users page
+          // Get users page
         Page<UserResponseDTO> userPage;
         if (search.isEmpty()) {
             userPage = appUserService.getUsersPage(pageable);
         } else {
             userPage = appUserService.searchUsers(search, pageable);
         }
+        
+        // Debug log
+        log.debug("🔍 Users page - Total: {}, Content size: {}, Page: {}/{}", 
+                userPage.getTotalElements(), userPage.getContent().size(), 
+                userPage.getNumber(), userPage.getTotalPages());
         
         // Get all roles for filtering (excluding SUPER_ADMIN for regular admins)
         List<Role> availableRoles = List.of(Role.ADMIN, Role.USER);

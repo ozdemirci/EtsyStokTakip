@@ -22,14 +22,11 @@ public class ProductMapper {
     public Product toEntity(ProductCreateDTO productCreateDTO) {
         if (productCreateDTO == null) {
             return null;
-        }
-
-        Product product = new Product();
+        }        Product product = new Product();
         product.setTitle(productCreateDTO.getTitle());
         product.setDescription(productCreateDTO.getDescription());
         product.setSku(productCreateDTO.getSku());
-        product.setCategory(productCreateDTO.getCategory());
-        product.setPrice(productCreateDTO.getPrice());
+        product.setCategory(productCreateDTO.getCategory());        product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
         product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());
         product.setEtsyProductId(productCreateDTO.getEtsyProductId());
@@ -81,10 +78,12 @@ public class ProductMapper {
         productResponseDTO.setTitle(product.getTitle());
         productResponseDTO.setDescription(product.getDescription());
         productResponseDTO.setSku(product.getSku());
-        productResponseDTO.setCategory(product.getCategory());
-        productResponseDTO.setPrice(product.getPrice());
+        productResponseDTO.setCategory(product.getCategory());        productResponseDTO.setPrice(product.getPrice());
         productResponseDTO.setStockLevel(product.getStockLevel());
-        productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());  // Bu satırı ekledim
+        productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());
+        productResponseDTO.setEtsyProductId(product.getEtsyProductId());
+        productResponseDTO.setIsActive(product.getIsActive());
+        productResponseDTO.setIsFeatured(product.getIsFeatured());
 
         return productResponseDTO;
     }

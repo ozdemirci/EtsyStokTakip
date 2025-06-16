@@ -1,10 +1,12 @@
 package dev.oasis.stockify.service;
 
+import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.mapper.UserMapper;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.repository.AppUserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
  * Service for managing user operations
  */
 @Service
+@Slf4j
 public class AppUserService {
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -60,25 +63,35 @@ public class AppUserService {
      * @return a list of all users for the current tenant
      */
     public List<UserResponseDTO> getAllUsers() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("👥 Getting all users for tenant: {}", currentTenant);
+        
         List<AppUser> users = appUserRepository.findAll();
+        log.debug("👥 Found {} users for tenant: {}", users.size(), currentTenant);
+        
         // Note: This is tenant-aware because the repository automatically filters by tenant
         // due to the multi-tenant configuration
         return users.stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    /**
+    }    /**
      * Retrieves a page of users from the database
      *
      * @param pageable pagination information
      * @return a page of users
      */
     public Page<UserResponseDTO> getUsersPage(Pageable pageable) {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("👥 Getting users page for tenant: {}, pageable: {}", currentTenant, pageable);
+        
         Page<AppUser> userPage = appUserRepository.findAll(pageable);
+        log.debug("👥 Found {} users in database for tenant: {}", userPage.getTotalElements(), currentTenant);
+        
         List<UserResponseDTO> userDtos = userPage.getContent().stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
+        
+        log.debug("👥 Converted {} users to DTOs", userDtos.size());
         return new PageImpl<>(userDtos, pageable, userPage.getTotalElements());
     }
 

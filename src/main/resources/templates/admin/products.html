@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management - Stockify Admin</title>
+    <title>Product Management - Stockify Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -16,12 +16,10 @@
         .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
         .table th { background-color: #f8f9fa; border-top: none; font-weight: 600; }
         .btn-action { padding: 4px 8px; margin: 2px; }
+        .low-stock { background-color: #fff3cd; }
+        .out-of-stock { background-color: #f8d7da; }
         .search-box { max-width: 300px; }
         .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
-        .inactive-user { background-color: #f8f9fa; }
-        .stats-card { border-left: 4px solid #007bff; }
-        .role-admin { background-color: #dc3545; }
-        .role-user { background-color: #6c757d; }
     </style>
 </head>
 <body>
@@ -34,7 +32,7 @@
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i> 
-                    <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
+                    <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
                 </span>
                 <a class="nav-link" href="/logout">
                     <i class="bi bi-box-arrow-right"></i> Logout
@@ -55,12 +53,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/products">
+                            <a class="nav-link active" href="/admin/products">
                                 <i class="bi bi-box-seam"></i> Products
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="/admin/users">
+                            <a class="nav-link" href="/admin/users">
                                 <i class="bi bi-people"></i> Users
                             </a>
                         </li>
@@ -78,17 +76,22 @@
                 <!-- Header -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
-                        <i class="bi bi-people"></i> User Management
+                        <i class="bi bi-box-seam"></i> 
+                        <span th:if="${isLowStockView}">Low Stock Products</span>
+                        <span th:unless="${isLowStockView}">Product Management</span>
                     </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
-                            <a href="/admin/users/add" class="btn btn-success">
-                                <i class="bi bi-plus-circle"></i> Add User
+                            <a href="/admin/products/add" class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i> Add Product
+                            </a>
+                            <a href="/admin/products/template" class="btn btn-outline-secondary">
+                                <i class="bi bi-download"></i> Template
                             </a>
                             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importModal">
                                 <i class="bi bi-upload"></i> Import
                             </button>
-                            <a href="/admin/users/export" class="btn btn-outline-info">
+                            <a href="/admin/products/export" class="btn btn-outline-info">
                                 <i class="bi bi-file-earmark-spreadsheet"></i> Export
                             </a>
                         </div>
@@ -105,77 +108,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
-                <!-- Statistics Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card stats-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="card-title text-muted">Total Users</h6>
-                                        <h3 class="mb-0" th:text="${totalItems ?: 0}">0</h3>
-                                    </div>
-                                    <div class="text-primary">
-                                        <i class="bi bi-people-fill display-6"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>                    <div class="col-md-3">
-                        <div class="card stats-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="card-title text-muted">Active Users</h6>
-                                        <h3 class="mb-0" th:text="${users != null ? #lists.size(#lists.select(users, user, user != null and user.isActive != null and user.isActive)) : 0}">0</h3>
-                                    </div>
-                                    <div class="text-success">
-                                        <i class="bi bi-person-check-fill display-6"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card stats-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="card-title text-muted">Admin Users</h6>
-                                        <h3 class="mb-0" th:text="${users != null ? #lists.size(#lists.select(users, user, user != null and user.role != null and user.role.toString() == 'ADMIN')) : 0}">0</h3>
-                                    </div>
-                                    <div class="text-danger">
-                                        <i class="bi bi-shield-fill-check display-6"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card stats-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="card-title text-muted">Regular Users</h6>
-                                        <h3 class="mb-0" th:text="${users != null ? #lists.size(#lists.select(users, user, user != null and user.role != null and user.role.toString() == 'USER')) : 0}">0</h3>
-                                    </div>
-                                    <div class="text-info">
-                                        <i class="bi bi-person-fill display-6"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Search and Filters -->
-                <div class="card mb-4">
+                <div class="card mb-4" th:unless="${isLowStockView}">
                     <div class="card-body">
-                        <form method="get" action="/admin/users" class="row g-3">
+                        <form method="get" action="/admin/products" class="row g-3">
                             <div class="col-md-6">
                                 <div class="input-group search-box">
                                     <input type="text" class="form-control" name="search" th:value="${search}" 
-                                           placeholder="Search users...">
+                                           placeholder="Search products...">
                                     <button class="btn btn-outline-secondary" type="submit">
                                         <i class="bi bi-search"></i>
                                     </button>
@@ -183,9 +123,10 @@
                             </div>
                             <div class="col-md-3">
                                 <select class="form-select" name="sortBy" th:value="${sortBy}">
-                                    <option value="username" th:selected="${sortBy == 'username'}">Sort by Username</option>
-                                    <option value="email" th:selected="${sortBy == 'email'}">Sort by Email</option>
-                                    <option value="role" th:selected="${sortBy == 'role'}">Sort by Role</option>
+                                    <option value="title" th:selected="${sortBy == 'title'}">Sort by Title</option>
+                                    <option value="category" th:selected="${sortBy == 'category'}">Sort by Category</option>
+                                    <option value="price" th:selected="${sortBy == 'price'}">Sort by Price</option>
+                                    <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock</option>
                                     <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by Date</option>
                                 </select>
                             </div>
@@ -199,72 +140,76 @@
                     </div>
                 </div>
 
-                <!-- Users Table -->
+                <!-- Products Table -->
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>User</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>SKU</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
                                         <th>Status</th>
-                                        <th>Created</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:if="${users == null or #lists.isEmpty(users)}">
-                                        <td colspan="6" class="text-center text-muted py-4">
-                                            <i class="bi bi-person-x display-4"></i>
-                                            <div class="mt-2">No users found</div>
+                                    <tr th:if="${products != null and products.totalElements == 0}">
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox display-4"></i>
+                                            <div class="mt-2">No products found</div>
                                         </td>
-                                    </tr>                                    <tr th:each="user : ${users}" th:if="${user != null}"
-                                        th:class="${user.isActive != null and !user.isActive} ? 'inactive-user' : ''">
+                                    </tr>
+                                    <tr th:if="${products == null or products.empty}">
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox display-4"></i>
+                                            <div class="mt-2">No products available</div>
+                                        </td>
+                                    </tr>
+                                    <tr th:each="product : ${products}" 
+                                        th:class="${product.stockLevel == 0} ? 'out-of-stock' : (${product.stockLevel <= product.lowStockThreshold} ? 'low-stock' : '')">
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-                                                         style="width: 40px; height: 40px;">
-                                                        <i class="bi bi-person-fill"></i>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold" th:text="${user.username ?: 'N/A'}">Username</div>
-                                                    <small class="text-muted" th:text="'ID: ' + ${user.id ?: 'N/A'}">ID: 1</small>
-                                                </div>
+                                            <div class="fw-bold" th:text="${product.title}">Product Title</div>
+                                            <small class="text-muted" th:text="${product.description}">Description</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${product.category}">Category</span>
+                                        </td>
+                                        <td>
+                                            <code th:text="${product.sku}">SKU123</code>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold" th:text="'$' + ${product.price}">$0.00</span>
+                                        </td>
+                                        <td>
+                                            <span th:class="${product.stockLevel == 0} ? 'badge bg-danger' : (${product.stockLevel <= product.lowStockThreshold} ? 'badge bg-warning' : 'badge bg-success')" 
+                                                  th:text="${product.stockLevel}">0</span>
+                                            <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
+                                        </td>                                        <td>
+                                            <span th:if="${product.isActive}" class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Active
+                                            </span>
+                                            <span th:unless="${product.isActive}" class="badge bg-secondary">
+                                                <i class="bi bi-pause-circle"></i> Inactive
+                                            </span>
+                                            <div th:if="${product.isFeatured}" class="mt-1">
+                                                <span class="badge bg-warning">
+                                                    <i class="bi bi-star"></i> Featured
+                                                </span>
                                             </div>
                                         </td>
                                         <td>
-                                            <span th:text="${user.email ?: 'N/A'}">user@example.com</span>
-                                        </td>                                        <td>
-                                            <span th:if="${user.role != null}" 
-                                                  th:class="${user.role.toString() == 'ADMIN'} ? 'badge role-admin' : 'badge role-user'" 
-                                                  th:text="${user.role.toString()}">USER</span>
-                                            <span th:unless="${user.role != null}" class="badge bg-secondary">N/A</span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${user.isActive != null and user.isActive}" class="badge bg-success">
-                                                <i class="bi bi-check-circle"></i> Active
-                                            </span>
-                                            <span th:unless="${user.isActive != null and user.isActive}" class="badge bg-secondary">
-                                                <i class="bi bi-pause-circle"></i> Inactive
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${user.createdAt}" th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2024</span>
-                                            <span th:unless="${user.createdAt}" class="text-muted">-</span>
-                                        </td>
-                                        <td>
                                             <div class="btn-group" role="group">
-                                                <a th:href="@{/admin/users/edit/{id} (id=${user.id})}" 
+                                                <a th:href="@{/admin/products/{id}/edit (id=${product.id})}" 
                                                    class="btn btn-outline-primary btn-action" title="Edit">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-outline-danger btn-action" 
                                                         title="Delete" data-bs-toggle="modal" 
-                                                        th:data-bs-target="'#deleteModal' + ${user.id}">
+                                                        th:data-bs-target="'#deleteModal' + ${product.id}">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </div>
@@ -275,20 +220,20 @@
                         </div>
 
                         <!-- Pagination -->
-                        <nav th:if="${totalPages != null and totalPages > 1}">
+                        <nav th:if="${products != null and products.totalPages > 1}">
                             <ul class="pagination justify-content-center">
-                                <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                <li class="page-item" th:class="${products.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/products(page=${products.number - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
-                                <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}" 
-                                    class="page-item" th:class="${page == currentPage} ? 'active'">
+                                <li th:each="page : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                                    class="page-item" th:class="${page == products.number} ? 'active'">
                                     <a class="page-link" th:text="${page + 1}" 
-                                       th:href="@{/admin/users(page=${page}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">1</a>
+                                       th:href="@{/admin/products(page=${page}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">1</a>
                                 </li>
-                                <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                <li class="page-item" th:class="${products.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/products(page=${products.number + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
@@ -296,10 +241,10 @@
                         </nav>
 
                         <!-- Summary -->
-                        <div class="mt-3 text-muted text-center" th:if="${totalItems != null and totalItems > 0}">
-                            Showing <span th:text="${currentPage * pageSize + 1}">1</span> to 
-                            <span th:text="${(currentPage + 1) * pageSize > totalItems ? totalItems : (currentPage + 1) * pageSize}">10</span>
-                            of <span th:text="${totalItems}">100</span> results
+                        <div class="mt-3 text-muted text-center" th:if="${products != null and products.totalElements > 0}">
+                            Showing <span th:text="${products.number * products.size + 1}">1</span> to 
+                            <span th:text="${(products.number + 1) * products.size > products.totalElements ? products.totalElements : (products.number + 1) * products.size}">10</span>
+                            of <span th:text="${products.totalElements}">100</span> results
                         </div>
                     </div>
                 </div>
@@ -311,10 +256,10 @@
     <div class="modal fade" id="importModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="/admin/users/import" method="post" enctype="multipart/form-data">
+                <form action="/admin/products/import" method="post" enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            <i class="bi bi-upload"></i> Import Users
+                            <i class="bi bi-upload"></i> Import Products
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
@@ -323,8 +268,8 @@
                             <label for="importFile" class="form-label">CSV File</label>
                             <input type="file" class="form-control" id="importFile" name="file" accept=".csv" required>
                             <div class="form-text">
-                                Please select a CSV file to import users. 
-                                Expected format: username,email,role,isActive.
+                                Please select a CSV file to import. 
+                                <a href="/admin/products/template">Download template</a> for proper format.
                             </div>
                         </div>
                     </div>
@@ -337,8 +282,10 @@
                 </form>
             </div>
         </div>
-    </div>    <!-- Delete Modals -->
-    <div th:each="user : ${users}" th:if="${user != null}" class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1">
+    </div>
+
+    <!-- Delete Modals -->
+    <div th:each="product : ${products}" class="modal fade" th:id="'deleteModal' + ${product.id}" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -348,13 +295,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete the user:</p>
-                    <p class="fw-bold" th:text="${user.username ?: 'Unknown User'}">Username</p>
+                    <p>Are you sure you want to delete the product:</p>
+                    <p class="fw-bold" th:text="${product.title}">Product Name</p>
                     <p class="text-muted">This action cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form th:action="@{/admin/users/delete/{id} (id=${user.id})}" method="post" class="d-inline">
+                    <form th:action="@{/admin/products/{id}/delete (id=${product.id})}" method="post" class="d-inline">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Delete
                         </button>

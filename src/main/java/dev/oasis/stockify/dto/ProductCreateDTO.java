@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 /**
  * DTO for creating or updating a product
  */
-public class ProductCreateDTO {    @NotBlank(message = "Başlık boş olamaz")
+public class ProductCreateDTO {  
+    @NotBlank(message = "Başlık boş olamaz")
     @Size(min = 3, max = 50, message = "Başlık 3 ile 50 karakter arasında olmalıdır")
     private String title;
 
@@ -31,9 +32,7 @@ public class ProductCreateDTO {    @NotBlank(message = "Başlık boş olamaz")
     private int stockLevel;
 
     @Min(value = 1, message = "Düşük stok eşiği en az 1 olmalıdır")
-    private int lowStockThreshold = 5;
-
-    private String etsyProductId;
+    private int lowStockThreshold = 5;    private String etsyProductId;
 
     // Getters and Setters
     public String getTitle() {
@@ -94,9 +93,7 @@ public class ProductCreateDTO {    @NotBlank(message = "Başlık boş olamaz")
 
     public String getEtsyProductId() {
         return etsyProductId;
-    }
-
-    public void setEtsyProductId(String etsyProductId) {
+    }    public void setEtsyProductId(String etsyProductId) {
         this.etsyProductId = etsyProductId;
     }
 }

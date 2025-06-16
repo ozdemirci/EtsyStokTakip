@@ -24,6 +24,8 @@ public class UserMapper {
         appUser.setPassword(userCreateDTO.getPassword());
         appUser.setRole(userCreateDTO.getRole());
         appUser.setEmail(userCreateDTO.getEmail());
+        appUser.setIsActive(userCreateDTO.getIsActive());
+        appUser.setPrimaryTenant(userCreateDTO.getPrimaryTenant());
         
         return appUser;
     }
@@ -41,6 +43,8 @@ public class UserMapper {
         appUser.setPassword(userCreateDTO.getPassword());
         appUser.setRole(userCreateDTO.getRole());
         appUser.setEmail(userCreateDTO.getEmail());
+        appUser.setIsActive(userCreateDTO.getIsActive());
+        appUser.setPrimaryTenant(userCreateDTO.getPrimaryTenant());
         
         return appUser;
     }    /**
