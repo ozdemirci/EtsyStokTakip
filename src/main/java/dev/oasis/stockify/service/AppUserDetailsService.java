@@ -65,11 +65,9 @@ public class AppUserDetailsService implements UserDetailsService {
                         .orElseThrow(() -> new UsernameNotFoundException(
                                 String.format("Kullanıcı bulunamadı: %s (Tenant: %s)", username, tenantId)));
 
-                logger.debug("User found in database: {} for tenant: {}", username, tenantId);
-
-                return User.withUsername(appUser.getUsername())
+                logger.debug("User found in database: {} for tenant: {}", username, tenantId);                return User.withUsername(appUser.getUsername())
                         .password(appUser.getPassword())
-                        .roles(appUser.getRole().toUpperCase())
+                        .roles(appUser.getRole().getCode())
                         .build();
 
             } catch (Exception e) {

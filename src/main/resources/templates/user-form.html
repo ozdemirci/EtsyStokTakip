@@ -11,15 +11,25 @@
         <div class="mb-3">
             <label for="username" class="form-label">Kullanıcı Adı</label>
             <input type="text" class="form-control" id="username" th:field="*{username}" required autofocus>
-        </div>
-        <div class="mb-3">
+        </div>        <div class="mb-3">
             <label for="password" class="form-label">Şifre</label>
             <input type="password" class="form-control" id="password" th:field="*{password}" required>
         </div>
         <div class="mb-3">
+            <label for="email" class="form-label">E-posta (İsteğe bağlı)</label>
+            <input type="email" class="form-control" id="email" th:field="*{email}" 
+                   placeholder="ornek@email.com">
+            <div class="form-text">E-posta adresi opsiyoneldir.</div>
+        </div>        <div class="mb-3">
             <label for="role" class="form-label">Rol</label>
             <select class="form-select" id="role" th:field="*{role}" required>
-                <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+                <option value="">-- Rol Seçiniz --</option>
+                <option th:each="role : ${T(dev.oasis.stockify.model.Role).values()}" 
+                        th:if="${role.name() != 'SUPER_ADMIN'}"
+                        th:value="${role}" 
+                        th:text="${role.displayName + ' (' + role.description + ')'}"
+                        th:selected="${role == user.role}">
+                </option>
             </select>
         </div>
         <button type="submit" class="btn btn-success w-100">Kaydet</button>

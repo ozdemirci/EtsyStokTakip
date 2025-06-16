@@ -4,6 +4,7 @@ import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.Product;
+import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,11 +44,10 @@ public class SuperAdminService {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 List<AppUser> users = appUserRepository.findAll();
-                
-                // Filter out SUPER_ADMIN users from non-public tenants
+                  // Filter out SUPER_ADMIN users from non-public tenants
                 if (!"public".equals(tenant)) {
                     users = users.stream()
-                            .filter(user -> !"SUPER_ADMIN".equals(user.getRole()))
+                            .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
                             .collect(Collectors.toList());
                     log.debug("📊 Tenant '{}': Filtered out SUPER_ADMIN users, showing {} users", tenant, users.size());
                 } else {
@@ -127,9 +127,8 @@ public class SuperAdminService {
             Optional<AppUser> userOptional = appUserRepository.findById(userId);
             if (userOptional.isPresent()) {
                 AppUser user = userOptional.get();
-                
-                // Prevent deleting SUPER_ADMIN users
-                if ("SUPER_ADMIN".equals(user.getRole())) {
+                  // Prevent deleting SUPER_ADMIN users
+                if (Role.SUPER_ADMIN.equals(user.getRole())) {
                     throw new IllegalArgumentException("Cannot delete SUPER_ADMIN users");
                 }
                 
@@ -171,25 +170,24 @@ public class SuperAdminService {
                 TenantContext.setCurrentTenant(tenant);
                 
                 Map<String, Object> stats = new HashMap<>();
-                
-                // Calculate user count excluding SUPER_ADMIN for non-public tenants
+                  // Calculate user count - only show SUPER_ADMIN for public tenant
                 long userCount;
                 long activeUserCount;
-                  if (!"public".equals(tenant)) {
-                    // For non-public tenants, exclude SUPER_ADMIN users from count
-                    List<AppUser> users = appUserRepository.findAll();
-                    userCount = users.stream()
-                            .filter(user -> !"SUPER_ADMIN".equals(user.getRole()))
-                            .count();
-                    activeUserCount = users.stream()
-                            .filter(user -> !"SUPER_ADMIN".equals(user.getRole()) && Boolean.TRUE.equals(user.getIsActive()))
-                            .count();
-                    log.debug("📊 Tenant '{}': Filtered user count {} (excluding SUPER_ADMIN)", tenant, userCount);
-                } else {
+                
+                if ("public".equals(tenant)) {
                     // For public tenant, include all users including SUPER_ADMIN
                     userCount = appUserRepository.count();
                     activeUserCount = appUserRepository.countByIsActive(true);
-                    log.debug("📊 Tenant '{}' (public): All user count {} (including SUPER_ADMIN)", tenant, userCount);
+                    log.debug("📊 Tenant '{}' (public): All user count {} (including SUPER_ADMIN)", tenant, userCount);                } else {
+                    // For other tenants, exclude SUPER_ADMIN users from count
+                    List<AppUser> users = appUserRepository.findAll();
+                    userCount = users.stream()
+                            .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
+                            .count();
+                    activeUserCount = users.stream()
+                            .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()) && Boolean.TRUE.equals(user.getIsActive()))
+                            .count();
+                    log.debug("📊 Tenant '{}': Filtered user count {} (excluding SUPER_ADMIN)", tenant, userCount);
                 }
                 
                 stats.put("userCount", userCount);
@@ -213,23 +211,21 @@ public class SuperAdminService {
         
         log.info("✅ Generated statistics for {} tenants (SUPER_ADMIN only counted in public)", tenantStats.size());
         return tenantStats;
-    }
-
-    /**
+    }    /**
      * Get users by role across all tenants (SUPER_ADMIN only)
      */
     @Transactional(readOnly = true)
-    public Map<String, Map<String, List<AppUser>>> getUsersByRoleAcrossAllTenants() {
+    public Map<String, Map<Role, List<AppUser>>> getUsersByRoleAcrossAllTenants() {
         log.info("👥 Super Admin: Fetching users by role across all tenants");
         
-        Map<String, Map<String, List<AppUser>>> result = new HashMap<>();
+        Map<String, Map<Role, List<AppUser>>> result = new HashMap<>();
         
         for (String tenant : ALL_TENANTS) {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 
                 List<AppUser> allUsers = appUserRepository.findAll();
-                Map<String, List<AppUser>> usersByRole = allUsers.stream()
+                Map<Role, List<AppUser>> usersByRole = allUsers.stream()
                     .collect(Collectors.groupingBy(AppUser::getRole));
                 
                 result.put(tenant, usersByRole);
@@ -258,9 +254,8 @@ public class SuperAdminService {
             
             AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-            
-            // Prevent deactivating SUPER_ADMIN users
-            if ("SUPER_ADMIN".equals(user.getRole()) && !isActive) {
+              // Prevent deactivating SUPER_ADMIN users
+            if (Role.SUPER_ADMIN.equals(user.getRole()) && !isActive) {
                 throw new IllegalArgumentException("Cannot deactivate SUPER_ADMIN users");
             }
             

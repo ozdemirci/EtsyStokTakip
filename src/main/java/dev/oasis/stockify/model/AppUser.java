@@ -20,16 +20,17 @@ public class AppUser {
     @NotBlank(message = "Kullanıcı adı boş olamaz")
     @Size(min = 3, max = 20, message = "Kullanıcı adı 3 ile 20 karakter arasında olmalıdır")
     @Column(name = "username", unique = true, nullable = false)
-    private String username;
-
-    @NotBlank(message = "Şifre boş olamaz")
+    private String username;    @NotBlank(message = "Şifre boş olamaz")
     @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
     @Column(name = "password", nullable = false)
     private String password;
 
-    @NotBlank(message = "Rol boş olamaz")
-    @Column(name = "role")
-    private String role; // "SUPER_ADMIN", "ADMIN", "DEPO", "USER"
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role; // SUPER_ADMIN, ADMIN, USER
+
+    @Column(name = "email")
+    private String email; // Optional email field
 
     // Super Admin specific fields
     @Column(name = "can_manage_all_tenants")
@@ -55,15 +56,13 @@ public class AppUser {
     private Boolean isActive = true;
     
     @Column(name = "last_login")
-    private LocalDateTime lastLogin;
-
-    @PrePersist
+    private LocalDateTime lastLogin;    @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         
         // Set defaults for SUPER_ADMIN
-        if ("SUPER_ADMIN".equals(role)) {
+        if (Role.SUPER_ADMIN.equals(role)) {
             canManageAllTenants = true;
             isGlobalUser = true;
             accessibleTenants = "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions";
@@ -77,10 +76,13 @@ public class AppUser {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-    
-    // Helper methods for Super Admin
+      // Helper methods for Super Admin
     public boolean isSuperAdmin() {
-        return "SUPER_ADMIN".equals(role);
+        return Role.SUPER_ADMIN.equals(role);
+    }
+    
+    public boolean isAdmin() {
+        return role != null && role.isAdmin();
     }
     
     public boolean canAccessTenant(String tenantName) {

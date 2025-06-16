@@ -6,6 +6,7 @@ import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.exception.TenantAlreadyExistsException;
 import dev.oasis.stockify.exception.TenantNotFoundException;
+import dev.oasis.stockify.model.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -233,14 +234,12 @@ public class TenantManagementService {
                 stmt.executeUpdate();
             }
         }
-    }
-
-    private void createTenantAdmin(TenantCreateDTO createDTO) {
+    }    private void createTenantAdmin(TenantCreateDTO createDTO) {
         try {
             UserCreateDTO adminUser = new UserCreateDTO();
             adminUser.setUsername(createDTO.getAdminUsername());
             adminUser.setPassword(createDTO.getAdminPassword());
-            adminUser.setRole("ADMIN");
+            adminUser.setRole(Role.ADMIN);
             adminUser.setEmail(createDTO.getAdminEmail());
             
             appUserService.saveUser(adminUser);

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS app_user (
     username VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'USER',
+    email VARCHAR(255), -- Optional email field
     
     -- Super Admin specific fields
     can_manage_all_tenants BOOLEAN DEFAULT FALSE,

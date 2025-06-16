@@ -1,6 +1,7 @@
 package dev.oasis.stockify.repository;
 
 import dev.oasis.stockify.model.AppUser;
+import dev.oasis.stockify.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsername(String username);
     
-    List<AppUser> findByRole(String role);
+    List<AppUser> findByRole(Role role);
     
     List<AppUser> findByIsActive(Boolean isActive);
     

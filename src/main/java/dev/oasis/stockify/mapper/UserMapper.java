@@ -19,12 +19,11 @@ public class UserMapper {
     public AppUser toEntity(UserCreateDTO userCreateDTO) {
         if (userCreateDTO == null) {
             return null;
-        }
-
-        AppUser appUser = new AppUser();
+        }        AppUser appUser = new AppUser();
         appUser.setUsername(userCreateDTO.getUsername());
         appUser.setPassword(userCreateDTO.getPassword());
         appUser.setRole(userCreateDTO.getRole());
+        appUser.setEmail(userCreateDTO.getEmail());
         
         return appUser;
     }
@@ -38,16 +37,13 @@ public class UserMapper {
     public AppUser updateEntity(AppUser appUser, UserCreateDTO userCreateDTO) {
         if (userCreateDTO == null) {
             return appUser;
-        }
-
-        appUser.setUsername(userCreateDTO.getUsername());
+        }        appUser.setUsername(userCreateDTO.getUsername());
         appUser.setPassword(userCreateDTO.getPassword());
         appUser.setRole(userCreateDTO.getRole());
+        appUser.setEmail(userCreateDTO.getEmail());
         
         return appUser;
-    }
-
-    /**
+    }    /**
      * Converts an AppUser entity to a UserResponseDTO
      * @param appUser the entity to convert
      * @return the UserResponseDTO
@@ -61,6 +57,8 @@ public class UserMapper {
         userResponseDTO.setId(appUser.getId());
         userResponseDTO.setUsername(appUser.getUsername());
         userResponseDTO.setRole(appUser.getRole());
+        userResponseDTO.setEmail(appUser.getEmail());
+        userResponseDTO.setIsActive(appUser.getIsActive());
         
         return userResponseDTO;
     }

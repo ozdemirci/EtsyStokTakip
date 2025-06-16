@@ -11,8 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * Controller for user management operations
  */
@@ -23,15 +21,13 @@ public class UserController {
 
     public UserController(AppUserService appUserService) {
         this.appUserService = appUserService;
-    }
-
-    /**
+    }    /**
      * Displays the form for adding a new user
      */
     @GetMapping("/add")
     public String showAddUserForm(Model model) {
         model.addAttribute("user", new UserCreateDTO());
-        model.addAttribute("roles", List.of("ADMIN", "DEPO", "USER"));
+        // Roles artık template'de doğrudan Role enum'dan alınıyor
         return "user-form";
     }
 

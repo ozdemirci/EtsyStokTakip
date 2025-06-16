@@ -7,18 +7,32 @@
 <body>
 <div class="container mt-4">
     <h2>Kullanıcı Listesi</h2>
-    <a href="/users/add" class="btn btn-primary mb-2">Yeni Kullanıcı Ekle</a>
-    <table class="table table-bordered">
-        <thead>
+    <a href="/users/add" class="btn btn-primary mb-2">Yeni Kullanıcı Ekle</a>    <table class="table table-bordered">
+        <thead class="table-dark">
         <tr>
             <th>ID</th>
             <th>Kullanıcı Adı</th>
+            <th>Rol</th>
+            <th>E-posta</th>
+            <th>Durum</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="user : ${users}">
             <td th:text="${user.id}"></td>
             <td th:text="${user.username}"></td>
+            <td>
+                <span th:text="${user.role?.displayName ?: 'Belirtilmemiş'}"
+                      th:class="'badge ' + 
+                               (${user.role?.name() == 'SUPER_ADMIN'} ? 'bg-danger' : 
+                                ${user.role?.name() == 'ADMIN'} ? 'bg-warning text-dark' : 
+                                'bg-info')"></span>
+            </td>
+            <td th:text="${user.email ?: '-'}"></td>
+            <td>
+                <span th:text="${user.isActive ? 'Aktif' : 'Pasif'}"
+                      th:class="'badge ' + (${user.isActive} ? 'bg-success' : 'bg-secondary')"></span>
+            </td>
         </tr>
         </tbody>
     </table>

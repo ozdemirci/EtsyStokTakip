@@ -3,17 +3,17 @@ package dev.oasis.stockify.config;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
+import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -23,62 +23,51 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Multi-Tenant Data Loader Component
- * This component initializes sample data for multiple tenants in the Stockify application.
- * It populates existing tenant schemas (created by Flyway) with initial data including:
- * - Administrative users with proper roles
- * - Sample products with realistic inventory data
- * - Tenant-specific configurations
- * The data loader runs only in 'dev' profile and ensures complete isolation
- * between tenant data while maintaining consistent data structure.
- * Schema and table creation is handled by MultiTenantFlywayConfig.
- * 
- * @author Stockify Team
- * @version 1.0
- * @since 2025
- */
+@Slf4j
 @Component
-@Profile("dev") // Re-enabled after fixing schema case issues
 @Order(2) // Run after MultiTenantFlywayConfig (1)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
-
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataLoader.class);
+   
     private final DataSource dataSource;
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
-    private final ProductRepository productRepository;
+    private final ProductRepository productRepository;    
     private static final List<String> TENANT_IDS = Arrays.asList(
-        "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
-    );// Sample data configurations - 3 users per tenant
+        "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions","company1"
+    );     // Sample users using DTO directly
+    private static final List<UserCreateDTO> SAMPLE_USERS = Arrays.asList(
+        createUserDTO("admin", "admin123", Role.ADMIN),
+        createUserDTO("operator", "operator123", Role.USER),
+        createUserDTO("manager", "manager123", Role.USER)
+    );
 
-    private static final List<SampleUser> SAMPLE_USERS = Arrays.asList(
-        new SampleUser("admin", "admin123", "ADMIN"),
-        new SampleUser("operator", "operator123", "USER"),
-        new SampleUser("manager", "manager123", "USER")
-    );    private static final List<SampleProduct> SAMPLE_PRODUCTS = Arrays.asList(
+    // Sample products using DTO directly
+    private static final List<ProductCreateDTO> SAMPLE_PRODUCTS = Arrays.asList(
         // Electronics category
-        new SampleProduct("ELEC-001", "Wireless Bluetooth Headphones", "High-quality wireless headphones with noise cancellation", "Electronics", "149.99", 35, 5),
-        new SampleProduct("ELEC-002", "USB-C Charging Cable", "Fast charging USB-C cable with durable braided design", "Electronics", "19.99", 100, 10),
-        new SampleProduct("ELEC-003", "Smartphone Stand", "Adjustable aluminum smartphone stand for desk use", "Electronics", "29.99", 50, 8),
+        createProductDTO("ELEC-001", "Wireless Bluetooth Headphones", "High-quality wireless headphones with noise cancellation", "Electronics", "149.99", 35, 5),
+        createProductDTO("ELEC-002", "USB-C Charging Cable", "Fast charging USB-C cable with durable braided design", "Electronics", "19.99", 100, 10),
+        createProductDTO("ELEC-003", "Smartphone Stand", "Adjustable aluminum smartphone stand for desk use", "Electronics", "29.99", 50, 8),
         
         // Home & Garden category
-        new SampleProduct("HOME-001", "Ceramic Coffee Mug", "Beautiful handcrafted ceramic mug with unique design", "Home & Garden", "24.99", 40, 5),
-        new SampleProduct("HOME-002", "Wooden Cutting Board", "Premium bamboo cutting board with juice groove", "Home & Garden", "34.99", 25, 3),
-        new SampleProduct("HOME-003", "LED Desk Lamp", "Modern adjustable LED desk lamp with touch control", "Home & Garden", "79.99", 20, 2),
+        createProductDTO("HOME-001", "Ceramic Coffee Mug", "Beautiful handcrafted ceramic mug with unique design", "Home & Garden", "24.99", 40, 5),
+        createProductDTO("HOME-002", "Wooden Cutting Board", "Premium bamboo cutting board with juice groove", "Home & Garden", "34.99", 25, 3),
+        createProductDTO("HOME-003", "LED Desk Lamp", "Modern adjustable LED desk lamp with touch control", "Home & Garden", "79.99", 20, 2),
         
         // Clothing category
-        new SampleProduct("CLOTH-001", "Cotton T-Shirt", "Comfortable 100% cotton t-shirt in various colors", "Clothing", "19.99", 75, 10),
-        new SampleProduct("CLOTH-002", "Denim Jeans", "Classic fit denim jeans with premium quality", "Clothing", "59.99", 30, 5),
-        new SampleProduct("CLOTH-003", "Wool Sweater", "Warm and cozy wool sweater for winter", "Clothing", "89.99", 15, 3),
+        createProductDTO("CLOTH-001", "Cotton T-Shirt", "Comfortable 100% cotton t-shirt in various colors", "Clothing", "19.99", 75, 10),
+        createProductDTO("CLOTH-002", "Denim Jeans", "Classic fit denim jeans with premium quality", "Clothing", "59.99", 30, 5),
+        createProductDTO("CLOTH-003", "Wool Sweater", "Warm and cozy wool sweater for winter", "Clothing", "89.99", 15, 3),
         
         // Books category
-        new SampleProduct("BOOK-001", "Programming Guide", "Complete guide to modern programming techniques", "Books", "39.99", 45, 5),
-        new SampleProduct("BOOK-002", "Business Strategy", "Essential business strategy and management principles", "Books", "29.99", 60, 8),
-        new SampleProduct("BOOK-003", "Cooking Recipes", "Collection of delicious and easy cooking recipes", "Books", "24.99", 35, 4)
-    );    @Override
+        createProductDTO("BOOK-001", "Programming Guide", "Complete guide to modern programming techniques", "Books", "39.99", 45, 5),
+        createProductDTO("BOOK-002", "Business Strategy", "Essential business strategy and management principles", "Books", "29.99", 60, 8),
+        createProductDTO("BOOK-003", "Cooking Recipes", "Collection of delicious and easy cooking recipes", "Books", "24.99", 35, 4)
+    );
+    
+    
+    @Override
     public void run(String... args)  {
         log.info("🚀 Starting Multi-Tenant Data Loader...");
           try {
@@ -110,12 +99,11 @@ public class DataLoader implements CommandLineRunner {
         try {
             // Set tenant context for this initialization
             TenantContext.setCurrentTenant(tenantId);
-            log.debug("🔄 Set tenant context to: {}", tenantId);
-              // Special handling for 'stockify' tenant (super admin tenant)
+            log.debug("🔄 Set tenant context to: {}", tenantId);            // Special handling for 'stockify' tenant (super admin tenant)
             if ("stockify".equals(tenantId)) {
-                log.info("🏛️ Stockify platform tenant - super admin already created by SuperAdminInitializer");
-                initializeTenantConfig(tenantId);
-                return;
+                log.info("🏛️ Stockify platform tenant - initializing with regular users");
+                // Stockify tenant should also have regular admin/operator/manager users
+                // No special super admin creation here as it's handled in public tenant
             }
             
             // Special handling for 'public' tenant (default tenant) - create superadmin
@@ -191,42 +179,40 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     protected void initializeTenantUsers(String tenantId) {
         log.info("👥 Creating users for tenant: {}", tenantId);
-        
-        int createdUserCount = 0;
-        for (SampleUser sampleUser : SAMPLE_USERS) {
+          int createdUserCount = 0;
+        for (UserCreateDTO sampleUser : SAMPLE_USERS) {
             try {
                 // Ensure tenant context is set
                 TenantContext.setCurrentTenant(tenantId);
-                log.debug("🔄 Set tenant context to: {} for user: {}", tenantId, sampleUser.username);
+                log.debug("🔄 Set tenant context to: {} for user: {}", tenantId, sampleUser.getUsername());
                 
                 // Check if user already exists in this tenant
-                boolean userExists = appUserRepository.findByUsername(sampleUser.username).isPresent();
-                log.debug("🔍 User {} exists in tenant {}: {}", sampleUser.username, tenantId, userExists);
+                boolean userExists = appUserRepository.findByUsername(sampleUser.getUsername()).isPresent();
+                log.debug("🔍 User {} exists in tenant {}: {}", sampleUser.getUsername(), tenantId, userExists);
                 
                 if (userExists) {
-                    log.debug("👤 User {} already exists for tenant {}, skipping", sampleUser.username, tenantId);
+                    log.debug("👤 User {} already exists for tenant {}, skipping", sampleUser.getUsername(), tenantId);
                     continue;
                 }
                 
-                // Create user DTO
+                // Use the DTO directly (create a copy to avoid modifying the original)
                 UserCreateDTO userDTO = new UserCreateDTO();
-                userDTO.setUsername(sampleUser.username);
-                userDTO.setPassword(sampleUser.password);
-                userDTO.setRole(sampleUser.role);
+                userDTO.setUsername(sampleUser.getUsername());
+                userDTO.setPassword(sampleUser.getPassword());
+                userDTO.setRole(sampleUser.getRole());
                 
                 log.debug("💾 Saving user: {} with role: {} for tenant: {}", 
-                    sampleUser.username, sampleUser.role, tenantId);
+                    sampleUser.getUsername(), sampleUser.getRole(), tenantId);
                 
                 // Save user through service
                 appUserService.saveUser(userDTO);
-                createdUserCount++;
-                
+                createdUserCount++;                
                 log.info("✅ Created user: {} with role: {} for tenant: {}", 
-                    sampleUser.username, sampleUser.role, tenantId);
+                    sampleUser.getUsername(), sampleUser.getRole(), tenantId);
                 
             } catch (Exception e) {
                 log.error("❌ Failed to create user {} for tenant {}: {}", 
-                    sampleUser.username, tenantId, e.getMessage(), e);
+                    sampleUser.getUsername(), tenantId, e.getMessage(), e);
                 // Continue with other users instead of failing completely
             }
         }
@@ -238,41 +224,40 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     protected void initializeTenantProducts(String tenantId) {
         log.info("📦 Creating products for tenant: {}", tenantId);
-        
-        int createdProductCount = 0;
-        for (SampleProduct sampleProduct : SAMPLE_PRODUCTS) {
+          int createdProductCount = 0;
+        for (ProductCreateDTO sampleProduct : SAMPLE_PRODUCTS) {
             try {
                 // Ensure tenant context is set
                 TenantContext.setCurrentTenant(tenantId);
                 
                 // Check if product already exists in this tenant
-                if (productRepository.findBySku(sampleProduct.sku).isPresent()) {
-                    log.debug("📦 Product {} already exists for tenant {}, skipping", sampleProduct.sku, tenantId);
+                if (productRepository.findBySku(sampleProduct.getSku()).isPresent()) {
+                    log.debug("📦 Product {} already exists for tenant {}, skipping", sampleProduct.getSku(), tenantId);
                     continue;
                 }
                 
-                // Create product DTO
+                // Use the DTO directly (create a copy to avoid modifying the original)
                 ProductCreateDTO productDTO = new ProductCreateDTO();
-                productDTO.setSku(sampleProduct.sku);
-                productDTO.setTitle(sampleProduct.title);
-                productDTO.setDescription(sampleProduct.description);
-                productDTO.setCategory(sampleProduct.category);
-                productDTO.setPrice(new BigDecimal(sampleProduct.price));
-                productDTO.setStockLevel(sampleProduct.stockLevel);
-                productDTO.setLowStockThreshold(sampleProduct.lowStockThreshold);
+                productDTO.setSku(sampleProduct.getSku());
+                productDTO.setTitle(sampleProduct.getTitle());
+                productDTO.setDescription(sampleProduct.getDescription());
+                productDTO.setCategory(sampleProduct.getCategory());
+                productDTO.setPrice(sampleProduct.getPrice());
+                productDTO.setStockLevel(sampleProduct.getStockLevel());
+                productDTO.setLowStockThreshold(sampleProduct.getLowStockThreshold());
                 
                 // Set external product ID (simulate external integration)
-                productDTO.setEtsyProductId("EXT_" + tenantId.toUpperCase(Locale.ROOT) + "_" + sampleProduct.sku);
+                productDTO.setEtsyProductId("EXT_" + tenantId.toUpperCase(Locale.ROOT) + "_" + sampleProduct.getSku());
                 
                 // Save product through service
                 productService.saveProduct(productDTO);
                 createdProductCount++;
                 
-                log.info("✅ Created product: {} for tenant: {}", sampleProduct.title, tenantId);
+                log.info("✅ Created product: {} for tenant: {}", sampleProduct.getTitle(), tenantId);
                 
             } catch (Exception e) {
                 log.error("❌ Failed to create product {} for tenant {}: {}", 
-                    sampleProduct.sku, tenantId, e.getMessage());
+                    sampleProduct.getSku(), tenantId, e.getMessage());
                 // Continue with other products instead of failing completely
             }
         }
@@ -354,13 +339,11 @@ public class DataLoader implements CommandLineRunner {
             log.info("🔑 Creating SuperAdmin user for public tenant");
 
             // Ensure we're in public tenant context
-            TenantContext.setCurrentTenant("public");
-
-            // Create superadmin user DTO
+            TenantContext.setCurrentTenant("public");            // Create superadmin user DTO
             UserCreateDTO superAdminDto = new UserCreateDTO();
             superAdminDto.setUsername("superadmin");
             superAdminDto.setPassword("superadmin123"); // Strong password - should be changed in production
-            superAdminDto.setRole("SUPER_ADMIN");
+            superAdminDto.setRole(Role.SUPER_ADMIN);
 
             // Create the superadmin user
             appUserService.saveUser(superAdminDto);
@@ -372,44 +355,30 @@ public class DataLoader implements CommandLineRunner {
             log.error("❌ Failed to create SuperAdmin user for public tenant: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create SuperAdmin for public tenant", e);
         }
+    }      /**
+     * Helper method to create UserCreateDTO
+     */
+    private static UserCreateDTO createUserDTO(String username, String password, Role role) {
+        UserCreateDTO dto = new UserCreateDTO();
+        dto.setUsername(username);
+        dto.setPassword(password);
+        dto.setRole(role);
+        return dto;
     }
 
     /**
-     * Sample user data structure
+     * Helper method to create ProductCreateDTO
      */
-    private static class SampleUser {
-        final String username;
-        final String password;
-        final String role;
-
-        SampleUser(String username, String password, String role) {
-            this.username = username;
-            this.password = password;
-            this.role = role;
-        }
-    }
-
-    /**
-     * Sample product data structure
-     */
-    private static class SampleProduct {
-        final String sku;
-        final String title;
-        final String description;
-        final String category;
-        final String price;
-        final int stockLevel;
-        final int lowStockThreshold;
-
-        SampleProduct(String sku, String title, String description, String category, 
-                     String price, int stockLevel, int lowStockThreshold) {
-            this.sku = sku;
-            this.title = title;
-            this.description = description;
-            this.category = category;
-            this.price = price;
-            this.stockLevel = stockLevel;
-            this.lowStockThreshold = lowStockThreshold;
-        }
+    private static ProductCreateDTO createProductDTO(String sku, String title, String description, 
+                                                   String category, String price, int stockLevel, int lowStockThreshold) {
+        ProductCreateDTO dto = new ProductCreateDTO();
+        dto.setSku(sku);
+        dto.setTitle(title);
+        dto.setDescription(description);
+        dto.setCategory(category);
+        dto.setPrice(new BigDecimal(price));
+        dto.setStockLevel(stockLevel);
+        dto.setLowStockThreshold(lowStockThreshold);
+        return dto;
     }
 }
