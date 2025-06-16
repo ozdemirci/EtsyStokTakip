@@ -45,11 +45,21 @@ public class AdminDashboardController {
         }
           // Get dashboard metrics
         DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();
-        
-        // Get all users in current tenant
+          // Get all users in current tenant
         List<UserResponseDTO> tenantUsers = appUserService.getAllUsers();
         log.debug("Found {} users for tenant: {}", tenantUsers.size(), currentTenantId);
-          // Add individual metrics for template
+        
+        // Mock notification data (in real implementation, this would come from NotificationService)
+        int totalNotifications = 12;
+        int unreadNotifications = 3;
+        int criticalNotifications = 2;
+        
+        // Calculate notification data based on stock levels
+        if (metrics.getLowStockProducts() > 10) {
+            criticalNotifications = (int) (metrics.getLowStockProducts() / 5);
+            unreadNotifications = Math.max(unreadNotifications, criticalNotifications);
+            totalNotifications = Math.max(totalNotifications, unreadNotifications + 5);
+        }        // Add individual metrics for template
         model.addAttribute("totalProducts", metrics.getTotalProducts());
         model.addAttribute("activeProducts", Math.max(0, metrics.getTotalProducts() - metrics.getLowStockProducts()));
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
@@ -58,6 +68,11 @@ public class AdminDashboardController {
         model.addAttribute("adminUsers", tenantUsers.stream().mapToInt(u -> 
             u.getRole() != null && "ADMIN".equals(u.getRole().toString()) ? 1 : 0).sum());
         model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));
+        
+        // Add notification data
+        model.addAttribute("totalNotifications", totalNotifications);
+        model.addAttribute("unreadNotifications", unreadNotifications);
+        model.addAttribute("criticalNotifications", criticalNotifications);
         
         // Add collections
         model.addAttribute("metrics", metrics);

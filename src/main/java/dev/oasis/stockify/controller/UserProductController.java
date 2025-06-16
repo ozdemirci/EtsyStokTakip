@@ -6,6 +6,7 @@ import dev.oasis.stockify.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,6 +14,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * User controller for product viewing operations
@@ -139,25 +144,30 @@ public class UserProductController {
     @GetMapping("/low-stock")
     public String getLowStockProducts(HttpServletRequest request, Model model) {
         String tenantId = getCurrentTenantId(request);
-        log.info("⚠️ User checking low stock products for tenant: {}", tenantId);
+        log.info("⚠️ User checking low stock products for tenant: {}", tenantId);        try {
+            // For user view, we'll show all products and filter for low stock on the frontend
+            // Since getLowStockProducts(Pageable) doesn't exist, we'll use getProductsPage and filter
+            Pageable pageable = PageRequest.of(0, 100, Sort.by("quantity").ascending());
+            Page<ProductResponseDTO> allProducts = productService.getProductsPage(pageable);
+              // Filter for low stock products using isLowStock() method
+            List<ProductResponseDTO> lowStockProducts = allProducts.getContent().stream()
+                .filter(ProductResponseDTO::isLowStock)
+                .collect(Collectors.toList());
+            
+            // Create a new Page object for low stock products
+            Page<ProductResponseDTO> lowStockPage = new PageImpl<>(
+                lowStockProducts, pageable, lowStockProducts.size());
 
-        try {
-            // For user view, we'll show low stock products with pagination
-            Pageable pageable = PageRequest.of(0, 20, Sort.by("quantity").ascending());
-            Page<ProductResponseDTO> lowStockProducts = productService.getLowStockProducts(pageable);
-
-            model.addAttribute("products", lowStockProducts);
+            model.addAttribute("products", lowStockPage);
             model.addAttribute("currentPage", 0);
             model.addAttribute("pageSize", 20);
             model.addAttribute("sortBy", "quantity");
             model.addAttribute("sortDir", "asc");
-            model.addAttribute("totalPages", lowStockProducts.getTotalPages());
-            model.addAttribute("totalElements", lowStockProducts.getTotalElements());
+            model.addAttribute("totalPages", lowStockPage.getTotalPages());
+            model.addAttribute("totalElements", lowStockPage.getTotalElements());
             model.addAttribute("tenantId", tenantId);
-            model.addAttribute("isLowStockView", true);
-
-            log.info("📊 Found {} low stock products for tenant: {}", 
-                lowStockProducts.getTotalElements(), tenantId);
+            model.addAttribute("isLowStockView", true);            log.info("📊 Found {} low stock products for tenant: {}", 
+                lowStockPage.getTotalElements(), tenantId);
             
             return "user/products";
             
@@ -176,10 +186,15 @@ public class UserProductController {
                              HttpServletRequest request,
                              Model model) {
         String tenantId = getCurrentTenantId(request);
-        log.info("👁️ User viewing product {} for tenant: {}", id, tenantId);
-
-        try {
-            ProductResponseDTO product = productService.getProductById(id);
+        log.info("👁️ User viewing product {} for tenant: {}", id, tenantId);        try {
+            Optional<ProductResponseDTO> productOpt = productService.getProductById(id);
+            if (productOpt.isEmpty()) {
+                log.error("❌ Product not found with ID: {} for tenant: {}", id, tenantId);
+                model.addAttribute("errorMessage", "Product not found");
+                return "redirect:/user/products";
+            }
+            
+            ProductResponseDTO product = productOpt.get();
             model.addAttribute("product", product);
             model.addAttribute("tenantId", tenantId);
             model.addAttribute("isReadOnly", true);

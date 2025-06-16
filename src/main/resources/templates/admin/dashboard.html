@@ -32,8 +32,14 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/admin/dashboard">
                 <i class="bi bi-boxes"></i> Stockify Admin
-            </a>
-            <div class="navbar-nav ms-auto">
+            </a>            <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                          id="navNotificationBadge" 
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i> 
                     <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
@@ -65,10 +71,15 @@
                             <a class="nav-link" href="/admin/users">
                                 <i class="bi bi-people"></i> Users
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        <li class="nav-item">
                             <a class="nav-link" href="/admin/products/low-stock">
                                 <i class="bi bi-exclamation-triangle"></i> Low Stock
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                                <span class="badge bg-danger ms-2" id="notificationBadge" style="display: none;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -148,8 +159,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
+                    </div>                    <div class="col-md-3">
                         <div class="card stats-card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
@@ -165,6 +175,59 @@
                                     <small class="text-success">
                                         <i class="bi bi-graph-up"></i> Inventory Value
                                     </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Alert Row -->
+                <div class="row mb-4">
+                    <div class="col-md-3">                        <div class="card stats-card border-warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Active Notifications</h6>
+                                        <h3 class="mb-0 text-warning" id="activeNotificationsCount" th:text="${totalNotifications ?: 3}">3</h3>
+                                    </div>
+                                    <div class="text-warning">
+                                        <i class="bi bi-bell-fill display-6"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-danger">
+                                        <i class="bi bi-exclamation-triangle"></i> <span id="criticalNotificationsCount" th:text="${criticalNotifications ?: 2}">2</span> Critical
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="card-title mb-0">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Recent Critical Alerts
+                                </h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row" id="recentAlertsContainer">
+                                    <div class="col-md-4">
+                                        <div class="alert alert-danger alert-sm mb-1 p-2">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            <small><strong>5 products</strong> out of stock</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="alert alert-warning alert-sm mb-1 p-2">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            <small><strong>12 products</strong> low stock</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-bell"></i> View All
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -202,9 +265,11 @@
                                     </a>
                                     <a href="/admin/users/add" class="btn btn-primary quick-action-btn">
                                         <i class="bi bi-person-plus"></i> Add User
-                                    </a>
-                                    <a href="/admin/products/low-stock" class="btn btn-warning quick-action-btn">
+                                    </a>                                    <a href="/admin/products/low-stock" class="btn btn-warning quick-action-btn">
                                         <i class="bi bi-exclamation-triangle"></i> Check Low Stock
+                                    </a>
+                                    <a href="/admin/notifications" class="btn btn-secondary quick-action-btn">
+                                        <i class="bi bi-bell"></i> View Notifications
                                     </a>
                                     <a href="/admin/products/export" class="btn btn-info quick-action-btn">
                                         <i class="bi bi-download"></i> Export Data
@@ -538,11 +603,11 @@
                                     <i class="bi bi-people d-block mb-1"></i>
                                     <small>Kullanıcılar</small>
                                 </a>
-                            </div>
-                            <div class="col-md-2 col-sm-4 col-6">
-                                <a href="/notifications" class="btn btn-outline-warning w-100">
+                            </div>                            <div class="col-md-2 col-sm-4 col-6">
+                                <a href="/admin/notifications" class="btn btn-outline-warning w-100">
                                     <i class="bi bi-bell d-block mb-1"></i>
                                     <small>Bildirimler</small>
+                                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="quickActionNotificationBadge" style="display: none;">0</span>
                                 </a>
                             </div>
                             <div class="col-md-2 col-sm-4 col-6">
@@ -730,8 +795,160 @@
                         }
                     }
                 }
+            }        });
+    </script>
+      <!-- Notification Coordination Script -->
+    <script th:inline="javascript">
+        // Notification System Integration - Get initial data from server
+        let notificationData = {
+            total: /*[[${totalNotifications}]]*/ 12,
+            unread: /*[[${unreadNotifications}]]*/ 3,
+            critical: /*[[${criticalNotifications}]]*/ 2,
+            alerts: [
+                { 
+                    type: /*[[${outOfStockProducts > 0 ? 'danger' : 'warning'}]]*/ 'danger', 
+                    message: /*[[${outOfStockProducts ?: 0}]]*/ '5' + ' products out of stock', 
+                    icon: 'x-circle' 
+                },
+                { 
+                    type: 'warning', 
+                    message: /*[[${lowStockProducts ?: 0}]]*/ '12' + ' products low stock', 
+                    icon: 'exclamation-triangle' 
+                }
+            ]
+        };        // Update notification counters
+        function updateNotificationCounters() {
+            // Update navigation badge
+            const navBadge = document.getElementById('navNotificationBadge');
+            if (navBadge) {
+                if (notificationData.unread > 0) {
+                    navBadge.textContent = notificationData.unread;
+                    navBadge.style.display = 'inline';
+                } else {
+                    navBadge.style.display = 'none';
+                }
             }
+
+            // Update sidebar badge
+            const sidebarBadge = document.getElementById('notificationBadge');
+            if (notificationData.unread > 0) {
+                sidebarBadge.textContent = notificationData.unread;
+                sidebarBadge.style.display = 'inline';
+            } else {
+                sidebarBadge.style.display = 'none';
+            }
+
+            // Update quick action badge
+            const quickActionBadge = document.getElementById('quickActionNotificationBadge');
+            if (notificationData.critical > 0) {
+                quickActionBadge.textContent = notificationData.critical;
+                quickActionBadge.style.display = 'inline';
+            } else {
+                quickActionBadge.style.display = 'none';
+            }
+
+            // Update stats cards
+            document.getElementById('activeNotificationsCount').textContent = notificationData.total;
+            document.getElementById('criticalNotificationsCount').textContent = notificationData.critical;
+        }
+
+        // Update recent alerts display
+        function updateRecentAlerts() {
+            const container = document.getElementById('recentAlertsContainer');
+            const alertsHtml = notificationData.alerts.map(alert => `
+                <div class="col-md-4">
+                    <div class="alert alert-${alert.type} alert-sm mb-1 p-2">
+                        <i class="bi bi-${alert.icon} me-1"></i>
+                        <small>${alert.message}</small>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = alertsHtml + `
+                <div class="col-md-4 text-end">
+                    <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-bell"></i> View All
+                    </a>
+                </div>
+            `;
+        }
+
+        // Simulate notification updates (in real app, this would be WebSocket or polling)
+        function checkForNewNotifications() {
+            // This would typically fetch from server
+            // For demo, we'll occasionally update the counts
+            const shouldUpdate = Math.random() < 0.1; // 10% chance of update
+            
+            if (shouldUpdate) {
+                // Simulate new notification
+                const wasUnread = notificationData.unread;
+                notificationData.unread = Math.max(0, notificationData.unread + (Math.random() > 0.5 ? 1 : -1));
+                notificationData.total = Math.max(notificationData.unread, notificationData.total);
+                
+                if (notificationData.unread > wasUnread) {
+                    // Show toast for new notification
+                    showNotificationToast('New notification received!');
+                }
+                
+                updateNotificationCounters();
+            }
+        }
+
+        // Show notification toast
+        function showNotificationToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="bi bi-bell-fill text-primary me-2"></i>
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            const bootstrapToast = new bootstrap.Toast(toast);
+            bootstrapToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Add click handlers for notification links
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update initial state
+            updateNotificationCounters();
+            updateRecentAlerts();
+            
+            // Check for notifications every 30 seconds
+            setInterval(checkForNewNotifications, 30000);
+            
+            // Add click tracking for notification links
+            document.querySelectorAll('a[href="/admin/notifications"]').forEach(link => {
+                link.addEventListener('click', function() {
+                    // Mark notifications as being viewed
+                    notificationData.unread = 0;
+                    updateNotificationCounters();
+                });
+            });
         });
+
+        // Expose function to manually trigger notification update (for testing)
+        window.triggerNotificationUpdate = function(type = 'info', message = 'Test notification') {
+            notificationData.unread++;
+            notificationData.total++;
+            if (type === 'critical') {
+                notificationData.critical++;
+            }
+            updateNotificationCounters();
+            updateRecentAlerts();
+            showNotificationToast(message);
+        };
     </script>
     
     <!-- Bootstrap JS -->
