@@ -35,24 +35,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MultiTenantFlywayConfig implements CommandLineRunner {
 
-    @Value("${spring.flyway.schemas:public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions,tenant1,tenant2}")
+    @Value("${spring.flyway.schemas:public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions}")
     private String[] tenantSchemas;
 
     @Value("${spring.flyway.locations:classpath:db/migration}")
     private String[] migrationLocations;
-    
-    private final DataSource dataSource;    @Override
+    private final DataSource dataSource;
+
     public void run(String... args) {
-        log.info("🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...");
+       // log.info("🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...");
         
         try {
             // Step 1: Apply Flyway migrations to all tenant schemas
             // This will be handled by the FlywayMigrationStrategy bean
             
             // Step 2: Create super admin in 'stockify' tenant
-            createSuperAdminIfNotExists();
+           // createSuperAdminIfNotExists();
             
-            log.info("✅ Multi-tenant setup completed successfully!");
+           // log.info("✅ Multi-tenant setup completed successfully!");
             
         } catch (Exception e) {
             log.error("❌ Failed during multi-tenant setup: {}", e.getMessage(), e);

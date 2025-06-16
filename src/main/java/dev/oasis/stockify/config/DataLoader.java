@@ -8,7 +8,6 @@ import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
@@ -31,7 +30,6 @@ import java.util.Locale;
  * - Administrative users with proper roles
  * - Sample products with realistic inventory data
  * - Tenant-specific configurations
- * 
  * The data loader runs only in 'dev' profile and ensures complete isolation
  * between tenant data while maintaining consistent data structure.
  * Schema and table creation is handled by MultiTenantFlywayConfig.
@@ -47,19 +45,15 @@ import java.util.Locale;
 public class DataLoader implements CommandLineRunner {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataLoader.class);
-    
     private final DataSource dataSource;
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
-    private final ProductRepository productRepository; // Configuration for tenant setup - Real company-based tenant schemas
-    // Note: 'stockify' tenant is reserved for super admin and created by SuperAdminInitializer
-
-     
-
+    private final ProductRepository productRepository;
     private static final List<String> TENANT_IDS = Arrays.asList(
         "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
     );// Sample data configurations - 3 users per tenant
+
     private static final List<SampleUser> SAMPLE_USERS = Arrays.asList(
         new SampleUser("admin", "admin123", "ADMIN"),
         new SampleUser("operator", "operator123", "USER"),
@@ -110,7 +104,7 @@ public class DataLoader implements CommandLineRunner {
      * Initialize data for a specific tenant
      */
     @Transactional
-    private void initializeTenantData(String tenantId) {
+    protected void initializeTenantData(String tenantId) {
         log.info("🏢 Initializing data for tenant: {}", tenantId);
         
         try {
@@ -128,7 +122,7 @@ public class DataLoader implements CommandLineRunner {
             if ("public".equals(tenantId)) {
                 log.info("🌐 Public tenant - initializing default tenant data with superadmin");
                 // Check if superadmin already exists
-                if (!appUserRepository.findByUsername("superadmin").isPresent()) {
+                if (appUserRepository.findByUsername("superadmin").isEmpty()) {
                     createSuperAdminForPublicTenant();
                 } else {
                     log.info("🔑 SuperAdmin already exists in public tenant");
@@ -164,7 +158,7 @@ public class DataLoader implements CommandLineRunner {
      * Check if data is already loaded for the tenant
      */
     @Transactional(readOnly = true)
-    private boolean isDataAlreadyLoaded(String tenantId) {
+    protected boolean isDataAlreadyLoaded(String tenantId) {
         try {
             // Set tenant context to check in the correct schema
             TenantContext.setCurrentTenant(tenantId);
@@ -195,7 +189,7 @@ public class DataLoader implements CommandLineRunner {
      * Initialize users for the tenant
      */
     @Transactional
-    private void initializeTenantUsers(String tenantId) {
+    protected void initializeTenantUsers(String tenantId) {
         log.info("👥 Creating users for tenant: {}", tenantId);
         
         int createdUserCount = 0;
@@ -242,7 +236,7 @@ public class DataLoader implements CommandLineRunner {
      * Initialize products for the tenant
      */
     @Transactional
-    private void initializeTenantProducts(String tenantId) {
+    protected void initializeTenantProducts(String tenantId) {
         log.info("📦 Creating products for tenant: {}", tenantId);
         
         int createdProductCount = 0;
@@ -355,25 +349,25 @@ public class DataLoader implements CommandLineRunner {
      * This creates a superadmin user with SUPER_ADMIN role in the public tenant
      */
     @Transactional
-    private void createSuperAdminForPublicTenant() {
+    protected void createSuperAdminForPublicTenant() {
         try {
             log.info("🔑 Creating SuperAdmin user for public tenant");
-            
+
             // Ensure we're in public tenant context
             TenantContext.setCurrentTenant("public");
-            
+
             // Create superadmin user DTO
             UserCreateDTO superAdminDto = new UserCreateDTO();
             superAdminDto.setUsername("superadmin");
             superAdminDto.setPassword("superadmin123"); // Strong password - should be changed in production
             superAdminDto.setRole("SUPER_ADMIN");
-            
+
             // Create the superadmin user
             appUserService.saveUser(superAdminDto);
-            
+
             log.info("✅ Successfully created SuperAdmin user for public tenant");
             log.warn("⚠️ Default SuperAdmin password is 'superadmin123' - CHANGE THIS IN PRODUCTION!");
-            
+
         } catch (Exception e) {
             log.error("❌ Failed to create SuperAdmin user for public tenant: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create SuperAdmin for public tenant", e);
