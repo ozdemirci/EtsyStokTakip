@@ -113,21 +113,20 @@
                             <span th:text="${tenantEntry.key}">TENANT</span>
                         </h5>
                     </div>
-                    <div class="card-body">
-                        <div th:if="${tenantEntry.value.error}" class="text-danger">
+                    <div class="card-body">                        <div th:if="${tenantEntry.value['error']}" class="text-danger">
                             <i class="fas fa-exclamation-triangle me-1"></i>
-                            <span th:text="${tenantEntry.value.error}">Error loading data</span>
+                            <span th:text="${tenantEntry.value['error']}">Error loading data</span>
                         </div>
-                        <div th:unless="${tenantEntry.value.error}">
+                        <div th:unless="${tenantEntry.value['error']}"
                             <div class="row text-center">
                                 <div class="col-6">
                                     <div class="border-end">
-                                        <h4 class="text-primary mb-0" th:text="${tenantEntry.value.userCount}">0</h4>
+                                        <h4 class="text-primary mb-0" th:text="${tenantEntry.value['userCount']}">0</h4>
                                         <small class="text-muted">Users</small>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <h4 class="text-success mb-0" th:text="${tenantEntry.value.productCount}">0</h4>
+                                    <h4 class="text-success mb-0" th:text="${tenantEntry.value['productCount']}">0</h4>
                                     <small class="text-muted">Products</small>
                                 </div>
                             </div>
@@ -135,19 +134,19 @@
                             <div class="row text-center">
                                 <div class="col-6">
                                     <div class="border-end">
-                                        <h6 class="text-info mb-0" th:text="${tenantEntry.value.activeUserCount}">0</h6>
+                                        <h6 class="text-info mb-0" th:text="${tenantEntry.value['activeUserCount']}">0</h6>
                                         <small class="text-muted">Active Users</small>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <h6 class="text-warning mb-0" th:text="${tenantEntry.value.lowStockProductCount}">0</h6>
+                                    <h6 class="text-warning mb-0" th:text="${tenantEntry.value['lowStockProductCount']}">0</h6>
                                     <small class="text-muted">Low Stock</small>
                                 </div>
                             </div>
                             <hr>
                             <div class="text-center">
                                 <h6 class="text-success mb-0">
-                                    $<span th:text="${#numbers.formatDecimal(tenantEntry.value.totalStockValue,0,2)}">0.00</span>
+                                    $<span th:text="${#numbers.formatDecimal(tenantEntry.value['totalStockValue'],0,2)}">0.00</span>
                                 </h6>
                                 <small class="text-muted">Total Stock Value</small>
                             </div>

@@ -65,13 +65,11 @@ public class SuperAdminController {
      */
     @GetMapping("/users")
     public String allUsers(Model model, Principal principal) {
-        log.info("👥 Super Admin '{}' accessing all users", principal.getName());
-          try {
+        log.info("👥 Super Admin '{}' accessing all users", principal.getName());        try {
             Map<String, List<AppUser>> tenantUsers = superAdminService.getAllUsersAcrossAllTenants();
-            Map<String, Map<String, List<AppUser>>> usersByRole = superAdminService.getUsersByRoleAcrossAllTenants();
             
             model.addAttribute("tenantUsers", tenantUsers);
-            model.addAttribute("usersByRole", usersByRole);            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
             model.addAttribute("currentUser", principal.getName());
             
             return "superadmin/users";
