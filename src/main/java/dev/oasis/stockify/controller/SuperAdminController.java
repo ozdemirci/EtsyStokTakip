@@ -13,11 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Super Admin Controller - Handles cross-tenant management operations
@@ -321,19 +317,10 @@ public class SuperAdminController {
         } finally {
             superAdminService.clearTenantContext();
         }
-    }    /**
-     * Debug endpoint to check users data
-     */
-    @GetMapping("/api/debug/users")
-    @ResponseBody
-    public ResponseEntity<?> debugUsers(Principal principal) {
-        try {
-            Map<String, List<AppUser>> tenantUsers = superAdminService.getAllUsersAcrossAllTenants();
-            return ResponseEntity.ok(tenantUsers);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        } finally {
-            superAdminService.clearTenantContext();
-        }
-    }
-}
+    }    
+   
+
+    
+
+    
+  }

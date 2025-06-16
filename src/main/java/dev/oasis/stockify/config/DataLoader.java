@@ -40,19 +40,23 @@ import java.util.Locale;
  * @version 1.0
  * @since 2025
  */
-@Slf4j
 @Component
 @Profile("dev") // Re-enabled after fixing schema case issues
 @Order(2) // Run after MultiTenantFlywayConfig (1)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataLoader.class);
     
     private final DataSource dataSource;
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
-    private final ProductRepository productRepository;    // Configuration for tenant setup - Real company-based tenant schemas
+    private final ProductRepository productRepository; // Configuration for tenant setup - Real company-based tenant schemas
     // Note: 'stockify' tenant is reserved for super admin and created by SuperAdminInitializer
+
+     
+
     private static final List<String> TENANT_IDS = Arrays.asList(
         "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
     );// Sample data configurations - 3 users per tenant

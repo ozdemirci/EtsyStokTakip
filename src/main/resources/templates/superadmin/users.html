@@ -124,7 +124,7 @@
         </div>
 
         <!-- Users by Tenant -->
-        <div th:if="${tenantUsers and !#maps.isEmpty(tenantUsers)}">
+        <div th:if="${tenantUsers != null and !#maps.isEmpty(tenantUsers)}">
             <div th:each="tenantEntry : ${tenantUsers}" class="mb-5">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="text-primary">
@@ -137,7 +137,7 @@
                 </div>
 
                 <!-- Users Table -->
-                <div th:if="${tenantEntry.value and !#lists.isEmpty(tenantEntry.value)}" class="table-responsive">
+                <div th:if="${tenantEntry.value != null and !#lists.isEmpty(tenantEntry.value)}" class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-dark">
                         <tr>

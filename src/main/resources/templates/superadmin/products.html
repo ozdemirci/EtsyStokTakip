@@ -135,11 +135,25 @@
             <i class="fas fa-check-circle me-2"></i>
             <span th:text="${success}">Success message</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <!-- Products by Tenant -->
-        <div th:if="${tenantProducts and !#maps.isEmpty(tenantProducts)}">
+        </div>        <!-- Products by Tenant -->
+        <div th:if="${tenantProducts != null and !#maps.isEmpty(tenantProducts)}">
+            <!-- DEBUG: Tenant Products Debug Info -->
+            <div class="alert alert-info">
+                <strong>Debug Info:</strong>
+                <br>tenantProducts is null: <span th:text="${tenantProducts == null}">false</span>
+                <br>tenantProducts size: <span th:text="${#maps.size(tenantProducts)}">0</span>
+                <br>tenantProducts isEmpty: <span th:text="${#maps.isEmpty(tenantProducts)}">false</span>
+            </div>
+            
             <div th:each="tenantEntry : ${tenantProducts}" class="mb-5">
+                <!-- DEBUG: Per Tenant Debug Info -->
+                <div class="alert alert-warning">
+                    <strong>Tenant: <span th:text="${tenantEntry.key}">TENANT</span></strong>
+                    <br>value is null: <span th:text="${tenantEntry.value == null}">false</span>
+                    <br>value size: <span th:text="${#lists.size(tenantEntry.value)}">0</span>
+                    <br>value isEmpty: <span th:text="${#lists.isEmpty(tenantEntry.value)}">false</span>
+                </div>
+                
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="text-primary">
                         <i class="fas fa-building me-2"></i>
@@ -148,51 +162,18 @@
                             (<span th:text="${#lists.size(tenantEntry.value)}">0</span> products)
                         </small>
                     </h3>
-                </div>
-
-                <!-- Products Grid -->
-                <div th:if="${tenantEntry.value and !#lists.isEmpty(tenantEntry.value)}" class="row">
+                </div>                <!-- Products Grid -->
+                <div th:if="${tenantEntry.value != null and !#lists.isEmpty(tenantEntry.value)}" class="row">
                     <div th:each="product : ${tenantEntry.value}" class="col-md-6 col-lg-4 mb-3">
-                        <div class="card product-card h-100"
-                             th:classappend="${product.stockLevel <= product.lowStockThreshold} ? 'low-stock' : 
-                                           (${product.stockLevel <= product.lowStockThreshold * 2} ? 'medium-stock' : 'high-stock')">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <small class="text-muted" th:text="${product.sku}">SKU</small>
-                                <span class="badge" 
-                                      th:classappend="${product.stockLevel <= product.lowStockThreshold} ? 'bg-danger' : 
-                                                    (${product.stockLevel <= product.lowStockThreshold * 2} ? 'bg-warning' : 'bg-success')"
-                                      th:text="${product.stockLevel <= product.lowStockThreshold} ? 'Low Stock' : 
-                                              (${product.stockLevel <= product.lowStockThreshold * 2} ? 'Medium Stock' : 'In Stock'">
-                                    Stock Status
-                                </span>
+                        <div class="card">
+                            <div class="card-header">
+                                <span th:text="${product.sku}">SKU</span>
                             </div>
                             <div class="card-body">
-                                <h6 class="card-title" th:text="${product.title}">Product Title</h6>
-                                <p class="card-text small text-muted" th:text="${product.description}">Product description</p>
-                                
-                                <div class="row text-center mt-3">
-                                    <div class="col-4">
-                                        <strong th:text="'$' + ${product.price}">$0.00</strong>
-                                        <br><small class="text-muted">Price</small>
-                                    </div>
-                                    <div class="col-4">
-                                        <strong th:text="${product.stockLevel}">0</strong>
-                                        <br><small class="text-muted">Stock</small>
-                                    </div>
-                                    <div class="col-4">
-                                        <strong th:text="${product.category}">Category</strong>
-                                        <br><small class="text-muted">Category</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">
-                                    Low Stock Threshold: <span th:text="${product.lowStockThreshold}">5</span>
-                                </small>
-                                <br>
-                                <small class="text-muted" th:if="${product.etsyProductId}">
-                                    External ID: <span th:text="${product.etsyProductId}">EXT_ID</span>
-                                </small>
+                                <h6 th:text="${product.title}">Product Title</h6>
+                                <p th:text="${product.description}">Description</p>
+                                <p>Price: <span th:text="${product.price}">$0.00</span></p>
+                                <p>Stock: <span th:text="${product.stockLevel}">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -204,10 +185,16 @@
                     No products found for tenant <strong th:text="${tenantEntry.key}">TENANT</strong>
                 </div>
             </div>
-        </div>
-
-        <!-- No Data Message -->
+        </div>        <!-- No Data Message -->
         <div th:if="${tenantProducts == null or #maps.isEmpty(tenantProducts)}" class="text-center py-5">
+            <!-- DEBUG: No Data Debug Info -->
+            <div class="alert alert-danger">
+                <strong>No Data Debug Info:</strong>
+                <br>tenantProducts is null: <span th:text="${tenantProducts == null}">true</span>
+                <br>tenantProducts size: <span th:text="${tenantProducts != null ? #maps.size(tenantProducts) : 'NULL'}">NULL</span>
+                <br>tenantProducts isEmpty: <span th:text="${tenantProducts != null ? #maps.isEmpty(tenantProducts) : 'NULL'}">NULL</span>
+            </div>
+            
             <div class="card">
                 <div class="card-body">
                     <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
