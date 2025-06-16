@@ -31,7 +31,6 @@ import java.util.Locale;
  * - Administrative users with proper roles
  * - Sample products with realistic inventory data
  * - Tenant-specific configurations
- * 
  * The data loader runs only in 'dev' profile and ensures complete isolation
  * between tenant data while maintaining consistent data structure.
  * Schema and table creation is handled by MultiTenantFlywayConfig.
@@ -40,31 +39,28 @@ import java.util.Locale;
  * @version 1.0
  * @since 2025
  */
+@Slf4j
 @Component
 @Profile("dev") // Re-enabled after fixing schema case issues
 @Order(2) // Run after MultiTenantFlywayConfig (1)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataLoader.class);
-    
+
     private final DataSource dataSource;
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
-    private final ProductRepository productRepository; // Configuration for tenant setup - Real company-based tenant schemas
-    // Note: 'stockify' tenant is reserved for super admin and created by SuperAdminInitializer
-
-     
-
+    private final ProductRepository productRepository;
     private static final List<String> TENANT_IDS = Arrays.asList(
         "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
-    );// Sample data configurations - 3 users per tenant
+    );    // Sample data configurations - 3 users per tenant (no SuperAdmin for regular tenants)
+
     private static final List<SampleUser> SAMPLE_USERS = Arrays.asList(
         new SampleUser("admin", "admin123", "ADMIN"),
         new SampleUser("operator", "operator123", "USER"),
         new SampleUser("manager", "manager123", "USER")
-    );    private static final List<SampleProduct> SAMPLE_PRODUCTS = Arrays.asList(
+    );private static final List<SampleProduct> SAMPLE_PRODUCTS = Arrays.asList(
         // Electronics category
         new SampleProduct("ELEC-001", "Wireless Bluetooth Headphones", "High-quality wireless headphones with noise cancellation", "Electronics", "149.99", 35, 5),
         new SampleProduct("ELEC-002", "USB-C Charging Cable", "Fast charging USB-C cable with durable braided design", "Electronics", "19.99", 100, 10),
@@ -93,11 +89,10 @@ public class DataLoader implements CommandLineRunner {
                 log.info("🔄 Processing tenant: {}", tenantId);
                 initializeTenantData(tenantId);
                 log.info("✅ Completed processing tenant: {}", tenantId);
-            }
-              log.info("✅ Multi-Tenant Data Loader completed successfully!");
+            }            log.info("✅ Multi-Tenant Data Loader completed successfully!");
             log.info("📊 Initialized {} tenants with sample data", TENANT_IDS.size());
             log.info("👥 Each tenant has {} users and {} products", SAMPLE_USERS.size(), SAMPLE_PRODUCTS.size());
-            log.info("🔑 Public tenant also has a SuperAdmin user with full privileges");
+            log.info("🔑 Only the 'public' tenant has a SuperAdmin user with full privileges");
             log.warn("⚠️ Remember to change default passwords in production!");
             } catch (Exception e) {
             log.error("❌ Error during data loading: {}", e.getMessage(), e);
@@ -110,25 +105,19 @@ public class DataLoader implements CommandLineRunner {
      * Initialize data for a specific tenant
      */
     @Transactional
-    private void initializeTenantData(String tenantId) {
+    protected void initializeTenantData(String tenantId) {
         log.info("🏢 Initializing data for tenant: {}", tenantId);
         
         try {
             // Set tenant context for this initialization
             TenantContext.setCurrentTenant(tenantId);
             log.debug("🔄 Set tenant context to: {}", tenantId);
-              // Special handling for 'stockify' tenant (super admin tenant)
-            if ("stockify".equals(tenantId)) {
-                log.info("🏛️ Stockify platform tenant - super admin already created by SuperAdminInitializer");
-                initializeTenantConfig(tenantId);
-                return;
-            }
             
-            // Special handling for 'public' tenant (default tenant) - create superadmin
+            // Special handling for 'public' tenant (default tenant) - create superadmin ONLY
             if ("public".equals(tenantId)) {
-                log.info("🌐 Public tenant - initializing default tenant data with superadmin");
+                log.info("🌐 Public tenant - initializing with SuperAdmin privileges");
                 // Check if superadmin already exists
-                if (!appUserRepository.findByUsername("superadmin").isPresent()) {
+                if (appUserRepository.findByUsername("superadmin").isEmpty()) {
                     createSuperAdminForPublicTenant();
                 } else {
                     log.info("🔑 SuperAdmin already exists in public tenant");
@@ -141,7 +130,7 @@ public class DataLoader implements CommandLineRunner {
                 return;
             }
             
-            // Initialize users
+            // Initialize regular users (no SuperAdmin for non-public tenants)
             initializeTenantUsers(tenantId);
             
             // Initialize products
@@ -160,11 +149,11 @@ public class DataLoader implements CommandLineRunner {
             TenantContext.clear();
             log.debug("🧹 Cleared tenant context for: {}", tenantId);
         }
-    }    /**
+    }/**
      * Check if data is already loaded for the tenant
      */
     @Transactional(readOnly = true)
-    private boolean isDataAlreadyLoaded(String tenantId) {
+    protected boolean isDataAlreadyLoaded(String tenantId) {
         try {
             // Set tenant context to check in the correct schema
             TenantContext.setCurrentTenant(tenantId);
@@ -195,7 +184,7 @@ public class DataLoader implements CommandLineRunner {
      * Initialize users for the tenant
      */
     @Transactional
-    private void initializeTenantUsers(String tenantId) {
+    protected void initializeTenantUsers(String tenantId) {
         log.info("👥 Creating users for tenant: {}", tenantId);
         
         int createdUserCount = 0;
@@ -242,7 +231,7 @@ public class DataLoader implements CommandLineRunner {
      * Initialize products for the tenant
      */
     @Transactional
-    private void initializeTenantProducts(String tenantId) {
+    protected void initializeTenantProducts(String tenantId) {
         log.info("📦 Creating products for tenant: {}", tenantId);
         
         int createdProductCount = 0;
@@ -330,8 +319,8 @@ public class DataLoader implements CommandLineRunner {
      */
     private String getTenantDisplayName(String tenantId) {
         return switch (tenantId.toLowerCase()) {
-            case "public" -> "Default Public Tenant";
-            case "stockify" -> "Stockify Platform (Super Admin)";
+            case "public" -> "Default Public Tenant (SuperAdmin)";
+            case "stockify" -> "Stockify Platform";
             case "acme_corp" -> "ACME Corporation";
             case "global_trade" -> "Global Trade Solutions";
             case "artisan_crafts" -> "Artisan Crafts Co.";
@@ -351,29 +340,31 @@ public class DataLoader implements CommandLineRunner {
         
         // All schema names in lowercase for consistency with H2 settings
         return tenantIdentifier.toLowerCase(Locale.ROOT);    }    /**
-     * Create SuperAdmin user for public tenant
-     * This creates a superadmin user with SUPER_ADMIN role in the public tenant
+     * Create SuperAdmin user for public tenant ONLY
+     * This creates a superadmin user with SUPER_ADMIN role exclusively in the public tenant.
+     * Other tenants will not have SuperAdmin users for security and access control.
      */
     @Transactional
-    private void createSuperAdminForPublicTenant() {
+    protected void createSuperAdminForPublicTenant() {
         try {
-            log.info("🔑 Creating SuperAdmin user for public tenant");
-            
+            log.info("🔑 Creating SuperAdmin user ONLY for public tenant");
+
             // Ensure we're in public tenant context
             TenantContext.setCurrentTenant("public");
-            
+
             // Create superadmin user DTO
             UserCreateDTO superAdminDto = new UserCreateDTO();
             superAdminDto.setUsername("superadmin");
             superAdminDto.setPassword("superadmin123"); // Strong password - should be changed in production
             superAdminDto.setRole("SUPER_ADMIN");
-            
+
             // Create the superadmin user
             appUserService.saveUser(superAdminDto);
-            
+
             log.info("✅ Successfully created SuperAdmin user for public tenant");
+            log.info("ℹ️ SuperAdmin will NOT be created for other tenants");
             log.warn("⚠️ Default SuperAdmin password is 'superadmin123' - CHANGE THIS IN PRODUCTION!");
-            
+
         } catch (Exception e) {
             log.error("❌ Failed to create SuperAdmin user for public tenant: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create SuperAdmin for public tenant", e);

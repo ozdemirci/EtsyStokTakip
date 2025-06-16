@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>Stockify</name>
-    <description>Spring Boot ile Etsy stok takip uygulaması</description>
+    <description>Stockify</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
