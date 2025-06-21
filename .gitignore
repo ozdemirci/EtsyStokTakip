@@ -2,3 +2,4 @@
 /.vscode
 /copy-logs.sh
 /target
+/logs

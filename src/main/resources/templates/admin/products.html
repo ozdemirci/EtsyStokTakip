@@ -201,9 +201,8 @@
                                                     <i class="bi bi-inbox display-4"></i>
                                                     <div class="mt-2">No products available</div>
                                                 </td>
-                                            </tr>
-                                            <tr th:each="product : ${products}" 
-                                                th:class="${product.stockLevel == 0} ? 'out-of-stock' : (${product.stockLevel <= product.lowStockThreshold} ? 'low-stock' : '')">
+                                            </tr>                                            <tr th:each="product : ${products}" 
+                                                th:class="${product.stockLevel == 0 ? 'out-of-stock' : (product.stockLevel <= product.lowStockThreshold ? 'low-stock' : '')}">
                                                 <td>
                                                     <div class="fw-bold" th:text="${product.title}">Product Title</div>
                                                     <small class="text-muted" th:text="${product.description}">Description</small>
@@ -218,7 +217,7 @@
                                                     <span class="fw-bold" th:text="'$' + ${product.price}">$0.00</span>
                                                 </td>
                                                 <td>
-                                                    <span th:class="${product.stockLevel == 0} ? 'badge bg-danger' : (${product.stockLevel <= product.lowStockThreshold} ? 'badge bg-warning' : 'badge bg-success')" 
+                                                    <span th:class="${product.stockLevel == 0 ? 'badge bg-danger' : (product.stockLevel <= product.lowStockThreshold ? 'badge bg-warning' : 'badge bg-success')}" 
                                                           th:text="${product.stockLevel}">0</span>
                                                     <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
                                                 </td>
@@ -370,10 +369,9 @@
                                                 </td>
                                                 <td>
                                                     <strong th:text="${category.name}">Category Name</strong>
-                                                </td>
-                                                <td>
+                                                </td>                                                <td>
                                                     <span th:text="${category.description ?: 'No description'}" 
-                                                          th:class="${category.description == null} ? 'text-muted' : ''">Description</span>
+                                                          th:class="${category.description == null ? 'text-muted' : ''}">Description</span>
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-secondary" th:text="${category.sortOrder}">1</span>
@@ -387,11 +385,16 @@
                                                 </td>                                                <td>
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-outline-primary btn-action" 
-                                                                title="Edit" th:onclick="|editCategory(${category.id})|">
+                                                                title="Edit" 
+                                                                th:data-category-id="${category.id}"
+                                                                onclick="editCategory(this.getAttribute('data-category-id'))">
                                                             <i class="bi bi-pencil"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-outline-danger btn-action" 
-                                                                title="Delete" th:onclick="|deleteCategory(${category.id}, '${category.name}')|">
+                                                                title="Delete" 
+                                                                th:data-category-id="${category.id}"
+                                                                th:data-category-name="${category.name}"
+                                                                onclick="deleteCategory(this.getAttribute('data-category-id'), this.getAttribute('data-category-name'))">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
