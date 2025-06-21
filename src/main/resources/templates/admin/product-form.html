@@ -25,8 +25,14 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/admin/dashboard">
                 <i class="bi bi-boxes"></i> Stockify Admin
-            </a>
-            <div class="navbar-nav ms-auto">
+            </a>            <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                          id="navNotificationBadge" 
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i> 
                     <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
@@ -42,8 +48,7 @@
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-2 sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
+                <div class="position-sticky pt-3">                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
@@ -60,8 +65,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/products/low-stock">
-                                <i class="bi bi-exclamation-triangle"></i> Low Stock
+                            <a class="nav-link" href="/admin/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                                <span class="badge bg-danger ms-2" id="sidebarNotificationBadge" 
+                                      th:if="${unreadNotifications > 0}"
+                                      th:text="${unreadNotifications}" style="display: none;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -70,12 +78,11 @@
 
             <!-- Main Content -->
             <main class="col-md-10 ms-sm-auto main-content">
-                <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <!-- Header -->                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
                         <i class="bi bi-box-seam"></i> 
-                        <span th:if="${product.id}">Edit Product</span>
-                        <span th:unless="${product.id}">Add New Product</span>
+                        <span th:if="${product != null and product.id != null}">Edit Product</span>
+                        <span th:if="${product == null or product.id == null}">Add New Product</span>
                     </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/admin/products" class="btn btn-outline-secondary">
@@ -103,8 +110,7 @@
                                     <i class="bi bi-info-circle"></i> Product Information
                                 </h5>
                             </div>
-                            <div class="card-body">
-                                <form th:action="${product.id} ? @{/admin/products/{id}(id=${product.id})} : @{/admin/products}" 
+                            <div class="card-body">                                <form th:action="${product != null and product.id != null} ? @{/admin/products/{id}(id=${product.id})} : @{/admin/products}" 
                                       th:object="${product}" method="post">
                                     
                                     <div class="row mb-3">
@@ -129,23 +135,21 @@
                                         <div class="form-text">Detailed description of the product</div>
                                     </div>
 
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
+                                    <div class="row mb-3">                                        <div class="col-md-6">
                                             <label for="category" class="form-label required">Category</label>
-                                            <select class="form-select" id="category" th:field="*{category}" required>
+                                            <select class="form-select" id="category" name="category" required>
                                                 <option value="">Select a category</option>
-                                                <option value="Electronics">Electronics</option>
-                                                <option value="Clothing">Clothing</option>
-                                                <option value="Books">Books</option>
-                                                <option value="Home & Garden">Home & Garden</option>
-                                                <option value="Sports">Sports</option>
-                                                <option value="Toys">Toys</option>
-                                                <option value="Food & Beverages">Food & Beverages</option>
-                                                <option value="Health & Beauty">Health & Beauty</option>
-                                                <option value="Automotive">Automotive</option>
-                                                <option value="Office Supplies">Office Supplies</option>
-                                                <option value="Other">Other</option>
+                                                <option th:each="category : ${categories}" 
+                                                        th:value="${category.name}" 
+                                                        th:text="${category.name}"
+                                                        th:selected="${product != null and product.category == category.name}">
+                                                    Category Name
+                                                </option>
                                             </select>
+                                            <div class="form-text">
+                                                Choose a category for this product. 
+                                                <a href="/admin/categories" target="_blank">Manage Categories</a>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="price" class="form-label required">Price ($)</label>
@@ -177,12 +181,11 @@
                                         <input type="text" class="form-control" id="etsyProductId" th:field="*{etsyProductId}" 
                                                placeholder="Enter Etsy product ID (optional)">
                                         <div class="form-text">Link to Etsy marketplace (if applicable)</div>
-                                    </div>
-
-                                    <div class="row mb-4">
+                                    </div>                                    <div class="row mb-4">
                                         <div class="col-md-6">
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="isActive" th:field="*{isActive}">
+                                                <input class="form-check-input" type="checkbox" id="isActive" name="isActive" th:checked="${product.isActive}" value="true">
+                                                <input type="hidden" name="_isActive" value="on">
                                                 <label class="form-check-label" for="isActive">
                                                     <i class="bi bi-check-circle"></i> Active Product
                                                 </label>
@@ -191,7 +194,8 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="isFeatured" th:field="*{isFeatured}">
+                                                <input class="form-check-input" type="checkbox" id="isFeatured" name="isFeatured" th:checked="${product.isFeatured}" value="true">
+                                                <input type="hidden" name="_isFeatured" value="on">
                                                 <label class="form-check-label" for="isFeatured">
                                                     <i class="bi bi-star"></i> Featured Product
                                                 </label>
@@ -203,11 +207,10 @@
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                         <a href="/admin/products" class="btn btn-outline-secondary me-md-2">
                                             <i class="bi bi-x-circle"></i> Cancel
-                                        </a>
-                                        <button type="submit" class="btn btn-success">
+                                        </a>                                        <button type="submit" class="btn btn-success">
                                             <i class="bi bi-check-circle"></i> 
-                                            <span th:if="${product.id}">Update Product</span>
-                                            <span th:unless="${product.id}">Create Product</span>
+                                            <span th:if="${product != null and product.id != null}">Update Product</span>
+                                            <span th:if="${product == null or product.id == null}">Create Product</span>
                                         </button>
                                     </div>
                                 </form>
@@ -233,28 +236,29 @@
                                         <li>Choose relevant categories for better organization</li>
                                         <li>Featured products appear prominently in listings</li>
                                     </ul>
-                                </div>
-
-                                <div th:if="${product.id}" class="alert alert-light">
+                                </div>                                <div th:if="${product != null and product.id != null}" class="alert alert-light">
                                     <h6><i class="bi bi-clock"></i> Product Details</h6>
                                     <div class="small">
-                                        <div><strong>Created:</strong> <span th:text="${#temporals.format(product.createdAt, 'MMM dd, yyyy HH:mm')}">Date</span></div>
-                                        <div><strong>Updated:</strong> <span th:text="${#temporals.format(product.updatedAt, 'MMM dd, yyyy HH:mm')}">Date</span></div>
+                                        <div th:if="${product.createdAt != null}"><strong>Created:</strong> <span th:text="${#temporals.format(product.createdAt, 'MMM dd, yyyy HH:mm')}">Date</span></div>
+                                        <div th:if="${product.updatedAt != null}"><strong>Updated:</strong> <span th:text="${#temporals.format(product.updatedAt, 'MMM dd, yyyy HH:mm')}">Date</span></div>
                                         <div><strong>Product ID:</strong> <span th:text="${product.id}">ID</span></div>
                                     </div>
                                 </div>                                <div class="alert alert-warning">
                                     <h6><i class="bi bi-exclamation-triangle"></i> Stock Status</h6>
                                     <div class="small">
-                                        <div th:if="${product.id != null}">
+                                        <div th:if="${product != null and product.id != null}">
                                             Current Stock: <strong th:text="${product.stockLevel}">0</strong>
                                         </div>
-                                        <div th:if="${product.id != null}">
+                                        <div th:if="${product != null and product.id != null}">
                                             Alert Threshold: <strong th:text="${product.lowStockThreshold}">5</strong>
                                         </div>
-                                        <div th:if="${product.id != null}">
+                                        <div th:if="${product != null and product.id != null}">
                                             <span th:if="${product.stockLevel == 0}" class="badge bg-danger">Out of Stock</span>
                                             <span th:if="${product.stockLevel > 0 and product.stockLevel <= product.lowStockThreshold}" class="badge bg-warning">Low Stock</span>
                                             <span th:if="${product.stockLevel > product.lowStockThreshold}" class="badge bg-success">In Stock</span>
+                                        </div>
+                                        <div th:if="${product == null or product.id == null}" class="text-muted">
+                                            Stock status will be available after creating the product.
                                         </div>
                                     </div>
                                 </div>
@@ -268,8 +272,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Form validation and interactivity -->
-    <script>
+    <!-- Form validation and interactivity -->    <script>
         // Auto-calculate and show stock status
         document.addEventListener('DOMContentLoaded', function() {
             const stockLevelInput = document.getElementById('stockLevel');
@@ -297,6 +300,23 @@
             
             // Initial status update
             updateStockStatus();
+            
+            // Fix checkbox toggle behavior
+            const isActiveCheckbox = document.getElementById('isActive');
+            const isFeaturedCheckbox = document.getElementById('isFeatured');
+            
+            // Ensure checkboxes work properly
+            if (isActiveCheckbox) {
+                isActiveCheckbox.addEventListener('change', function() {
+                    console.log('Active checkbox changed to:', this.checked);
+                });
+            }
+            
+            if (isFeaturedCheckbox) {
+                isFeaturedCheckbox.addEventListener('change', function() {
+                    console.log('Featured checkbox changed to:', this.checked);
+                });
+            }
         });
     </script>
 </body>

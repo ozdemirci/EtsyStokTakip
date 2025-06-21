@@ -6,8 +6,7 @@
     <title>Product Management - Stockify Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .navbar-brand { font-weight: bold; }
+    <style>        .navbar-brand { font-weight: bold; }
         .sidebar { height: 100vh; background-color: #f8f9fa; }
         .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
         .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
@@ -20,6 +19,7 @@
         .out-of-stock { background-color: #f8d7da; }
         .search-box { max-width: 300px; }
         .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
+        .category-color { width: 20px; height: 20px; border-radius: 50%; display: inline-block; border: 1px solid #dee2e6; }
     </style>
 </head>
 <body>
@@ -100,29 +100,35 @@
                             </a>
                         </div>
                     </div>
-                </div>
-
-                <!-- Product Tabs -->
+                </div>                <!-- Product Tabs -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <ul class="nav nav-tabs" id="productTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
+                        <ul class="nav nav-tabs" id="productTabs" role="tablist">                            <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="all-products-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#all-products" type="button" role="tab">
+                                        data-bs-target="#all-products" type="button" role="tab"
+                                        onclick="activateAllProductsTab()">
                                     <i class="bi bi-box-seam"></i> All Products
                                     <span class="badge bg-secondary ms-2" th:text="${totalProducts ?: 0}">0</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="low-stock-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#low-stock" type="button" role="tab">
+                                        data-bs-target="#low-stock" type="button" role="tab"
+                                        onclick="activateLowStockTab()">
                                     <i class="bi bi-exclamation-triangle"></i> Low Stock
                                     <span class="badge bg-warning ms-2" th:text="${lowStockCount ?: 0}">0</span>
+                                </button>
+                            </li><li class="nav-item" role="presentation">
+                                <button class="nav-link" id="categories-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#categories" type="button" role="tab"
+                                        onclick="activateCategoriesTab()">
+                                    <i class="bi bi-tags"></i> Categories
+                                    <span class="badge bg-info ms-2" th:text="${categories != null ? categories.size() : 0}">0</span>
                                 </button>
                             </li>
                         </ul>
                     </div>
-                </div>                <!-- Success/Error Messages -->
+                </div><!-- Success/Error Messages -->
                 <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -136,10 +142,9 @@
                 <div class="tab-content" id="productTabsContent">
                     <!-- All Products Tab -->
                     <div class="tab-pane fade show active" id="all-products" role="tabpanel">
-                        <!-- Search and Filters -->
-                        <div class="card mb-4">
+                        <!-- Search and Filters -->                        <div class="card mb-4">
                             <div class="card-body">
-                                <form method="get" action="/admin/products" class="row g-3">
+                                <form method="get" action="/admin/products" class="row g-3" id="productSearchForm">
                                     <div class="col-md-6">
                                         <div class="input-group search-box">
                                             <input type="text" class="form-control" name="search" th:value="${search}" 
@@ -150,8 +155,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <select class="form-select" name="sortBy" th:value="${sortBy}">
-                                            <option value="title" th:selected="${sortBy == 'title'}">Sort by Title</option>
+                                        <select class="form-select" name="sortBy" id="sortBySelect">
+                                            <option value="title" th:selected="${sortBy == null or sortBy == 'title'}">Sort by Title</option>
                                             <option value="category" th:selected="${sortBy == 'category'}">Sort by Category</option>
                                             <option value="price" th:selected="${sortBy == 'price'}">Sort by Price</option>
                                             <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock</option>
@@ -159,8 +164,8 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <select class="form-select" name="sortDir" th:value="${sortDir}">
-                                            <option value="asc" th:selected="${sortDir == 'asc'}">Ascending</option>
+                                        <select class="form-select" name="sortDir" id="sortDirSelect">
+                                            <option value="asc" th:selected="${sortDir == null or sortDir == 'asc'}">Ascending</option>
                                             <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
                                         </select>
                                     </div>
@@ -317,11 +322,86 @@
                                                     </div>
                                                     <div class="mt-2">Loading low stock products...</div>
                                                 </td>
+                                            </tr>                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>                        </div>
+                    </div>
+
+                    <!-- Categories Tab -->
+                    <div class="tab-pane fade" id="categories" role="tabpanel">
+                        <!-- Categories Management -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-tags"></i> Product Categories
+                                </h5>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                    <i class="bi bi-plus-circle"></i> Add Category
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Color</th>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Sort Order</th>
+                                                <th>Products</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:if="${categories == null or categories.empty}">
+                                                <td colspan="7" class="text-center text-muted py-4">
+                                                    <i class="bi bi-tags display-4"></i>
+                                                    <div class="mt-2">No categories available</div>
+                                                    <div class="text-muted">Create your first category to get started</div>
+                                                </td>
+                                            </tr>
+                                            <tr th:each="category : ${categories}">
+                                                <td>
+                                                    <span class="category-color" 
+                                                          th:style="'background-color: ' + ${category.color ?: '#6c757d'}" 
+                                                          th:title="${category.color ?: 'No color'}"></span>
+                                                </td>
+                                                <td>
+                                                    <strong th:text="${category.name}">Category Name</strong>
+                                                </td>
+                                                <td>
+                                                    <span th:text="${category.description ?: 'No description'}" 
+                                                          th:class="${category.description == null} ? 'text-muted' : ''">Description</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary" th:text="${category.sortOrder}">1</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info" th:text="${category.productCount ?: 0}">0</span>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${category.active}" class="badge bg-success">Active</span>
+                                                    <span th:unless="${category.active}" class="badge bg-secondary">Inactive</span>
+                                                </td>                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-outline-primary btn-action" 
+                                                                title="Edit" th:onclick="|editCategory(${category.id})|">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger btn-action" 
+                                                                title="Delete" th:onclick="|deleteCategory(${category.id}, '${category.name}')|">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>                        </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -384,145 +464,637 @@
                     </form>
                 </div>
             </div>
+        </div>    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addCategoryForm" method="post" action="/admin/products/categories">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-plus-circle"></i> Add New Category
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryColor" class="form-label">Color</label>
+                            <input type="color" class="form-control form-control-color" id="categoryColor" name="color" value="#6c757d">
+                        </div>
+                        <div class="mb-3">
+                            <label for="categorySortOrder" class="form-label">Sort Order</label>
+                            <input type="number" class="form-control" id="categorySortOrder" name="sortOrder" value="1" min="1">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="categoryActive" name="active" checked>
+                            <label class="form-check-label" for="categoryActive">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check"></i> Add Category
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editCategoryForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-pencil"></i> Edit Category
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editCategoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="editCategoryName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCategoryDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editCategoryDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCategoryColor" class="form-label">Color</label>
+                            <input type="color" class="form-control form-control-color" id="editCategoryColor" name="color">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCategorySortOrder" class="form-label">Sort Order</label>
+                            <input type="number" class="form-control" id="editCategorySortOrder" name="sortOrder" min="1">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="editCategoryActive" name="active">
+                            <label class="form-check-label" for="editCategoryActive">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Update Category
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Low Stock functionality
+        /**
+         * Product Management Admin Panel JavaScript
+         * Handles tab navigation, category management, low stock monitoring, and form interactions
+         */
+
+        // ================================
+        // TAB MANAGEMENT FUNCTIONS
+        // ================================
+
+        /**
+         * Activates the All Products tab and updates URL
+         */
+        function activateAllProductsTab() {
+            switchToTab('all-products-tab', 'all-products');
+            updateUrl(null); // Remove tab parameter for default tab
+        }
+
+        /**
+         * Activates the Low Stock tab, loads data, and updates URL
+         */
+        function activateLowStockTab() {
+            switchToTab('low-stock-tab', 'low-stock');
+            loadLowStockProducts();
+            updateUrl('low-stock');
+        }
+
+        /**
+         * Activates the Categories tab and updates URL
+         */
+        function activateCategoriesTab() {
+            switchToTab('categories-tab', 'categories');
+            updateUrl('categories');
+        }
+
+        /**
+         * Generic function to switch between tabs
+         * @param {string} tabId - ID of the tab button to activate
+         * @param {string} contentId - ID of the tab content to show
+         */
+        function switchToTab(tabId, contentId) {
+            const targetTab = document.getElementById(tabId);
+            const targetContent = document.getElementById(contentId);
+            
+            if (!targetTab || !targetContent) {
+                console.warn(`Tab elements not found: ${tabId}, ${contentId}`);
+                return;
+            }
+
+            // Deactivate all tabs and content
+            document.querySelectorAll('.nav-link').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-pane').forEach(content => {
+                content.classList.remove('show', 'active');
+            });
+
+            // Activate target tab and content
+            targetTab.classList.add('active');
+            targetContent.classList.add('show', 'active');
+        }
+
+        /**
+         * Updates the browser URL with the active tab parameter
+         * @param {string|null} tabName - Name of the tab or null to remove parameter
+         */
+        function updateUrl(tabName) {
+            const url = new URL(window.location);
+            if (tabName) {
+                url.searchParams.set('tab', tabName);
+            } else {
+                url.searchParams.delete('tab');
+            }
+            window.history.pushState({}, '', url);
+        }
+
+        // ================================
+        // CATEGORY MANAGEMENT FUNCTIONS
+        // ================================
+
+        /**
+         * Opens the edit category modal with populated data
+         * @param {number} categoryId - ID of the category to edit
+         */
+        function editCategory(categoryId) {
+            if (!categoryId) {
+                console.error('Category ID is required');
+                return;
+            }
+
+            showLoadingState('Loading category data...');
+
+            fetch(`/admin/products/categories/${categoryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(category => {
+                    populateEditForm(category);
+                    showEditModal(categoryId);
+                })
+                .catch(error => {
+                    console.error('Error fetching category:', error);
+                    showErrorMessage('Error loading category data. Please try again.');
+                })
+                .finally(() => {
+                    hideLoadingState();
+                });
+        }
+
+        /**
+         * Deletes a category after confirmation
+         * @param {number} categoryId - ID of the category to delete
+         * @param {string} categoryName - Name of the category for confirmation
+         */
+        function deleteCategory(categoryId, categoryName) {
+            if (!categoryId || !categoryName) {
+                console.error('Category ID and name are required');
+                return;
+            }
+
+            const confirmMessage = `Are you sure you want to delete the category "${categoryName}"?\n\nThis action cannot be undone.`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            submitDeleteForm(categoryId);
+        }
+
+        /**
+         * Refreshes the categories list and updates badge count
+         */
+        function loadCategories() {
+            fetch('/admin/products/categories/list')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(categories => {
+                    updateCategoriesBadge(categories.length);
+                })
+                .catch(error => {
+                    console.error('Error loading categories:', error);
+                });
+        }
+
+        /**
+         * Populates the edit form with category data
+         * @param {Object} category - Category data object
+         */
+        function populateEditForm(category) {
+            const fields = {
+                'editCategoryName': category.name || '',
+                'editCategoryDescription': category.description || '',
+                'editCategoryColor': category.color || '#6c757d',
+                'editCategorySortOrder': category.sortOrder || 1
+            };
+
+            Object.entries(fields).forEach(([fieldId, value]) => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = value;
+                }
+            });
+
+            const activeCheckbox = document.getElementById('editCategoryActive');
+            if (activeCheckbox) {
+                activeCheckbox.checked = category.active === true;
+            }
+        }
+
+        /**
+         * Shows the edit modal and sets the form action
+         * @param {number} categoryId - ID of the category being edited
+         */
+        function showEditModal(categoryId) {
+            const form = document.getElementById('editCategoryForm');
+            const modal = document.getElementById('editCategoryModal');
+            
+            if (form) {
+                form.action = `/admin/products/categories/${categoryId}`;
+            }
+            
+            if (modal) {
+                new bootstrap.Modal(modal).show();
+            }
+        }
+
+        /**
+         * Creates and submits a delete form for the category
+         * @param {number} categoryId - ID of the category to delete
+         */
+        function submitDeleteForm(categoryId) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/products/categories/${categoryId}/delete`;
+
+            // Add CSRF token if available
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken.content;
+                form.appendChild(csrfInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        /**
+         * Updates the categories tab badge with the count
+         * @param {number} count - Number of categories
+         */
+        function updateCategoriesBadge(count) {
+            const badge = document.querySelector('#categories-tab .badge');
+            if (badge) {
+                badge.textContent = count;
+            }
+        }
+
+        // ================================
+        // LOW STOCK MANAGEMENT FUNCTIONS
+        // ================================
+
+        /**
+         * Loads and displays low stock products
+         */
         function loadLowStockProducts() {
             const tableBody = document.getElementById('lowStockTableBody');
             
-            // Show loading state
+            if (!tableBody) {
+                console.error('Low stock table body not found');
+                return;
+            }
+
+            showLowStockLoading(tableBody);
+
+            fetch('/admin/products/low-stock-data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayLowStockProducts(tableBody, data);
+                    updateLowStockBadge(data.length);
+                })
+                .catch(error => {
+                    console.error('Error loading low stock products:', error);
+                    showLowStockError(tableBody);
+                });
+        }
+
+        /**
+         * Shows loading state in the low stock table
+         * @param {HTMLElement} tableBody - Table body element
+         */
+        function showLowStockLoading(tableBody) {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center text-muted py-4">
-                        <div class="spinner-border" role="status">
+                        <div class="spinner-border" role="status" aria-hidden="true">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                         <div class="mt-2">Loading low stock products...</div>
                     </td>
                 </tr>
             `;
-            
-            // Fetch low stock products from server
-            fetch('/admin/products/low-stock-data')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        tableBody.innerHTML = `
-                            <tr>
-                                <td colspan="6" class="text-center text-success py-4">
-                                    <i class="bi bi-check-circle display-4"></i>
-                                    <div class="mt-2">Great! No products are currently low on stock.</div>
-                                </td>
-                            </tr>
-                        `;
-                    } else {
-                        tableBody.innerHTML = data.map(product => `
-                            <tr class="low-stock">
-                                <td>
-                                    <div class="fw-bold">${product.title}</div>
-                                    <small class="text-muted">${product.description || ''}</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-secondary">${product.category}</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger">${product.stockLevel}</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-warning">${product.lowStockThreshold}</span>
-                                </td>
-                                <td>
-                                    ${product.stockLevel === 0 ? 
-                                        '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Out of Stock</span>' :
-                                        '<span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock</span>'
-                                    }
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="/admin/products/${product.id}/edit" 
-                                           class="btn btn-outline-primary btn-action" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-outline-success btn-action" 
-                                                title="Quick Restock" onclick="quickRestock(${product.id})">
-                                            <i class="bi bi-plus-circle"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('');
-                        
-                        // Update badge count
-                        const badge = document.querySelector('#low-stock-tab .badge');
-                        if (badge) {
-                            badge.textContent = data.length;
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading low stock products:', error);
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center text-danger py-4">
-                                <i class="bi bi-exclamation-triangle display-4"></i>
-                                <div class="mt-2">Error loading low stock products. Please try again.</div>
-                                <button class="btn btn-outline-primary mt-2" onclick="loadLowStockProducts()">
-                                    <i class="bi bi-arrow-clockwise"></i> Retry
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
         }
-        
+
+        /**
+         * Displays low stock products in the table
+         * @param {HTMLElement} tableBody - Table body element
+         * @param {Array} products - Array of low stock products
+         */
+        function displayLowStockProducts(tableBody, products) {
+            if (products.length === 0) {
+                showNoLowStockProducts(tableBody);
+                return;
+            }
+
+            tableBody.innerHTML = products.map(product => createLowStockProductRow(product)).join('');
+        }
+
+        /**
+         * Shows message when no low stock products are found
+         * @param {HTMLElement} tableBody - Table body element
+         */
+        function showNoLowStockProducts(tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-success py-4">
+                        <i class="bi bi-check-circle display-4" aria-hidden="true"></i>
+                        <div class="mt-2">Great! No products are currently low on stock.</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        /**
+         * Creates a table row for a low stock product
+         * @param {Object} product - Product data object
+         * @returns {string} HTML string for the table row
+         */
+        function createLowStockProductRow(product) {
+            const isOutOfStock = product.stockLevel === 0;
+            const statusBadge = isOutOfStock
+                ? '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Out of Stock</span>'
+                : '<span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock</span>';
+
+            return `
+                <tr class="low-stock">
+                    <td>
+                        <div class="fw-bold">${escapeHtml(product.title)}</div>
+                        <small class="text-muted">${escapeHtml(product.description || '')}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">${escapeHtml(product.category)}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-danger">${product.stockLevel}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning">${product.lowStockThreshold}</span>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="/admin/products/${product.id}/edit" 
+                               class="btn btn-outline-primary btn-action" title="Edit Product">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-outline-success btn-action" 
+                                    title="Quick Restock" onclick="quickRestock(${product.id})">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        /**
+         * Shows error state in the low stock table
+         * @param {HTMLElement} tableBody - Table body element
+         */
+        function showLowStockError(tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-danger py-4">
+                        <i class="bi bi-exclamation-triangle display-4" aria-hidden="true"></i>
+                        <div class="mt-2">Error loading low stock products. Please try again.</div>
+                        <button class="btn btn-outline-primary mt-2" onclick="loadLowStockProducts()">
+                            <i class="bi bi-arrow-clockwise"></i> Retry
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        /**
+         * Updates the low stock tab badge with the count
+         * @param {number} count - Number of low stock products
+         */
+        function updateLowStockBadge(count) {
+            const badge = document.querySelector('#low-stock-tab .badge');
+            if (badge) {
+                badge.textContent = count;
+            }
+        }
+
+        /**
+         * Handles quick restock functionality (placeholder)
+         * @param {number} productId - ID of the product to restock
+         */
         function quickRestock(productId) {
             const quantity = prompt('Enter quantity to add to stock:');
-            if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
-                // This would normally make an AJAX call to update the stock
-                alert(`Added ${quantity} items to product stock. This feature will be implemented with backend integration.`);
-                // After successful update, reload the low stock products
-                // loadLowStockProducts();
+            
+            if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
+                if (quantity !== null) { // User didn't cancel
+                    alert('Please enter a valid positive number.');
+                }
+                return;
+            }
+
+            // TODO: Implement actual restock API call
+            alert(`Added ${quantity} items to product stock. This feature will be implemented with backend integration.`);
+            
+            // After successful update, reload the low stock products
+            // loadLowStockProducts();
+        }
+
+        // ================================
+        // UTILITY FUNCTIONS
+        // ================================
+
+        /**
+         * Escapes HTML special characters to prevent XSS
+         * @param {string} text - Text to escape
+         * @returns {string} Escaped text
+         */
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Shows a loading state message
+         * @param {string} message - Loading message to display
+         */
+        function showLoadingState(message) {
+            // TODO: Implement global loading state if needed
+            console.log('Loading:', message);
+        }
+
+        /**
+         * Hides the loading state
+         */
+        function hideLoadingState() {
+            // TODO: Implement global loading state if needed
+            console.log('Loading complete');
+        }
+
+        /**
+         * Shows an error message to the user
+         * @param {string} message - Error message to display
+         */
+        function showErrorMessage(message) {
+            alert(message); // TODO: Replace with better error display
+        }
+
+        // ================================
+        // FORM HANDLING
+        // ================================
+
+        /**
+         * Sets up auto-submit functionality for sorting dropdowns
+         */
+        function setupSortingAutoSubmit() {
+            const sortBySelect = document.getElementById('sortBySelect');
+            const sortDirSelect = document.getElementById('sortDirSelect');
+            const productSearchForm = document.getElementById('productSearchForm');
+
+            if (!productSearchForm) {
+                console.warn('Product search form not found');
+                return;
+            }
+
+            [sortBySelect, sortDirSelect].forEach(select => {
+                if (select) {
+                    select.addEventListener('change', () => {
+                        productSearchForm.submit();
+                    });
+                }
+            });
+        }
+
+        // ================================
+        // INITIALIZATION
+        // ================================
+
+        /**
+         * Initializes the page based on URL parameters
+         */
+        function initializeActiveTab() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab');
+
+            // Switch to the appropriate tab based on URL parameter
+            switch (activeTab) {
+                case 'low-stock':
+                    if (document.getElementById('low-stock-tab')) {
+                        activateLowStockTab();
+                    }
+                    break;
+                case 'categories':
+                    if (document.getElementById('categories-tab')) {
+                        activateCategoriesTab();
+                    }
+                    break;
+                default:
+                    // Default to all products tab
+                    if (document.getElementById('all-products-tab')) {
+                        activateAllProductsTab();
+                    }
+                    break;
             }
         }
-          // Event listener for tab switching and initial load
+
+        /**
+         * Sets up Bootstrap tab event listeners
+         */
+        function setupTabEventListeners() {
+            const tabs = [
+                { id: 'low-stock-tab', action: loadLowStockProducts, urlParam: 'low-stock' },
+                { id: 'categories-tab', action: null, urlParam: 'categories' },
+                { id: 'all-products-tab', action: null, urlParam: null }
+            ];
+
+            tabs.forEach(({ id, action, urlParam }) => {
+                const tabElement = document.getElementById(id);
+                if (tabElement) {
+                    tabElement.addEventListener('shown.bs.tab', () => {
+                        if (action) action();
+                        updateUrl(urlParam);
+                    });
+                }
+            });
+        }
+
+        // ================================
+        // DOCUMENT READY
+        // ================================
+
+        /**
+         * Main initialization function
+         */
         document.addEventListener('DOMContentLoaded', function() {
-            const lowStockTab = document.getElementById('low-stock-tab');
-            const allProductsTab = document.getElementById('all-products-tab');
-            
-            // Check if we should activate the low-stock tab based on URL parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || '[[${activeTab}]]';
-            
-            if (activeTab === 'low-stock' && lowStockTab) {
-                // Switch to low-stock tab
-                const lowStockTabInstance = new bootstrap.Tab(lowStockTab);
-                lowStockTabInstance.show();
-                loadLowStockProducts();
-            }
-            
-            // Add event listener for when low-stock tab is shown
-            if (lowStockTab) {
-                lowStockTab.addEventListener('shown.bs.tab', function() {
-                    loadLowStockProducts();
-                    // Update URL to reflect active tab
-                    const url = new URL(window.location);
-                    url.searchParams.set('tab', 'low-stock');
-                    window.history.pushState({}, '', url);
-                });
-            }
-            
-            // Add event listener for when all-products tab is shown
-            if (allProductsTab) {
-                allProductsTab.addEventListener('shown.bs.tab', function() {
-                    // Remove tab parameter from URL
-                    const url = new URL(window.location);
-                    url.searchParams.delete('tab');
-                    window.history.pushState({}, '', url);
-                });
-            }
+            console.log('Product Management Admin Panel initialized');
+
+            // Setup form interactions
+            setupSortingAutoSubmit();
+
+            // Setup tab event listeners
+            setupTabEventListeners();
+
+            // Initialize active tab based on URL
+            initializeActiveTab();
         });
     </script>
 </body>

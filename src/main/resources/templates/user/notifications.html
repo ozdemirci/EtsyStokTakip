@@ -29,8 +29,13 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/user/dashboard">
                 <i class="bi bi-boxes"></i> Stockify User
-            </a>
-            <div class="navbar-nav ms-auto">
+            </a>            <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/user/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i> 
                     <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
@@ -79,9 +84,6 @@
                         <button class="btn btn-outline-danger btn-sm me-2" onclick="deleteAllRead(this)">
                             <i class="bi bi-trash"></i> Delete All as Read
                         </button>
-                        <button class="btn btn-outline-info btn-sm" onclick="testNotificationEndpoint()">
-                            <i class="bi bi-bug"></i> Test API
-                        </button>
                     </div>
                 </div>
 
@@ -100,12 +102,17 @@
                                          class="notification-item p-3 mb-3 rounded border" 
                                          th:classappend="${notification.read ? 'border-secondary' : 'border-warning'}"
                                          th:style="${notification.read ? 'opacity: 0.8;' : ''}"
-                                         th:data-id="${notification.id}">
-                                        <div class="d-flex justify-content-between align-items-start">
+                                         th:data-id="${notification.id}">                                        <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-1">
-                                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                                                    <span>Low Stock Alert</span>
+                                                    <i th:class="${notification.notificationType == 'OUT_OF_STOCK' ? 'bi bi-x-circle-fill text-danger me-2' : 
+                                                                 notification.notificationType == 'LOW_STOCK' ? 'bi bi-exclamation-triangle-fill text-warning me-2' : 
+                                                                 notification.notificationType == 'INVENTORY_UPDATE' ? 'bi bi-arrow-repeat text-info me-2' : 
+                                                                 'bi bi-info-circle text-primary me-2'}"></i>
+                                                    <span th:text="${notification.notificationType == 'OUT_OF_STOCK' ? 'Out of Stock Alert' : 
+                                                                   notification.notificationType == 'LOW_STOCK' ? 'Low Stock Alert' : 
+                                                                   notification.notificationType == 'INVENTORY_UPDATE' ? 'Inventory Update' : 
+                                                                   notification.notificationType}">Alert Type</span>
                                                 </h6>
                                                 <p class="mb-2" th:text="${notification.message}">Notification message</p>
                                                 <div class="d-flex align-items-center">
@@ -116,6 +123,10 @@
                                                     <small class="text-muted me-3">
                                                         <i class="bi bi-box"></i>
                                                         <span th:text="${notification.product.title}">Product</span>
+                                                    </small>
+                                                    <small class="text-muted me-3" th:if="${notification.priority}">
+                                                        <i class="bi bi-flag"></i>
+                                                        <span th:text="${notification.priority}">Priority</span>
                                                     </small>
                                                     <small class="text-muted">
                                                         <span th:if="${notification.read}">
@@ -128,7 +139,11 @@
                                                 </div>
                                             </div>
                                             <div class="flex-shrink-0">
-                                                <span class="badge bg-warning text-dark mb-2" th:text="${notification.notificationType}">LOW_STOCK</span>
+                                                <span th:class="${notification.notificationType == 'OUT_OF_STOCK' ? 'badge bg-danger mb-2' : 
+                                                                notification.notificationType == 'LOW_STOCK' ? 'badge bg-warning text-dark mb-2' : 
+                                                                notification.notificationType == 'INVENTORY_UPDATE' ? 'badge bg-info mb-2' : 
+                                                                'badge bg-primary mb-2'}" 
+                                                      th:text="${notification.notificationType}">TYPE</span>
                                                 <div class="btn-group d-block" role="group">
                                                     <button class="btn btn-sm btn-outline-success me-1" title="Mark as read" 
                                                             th:if="${!notification.read}"
@@ -469,49 +484,8 @@
             }, 3000);
         }
 
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
+        // Request notification permission        if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
-        }
-
-        function testNotificationEndpoint() {
-            console.log('🧪 Testing notification endpoints...');
-            
-            // Test mark all as read
-            fetch('/user/notifications/mark-all-read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                console.log('📧 Mark all as read response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('📧 Mark all as read response data:', data);
-                showToast('Mark all test: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'danger');
-                
-                // Now test delete all read
-                return fetch('/user/notifications/delete-all-read', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            })
-            .then(response => {
-                console.log('🗑️ Delete all read response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('🗑️ Delete all read response data:', data);
-                showToast('Delete all test: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'danger');
-            })
-            .catch(error => {
-                console.error('❌ Test failed:', error);
-                showToast('Test failed: ' + error.message, 'danger');
-            });
         }
     </script>
 </body>

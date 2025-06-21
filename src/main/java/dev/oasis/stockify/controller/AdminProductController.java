@@ -3,11 +3,15 @@ package dev.oasis.stockify.controller;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
+import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
+import dev.oasis.stockify.dto.ProductCategoryCreateDTO;
 import dev.oasis.stockify.exception.FileOperationException;
 import dev.oasis.stockify.service.ProductService;
+import dev.oasis.stockify.service.ProductCategoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,12 +37,11 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+@RequiredArgsConstructor
 public class AdminProductController {
-      private final ProductService productService;
 
-    public AdminProductController(ProductService productService) {
-        this.productService = productService;
-    }
+      private final ProductService productService;
+      private final ProductCategoryService categoryService;
 
     /**
      * Get current tenant ID from various sources
@@ -101,14 +104,15 @@ public class AdminProductController {
         } else {
             products = productService.getProductsPage(pageable);
             log.debug("📋 Listing all products for tenant: {}", tenantId);
-        }
-
-        // Get counts for badges
+        }        // Get counts for badges
         List<ProductResponseDTO> allProducts = productService.getAllProducts();
         long totalProducts = allProducts.size();
         long lowStockCount = allProducts.stream()
             .filter(p -> p.getStockLevel() <= p.getLowStockThreshold())
             .count();
+
+        // Get categories for the categories tab
+        List<ProductCategoryResponseDTO> categories = categoryService.getAllCategories();
 
         model.addAttribute("products", products);
         model.addAttribute("currentPage", page);
@@ -121,22 +125,23 @@ public class AdminProductController {
         model.addAttribute("totalProducts", totalProducts);
         model.addAttribute("lowStockCount", lowStockCount);
         model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
+        model.addAttribute("categories", categories); // For categories tab
 
-        log.debug("📊 Found {} total products, {} low stock for tenant: {}", 
-            totalProducts, lowStockCount, tenantId);
+        log.debug("📊 Found {} total products, {} low stock, {} categories for tenant: {}", 
+            totalProducts, lowStockCount, categories.size(), tenantId);
         return "admin/products";
     }
 
     /**
      * Show form for adding a new product
-     */
-    @GetMapping("/add")
+     */    @GetMapping("/add")
     public String showAddProductForm(HttpServletRequest request, Model model) {
         String tenantId = getCurrentTenantId(request);
         log.info("➕ Showing add product form for tenant: {}", tenantId);
         
         model.addAttribute("product", new ProductCreateDTO());
         model.addAttribute("tenantId", tenantId);
+        model.addAttribute("categories", categoryService.getAllActiveCategories());
         return "admin/product-form";
     }
 
@@ -173,13 +178,13 @@ public class AdminProductController {
                                      Model model,
                                      RedirectAttributes redirectAttributes) {
         String tenantId = getCurrentTenantId(request);
-        log.info("✏️ Showing edit form for product ID: {} for tenant: {}", id, tenantId);
-          try {
+        log.info("✏️ Showing edit form for product ID: {} for tenant: {}", id, tenantId);          try {
             Optional<ProductResponseDTO> productOpt = productService.getProductById(id);
             if (productOpt.isPresent()) {
                 ProductResponseDTO product = productOpt.get();
                 model.addAttribute("product", product);
                 model.addAttribute("tenantId", tenantId);
+                model.addAttribute("categories", categoryService.getAllActiveCategories());
                 return "admin/product-form";
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Product not found");
@@ -342,8 +347,7 @@ public class AdminProductController {
     @GetMapping("/low-stock-data")
     @ResponseBody
     public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);
-        log.info("📊 Getting low stock products data for tenant: {}", tenantId);
+        String tenantId = getCurrentTenantId(request);        log.info("📊 Getting low stock products data for tenant: {}", tenantId);
         
         try {
             List<ProductResponseDTO> lowStockProducts = productService.getAllProducts()
@@ -356,6 +360,111 @@ public class AdminProductController {
             return lowStockProducts;
         } catch (Exception e) {
             log.error("❌ Failed to get low stock products data for tenant: {}", tenantId, e);
+            return List.of(); // Return empty list on error
+        }
+    }
+
+    // Category management endpoints integrated into products page
+
+    /**
+     * Handle category creation from products page
+     */
+    @PostMapping("/categories")
+    public String createCategory(@ModelAttribute ProductCategoryCreateDTO categoryCreateDTO,
+                               HttpServletRequest request,
+                               RedirectAttributes redirectAttributes) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("💾 Creating category for tenant: {}", tenantId);
+
+        try {
+            ProductCategoryResponseDTO savedCategory = categoryService.createCategory(categoryCreateDTO);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Category '" + savedCategory.getName() + "' created successfully!");
+            log.info("✅ Category created successfully with ID: {} for tenant: {}", 
+                savedCategory.getId(), tenantId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Failed to create category: " + e.getMessage());
+            log.error("❌ Failed to create category for tenant: {}", tenantId, e);
+        }
+
+        return "redirect:/admin/products?tab=categories";
+    }    /**
+     * Get category details for editing
+     */
+    @GetMapping("/categories/{id}")
+    @ResponseBody
+    public ProductCategoryResponseDTO getCategoryDetails(@PathVariable Long id, HttpServletRequest request) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("📝 Getting category details for ID: {} for tenant: {}", id, tenantId);
+        
+        return categoryService.getCategoryById(id)
+            .orElseThrow(() -> new RuntimeException("Category not found with ID: " + id));
+    }
+
+    /**
+     * Handle category update from products page
+     */
+    @PostMapping("/categories/{id}")
+    public String updateCategory(@PathVariable Long id,
+                               @ModelAttribute ProductCategoryCreateDTO categoryUpdateDTO,
+                               HttpServletRequest request,
+                               RedirectAttributes redirectAttributes) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("📝 Updating category ID: {} for tenant: {}", id, tenantId);
+
+        try {
+            ProductCategoryResponseDTO updatedCategory = categoryService.updateCategory(id, categoryUpdateDTO);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Category '" + updatedCategory.getName() + "' updated successfully!");
+            log.info("✅ Category updated successfully with ID: {} for tenant: {}", id, tenantId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Failed to update category: " + e.getMessage());
+            log.error("❌ Failed to update category ID: {} for tenant: {}", id, tenantId, e);
+        }
+
+        return "redirect:/admin/products?tab=categories";
+    }
+
+    /**
+     * Handle category deletion from products page
+     */
+    @PostMapping("/categories/{id}/delete")
+    public String deleteCategory(@PathVariable Long id,
+                               HttpServletRequest request,
+                               RedirectAttributes redirectAttributes) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("🗑️ Deleting category ID: {} for tenant: {}", id, tenantId);
+
+        try {
+            categoryService.deleteCategory(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category deleted successfully!");
+            log.info("✅ Category deleted successfully with ID: {} for tenant: {}", id, tenantId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Failed to delete category: " + e.getMessage());
+            log.error("❌ Failed to delete category ID: {} for tenant: {}", id, tenantId, e);
+        }
+
+        return "redirect:/admin/products?tab=categories";
+    }
+
+    /**
+     * Get categories list for AJAX requests
+     */
+    @GetMapping("/categories/list")
+    @ResponseBody
+    public List<ProductCategoryResponseDTO> getCategoriesList(HttpServletRequest request) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("📋 Getting categories list for tenant: {}", tenantId);
+        
+        try {
+            List<ProductCategoryResponseDTO> categories = categoryService.getAllCategories();
+            log.info("📊 Found {} categories for tenant: {}", categories.size(), tenantId);
+            return categories;
+        } catch (Exception e) {
+            log.error("❌ Failed to get categories list for tenant: {}", tenantId, e);
             return List.of(); // Return empty list on error
         }
     }

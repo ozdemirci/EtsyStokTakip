@@ -3,8 +3,10 @@ package dev.oasis.stockify.controller;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
 import dev.oasis.stockify.dto.TenantDTO;
+import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.DashboardService;
 import dev.oasis.stockify.service.TenantManagementService;
+import dev.oasis.stockify.service.StockNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,16 +18,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 @RequestMapping("/user/dashboard")
 @PreAuthorize("hasRole('USER')")
 @RequiredArgsConstructor
 @Slf4j
-public class UserDashboardController {
-
-    private final DashboardService dashboardService;
+public class UserDashboardController {    private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
+    private final StockNotificationService stockNotificationService;
 
     @GetMapping
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
@@ -39,10 +41,12 @@ public class UserDashboardController {
             currentTenant = tenantManagementService.getTenant(currentTenantId);
         } catch (Exception e) {
             log.warn("Could not get tenant info for: {}, error: {}", currentTenantId, e.getMessage());
-        }
-
-        // Get dashboard metrics
+        }        // Get dashboard metrics
         DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();
+        
+        // Get notification data
+        List<StockNotification> notifications = stockNotificationService.getAllNotifications();
+        long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
         
         log.debug("Found metrics for tenant: {} - Products: {}, Stock Value: {}", 
                 currentTenantId, metrics.getTotalProducts(), metrics.getTotalInventoryValue());
@@ -53,6 +57,7 @@ public class UserDashboardController {
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
         model.addAttribute("outOfStockProducts", 0L); // TODO: Add to DashboardMetricsDTO
         model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));
+        model.addAttribute("unreadNotifications", unreadNotifications);
         
         // Add collections
         model.addAttribute("metrics", metrics);

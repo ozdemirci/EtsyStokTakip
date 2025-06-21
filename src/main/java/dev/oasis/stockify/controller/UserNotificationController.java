@@ -29,16 +29,23 @@ public class UserNotificationController {
 
     public UserNotificationController(StockNotificationService stockNotificationService) {
         this.stockNotificationService = stockNotificationService;
-    }
-
-    @GetMapping
+    }    @GetMapping
     public String notifications(HttpServletRequest request, Model model) {
         String tenantId = getCurrentTenantId(request);
         log.info("🔔 User accessing notifications for tenant: {}", tenantId);
         
         List<StockNotification> notifications = stockNotificationService.getAllNotifications();
+        long totalNotifications = notifications.size();
+        long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
+        
         model.addAttribute("notifications", notifications);
+        model.addAttribute("totalNotifications", totalNotifications);
+        model.addAttribute("unreadNotifications", unreadNotifications);
         model.addAttribute("tenantId", tenantId);
+        
+        log.info("📊 Notification stats for user in tenant {}: Total={}, Unread={}", 
+            tenantId, totalNotifications, unreadNotifications);
+        
         return "user/notifications";
     }
 

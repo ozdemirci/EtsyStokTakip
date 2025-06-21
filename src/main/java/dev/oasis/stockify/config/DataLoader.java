@@ -3,9 +3,12 @@ package dev.oasis.stockify.config;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
+import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.Role;
+import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
+import dev.oasis.stockify.repository.StockNotificationRepository;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +22,11 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 @Slf4j
 @Component
@@ -33,7 +38,8 @@ public class DataLoader implements CommandLineRunner {
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
-    private final ProductRepository productRepository;    
+    private final ProductRepository productRepository;
+    private final StockNotificationRepository stockNotificationRepository;
     private static final List<String> TENANT_IDS = Arrays.asList(
         "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions","company1"
     );     // Sample users using DTO directly
@@ -76,10 +82,9 @@ public class DataLoader implements CommandLineRunner {
                 log.info("🔄 Processing tenant: {}", tenantId);
                 initializeTenantData(tenantId);
                 log.info("✅ Completed processing tenant: {}", tenantId);
-            }
-              log.info("✅ Multi-Tenant Data Loader completed successfully!");
+            }            log.info("✅ Multi-Tenant Data Loader completed successfully!");
             log.info("📊 Initialized {} tenants with sample data", TENANT_IDS.size());
-            log.info("👥 Each tenant has {} users and {} products", SAMPLE_USERS.size(), SAMPLE_PRODUCTS.size());
+            log.info("👥 Each tenant has {} users, {} products, and sample notifications", SAMPLE_USERS.size(), SAMPLE_PRODUCTS.size());
             log.info("🔑 Public tenant also has a SuperAdmin user with full privileges");
             log.warn("⚠️ Remember to change default passwords in production!");
             } catch (Exception e) {
@@ -125,9 +130,11 @@ public class DataLoader implements CommandLineRunner {
             
             // Initialize users
             initializeTenantUsers(tenantId);
-            
-            // Initialize products
+              // Initialize products
             initializeTenantProducts(tenantId);
+            
+            // Initialize sample notifications
+            initializeTenantNotifications(tenantId);
             
             // Initialize tenant-specific configurations
             initializeTenantConfig(tenantId);
@@ -153,19 +160,23 @@ public class DataLoader implements CommandLineRunner {
             log.debug("🔍 Checking if data already loaded for tenant: {}", tenantId);
 
             boolean productsExist = productRepository.count() > 0;
-
-            // For public tenant, check both superadmin and admin users
+            boolean notificationsExist = stockNotificationRepository.count() > 0;            // For public tenant, check both superadmin and admin users
             if ("public".equals(tenantId)) {
                 boolean superAdminExists = appUserRepository.findByUsername("superadmin").isPresent();
                 boolean adminExists = appUserRepository.findByUsername("admin").isPresent();
+                // Don't include notifications in loaded check - let them be recreated if needed
                 boolean loaded = superAdminExists && adminExists && productsExist;
-                log.debug("🔍 Public tenant users - SuperAdmin: {}, Admin: {}, Products: {}", superAdminExists, adminExists, productsExist);
+                log.debug("🔍 Public tenant users - SuperAdmin: {}, Admin: {}, Products: {}, Notifications: {} (ignored for load check)", 
+                    superAdminExists, adminExists, productsExist, notificationsExist);
                 return loaded;
             } else {
                 // For other tenants, check if admin user exists and products exist
                 boolean adminExists = appUserRepository.findByUsername("admin").isPresent();
-                log.debug("🔍 Tenant {} - Admin user exists: {}, Products exist: {}", tenantId, adminExists, productsExist);
-                return adminExists && productsExist;
+                // Don't include notifications in loaded check - let them be recreated if needed
+                boolean loaded = adminExists && productsExist;
+                log.debug("🔍 Tenant {} - Admin user exists: {}, Products exist: {}, Notifications exist: {} (ignored for load check)", 
+                    tenantId, adminExists, productsExist, notificationsExist);
+                return loaded;
             }
             
         } catch (Exception e) {
@@ -173,7 +184,7 @@ public class DataLoader implements CommandLineRunner {
             log.debug("🔍 Could not check existing data for tenant {}, proceeding with initialization: {}", tenantId, e.getMessage());
             return false;
         }
-    }    /**
+    }/**
      * Initialize users for the tenant
      */
     @Transactional
@@ -262,6 +273,133 @@ public class DataLoader implements CommandLineRunner {
         }
         
         log.info("📦 Successfully created {} products for tenant: {}", createdProductCount, tenantId);
+    }    /**
+     * Initialize sample notifications for the tenant
+     */
+    @Transactional
+    protected void initializeTenantNotifications(String tenantId) {
+        log.info("🔔 Creating sample notifications for tenant: {}", tenantId);
+          try {
+            // Ensure tenant context is set
+            TenantContext.setCurrentTenant(tenantId);
+              // Clear existing notifications first to avoid duplicates
+            long existingNotificationCount = stockNotificationRepository.count();
+            if (existingNotificationCount > 0) {
+                log.info("🔔 Clearing {} existing notifications for tenant: {} before creating new ones", existingNotificationCount, tenantId);
+                stockNotificationRepository.deleteAll();
+            }
+            
+            // Get some products to create notifications for
+            List<Product> products = productRepository.findAll();
+            if (products.isEmpty()) {
+                log.warn("⚠️ No products found for tenant: {}, cannot create sample notifications", tenantId);
+                return;
+            }
+            
+            Random random = new Random();
+            int createdNotificationCount = 0;
+            
+            // Create various types of sample notifications with realistic scenarios
+            
+            // 1. Create 2-3 critical OUT_OF_STOCK notifications
+            for (int i = 0; i < Math.min(3, products.size()); i++) {
+                Product product = products.get(i);
+                
+                StockNotification notification = new StockNotification();
+                notification.setProduct(product);
+                notification.setNotificationType("OUT_OF_STOCK");
+                notification.setPriority("HIGH");
+                notification.setCategory("STOCK_ALERT");
+                notification.setMessage(String.format(
+                    "🚨 Critical: '%s' is completely out of stock! Immediate restocking required.",
+                    product.getTitle()
+                ));
+                notification.setRead(false); // Keep these unread for visibility
+                
+                // Set creation time (last 2 days for urgency)
+                LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(2));
+                notification.setCreatedAt(createdAt);
+                
+                stockNotificationRepository.save(notification);
+                createdNotificationCount++;
+                
+                log.info("✅ Created OUT_OF_STOCK notification for product: {} in tenant: {}", 
+                    product.getTitle(), tenantId);
+            }
+            
+            // 2. Create 3-4 LOW_STOCK notifications
+            for (int i = 3; i < Math.min(7, products.size()); i++) {
+                Product product = products.get(i);
+                
+                StockNotification notification = new StockNotification();
+                notification.setProduct(product);
+                notification.setNotificationType("LOW_STOCK");
+                notification.setPriority("MEDIUM");
+                notification.setCategory("STOCK_ALERT");
+                notification.setMessage(String.format(
+                    "⚠️ Low Stock Alert: '%s' has only %d items remaining. Current level is below the threshold of %d.",
+                    product.getTitle(), product.getStockLevel(), product.getLowStockThreshold()
+                ));
+                
+                // 70% unread, 30% read
+                boolean isRead = random.nextDouble() < 0.3;
+                notification.setRead(isRead);
+                
+                // Set creation time (last 5 days)
+                LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(5));
+                notification.setCreatedAt(createdAt);
+                
+                if (isRead) {
+                    notification.setReadAt(createdAt.plusHours(random.nextInt(48)));
+                    notification.setReadBy(1L);
+                }
+                
+                stockNotificationRepository.save(notification);
+                createdNotificationCount++;
+                
+                log.info("✅ Created LOW_STOCK notification for product: {} in tenant: {}", 
+                    product.getTitle(), tenantId);
+            }
+            
+            // 3. Create 1-2 INVENTORY_UPDATE notifications (mostly read)
+            for (int i = 7; i < Math.min(9, products.size()); i++) {
+                Product product = products.get(i);
+                
+                StockNotification notification = new StockNotification();
+                notification.setProduct(product);
+                notification.setNotificationType("INVENTORY_UPDATE");
+                notification.setPriority("LOW");
+                notification.setCategory("SYSTEM_NOTIFICATION");
+                notification.setMessage(String.format(
+                    "📊 Inventory Update: Stock level for '%s' has been updated. New quantity: %d units.",
+                    product.getTitle(), product.getStockLevel()
+                ));
+                
+                // Most of these are read (80% read)
+                boolean isRead = random.nextDouble() < 0.8;
+                notification.setRead(isRead);
+                
+                // Set creation time (last 7 days)
+                LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(7));
+                notification.setCreatedAt(createdAt);
+                
+                if (isRead) {
+                    notification.setReadAt(createdAt.plusHours(random.nextInt(72)));
+                    notification.setReadBy(1L);
+                }
+                
+                stockNotificationRepository.save(notification);
+                createdNotificationCount++;
+                
+                log.info("✅ Created INVENTORY_UPDATE notification for product: {} in tenant: {}", 
+                    product.getTitle(), tenantId);
+            }
+              log.info("🔔 Successfully created {} sample notifications for tenant: {}", createdNotificationCount, tenantId);
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to create sample notifications for tenant {}: {}", tenantId, e.getMessage(), e);
+            // Continue processing - notifications are not critical for initialization
+        }
     }
 
     /**

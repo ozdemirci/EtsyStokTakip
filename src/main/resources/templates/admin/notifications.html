@@ -95,12 +95,6 @@
                             <button class="btn btn-outline-danger btn-sm" onclick="deleteAllRead(this)">
                                 <i class="bi bi-trash"></i> Delete All as Read
                             </button>
-                            <button class="btn btn-outline-info btn-sm" onclick="testNotificationEndpoint()">
-                                <i class="bi bi-bug"></i> Test API
-                            </button>
-                            <button class="btn btn-outline-success btn-sm" onclick="createTestNotifications()">
-                                <i class="bi bi-plus-circle"></i> Create Test Data
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -196,67 +190,85 @@
                                 </h5>
                             </div>
                             <div class="card-body" id="notificationsList">
-                                <!-- Dynamic notifications will be loaded here -->                                <div th:if="${notifications != null and !notifications.empty}">
-                                    <div th:each="notification : ${notifications}" 
-                                         class="notification-item p-3 mb-3 rounded border" 
-                                         th:classappend="${notification.read ? 'border-secondary' : 'border-warning'}"
-                                         th:style="${notification.read ? 'opacity: 0.8;' : ''}"
-                                         th:data-id="${notification.id}">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">
-                                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                                                    <span>Low Stock Alert</span>
-                                                </h6>
-                                                <p class="mb-2" th:text="${notification.message}">Notification message</p>
-                                                <div class="d-flex align-items-center">
-                                                    <small class="text-muted me-3">
-                                                        <i class="bi bi-clock"></i> 
-                                                        <span th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
-                                                    </small>
-                                                    <small class="text-muted me-3">
-                                                        <i class="bi bi-box"></i>
-                                                        <span th:text="${notification.product.title}">Product</span>
-                                                    </small>
-                                                    <small class="text-muted">
-                                                        <span th:if="${notification.read}">
-                                                            <i class="bi bi-eye"></i> Read
-                                                        </span>
-                                                        <span th:unless="${notification.read}">
-                                                            <i class="bi bi-eye-slash"></i> Unread
-                                                        </span>
-                                                    </small>
+                                <!-- Dynamic notifications will be loaded here -->
+                                <div th:if="${notifications != null and !notifications.empty}">
+                                    <th:block th:each="notification : ${notifications}">
+                                        <div class="notification-item p-3 mb-3 rounded border" 
+                                             th:classappend="${notification.read ? 'border-secondary' : 'border-warning'}"
+                                             th:style="${notification.read ? 'opacity: 0.8;' : ''}"
+                                             th:data-id="${notification.id}">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">
+                                                        <!-- Icon based on notification type -->
+                                                        <th:block th:switch="${notification.notificationType}">
+                                                            <i th:case="'OUT_OF_STOCK'" class="bi bi-x-circle-fill text-danger me-2"></i>
+                                                            <i th:case="'LOW_STOCK'" class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                                            <i th:case="*" class="bi bi-info-circle-fill text-info me-2"></i>
+                                                        </th:block>
+                                                        <!-- Title based on notification type -->
+                                                        <th:block th:switch="${notification.notificationType}">
+                                                            <span th:case="'OUT_OF_STOCK'">Out of Stock Alert</span>
+                                                            <span th:case="'LOW_STOCK'">Low Stock Alert</span>
+                                                            <span th:case="*">Notification</span>
+                                                        </th:block>
+                                                    </h6>
+                                                    <p class="mb-2" th:text="${notification.message}">Notification message</p>
+                                                    <div class="d-flex align-items-center">
+                                                        <small class="text-muted me-3">
+                                                            <i class="bi bi-clock"></i> 
+                                                            <span th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
+                                                        </small>
+                                                        <small class="text-muted me-3" th:if="${notification.product != null}">
+                                                            <i class="bi bi-box"></i>
+                                                            <span th:text="${notification.product.title}">Product</span>
+                                                        </small>
+                                                        <small class="text-muted">
+                                                            <span th:if="${notification.read}">
+                                                                <i class="bi bi-eye"></i> Read
+                                                            </span>
+                                                            <span th:unless="${notification.read}">
+                                                                <i class="bi bi-eye-slash"></i> Unread
+                                                            </span>
+                                                        </small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="flex-shrink-0">
-                                                <span class="badge bg-warning text-dark mb-2" th:text="${notification.notificationType}">LOW_STOCK</span>
-                                                <div class="btn-group d-block" role="group">
-                                                    <button class="btn btn-sm btn-outline-success me-1" title="Mark as read" 
-                                                            th:if="${!notification.read}"
-                                                            th:onclick="'markSingleAsRead(' + ${notification.id} + ', this)'">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-primary me-1" title="View Product" 
-                                                            th:onclick="'window.open(\'/admin/products?search=' + ${notification.product.title} + '\', \'_blank\')'">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger" title="Delete" 
-                                                            th:onclick="'deleteSingleNotification(' + ${notification.id} + ', this)'">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+                                                <div class="flex-shrink-0">
+                                                    <!-- Badge based on notification type -->
+                                                    <th:block th:switch="${notification.notificationType}">
+                                                        <span th:case="'OUT_OF_STOCK'" class="badge bg-danger text-white mb-2" th:text="${notification.notificationType}">OUT_OF_STOCK</span>
+                                                        <span th:case="'LOW_STOCK'" class="badge bg-warning text-dark mb-2" th:text="${notification.notificationType}">LOW_STOCK</span>
+                                                        <span th:case="*" class="badge bg-info text-white mb-2" th:text="${notification.notificationType}">INFO</span>
+                                                    </th:block>
+                                                    <div class="btn-group d-block" role="group">
+                                                        <button class="btn btn-sm btn-outline-success me-1" title="Mark as read" 
+                                                                th:if="${!notification.read}"
+                                                                th:data-notification-id="${notification.id}"
+                                                                onclick="markSingleAsRead(this.dataset.notificationId, this)">
+                                                            <i class="bi bi-check"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-primary me-1" title="View Product" 
+                                                                th:if="${notification.product != null}"
+                                                                th:data-product-title="${notification.product.title}"
+                                                                onclick="viewProduct(this.dataset.productTitle)">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger" title="Delete" 
+                                                                th:data-notification-id="${notification.id}"
+                                                                onclick="deleteSingleNotification(this.dataset.notificationId, this)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </th:block>
                                 </div>
                                   <!-- Empty state when no notifications -->
                                 <div th:if="${notifications == null or notifications.empty}" class="text-center py-5">
                                     <i class="bi bi-bell-slash text-muted" style="font-size: 4rem;"></i>
                                     <h5 class="text-muted mt-3">No Notifications</h5>
                                     <p class="text-muted">You don't have any notifications at the moment.</p>
-                                    <button class="btn btn-outline-primary" onclick="createTestNotifications()">
-                                        <i class="bi bi-plus-circle"></i> Create Test Notifications
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -749,6 +761,13 @@
             showToast('Notification settings saved successfully!', 'success');
         }
 
+        function viewProduct(productTitle) {
+            if (productTitle) {
+                const encodedTitle = encodeURIComponent(productTitle);
+                window.open(`/admin/products?search=${encodedTitle}`, '_blank');
+            }
+        }
+
         function resetNotificationSettings() {
             if (confirm('Are you sure you want to reset all notification settings to default?')) {
                 // Reset all checkboxes and inputs to default values
@@ -905,53 +924,6 @@
                 button.innerHTML = originalText;
                 button.disabled = false;
             });
-        }
-
-        function testNotificationEndpoint() {
-            console.log('🧪 Testing notification endpoints...');
-            
-            // Test mark all as read
-            fetch('/admin/notifications/mark-all-read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                console.log('📧 Mark all as read response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('📧 Mark all as read response data:', data);
-                showToast('Mark all test: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'danger');
-                
-                // Now test delete all read
-                return fetch('/admin/notifications/delete-all-read', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            })
-            .then(response => {
-                console.log('🗑️ Delete all read response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('🗑️ Delete all read response data:', data);
-                showToast('Delete all test: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'danger');
-            })
-            .catch(error => {
-                console.error('❌ Test failed:', error);
-                showToast('Test failed: ' + error.message, 'danger');
-            });
-        }        function createTestNotifications() {
-            console.log('🧪 Creating test notifications...');
-            
-            showToast('To create test notifications, please go to Products page and set some products to low stock levels', 'info');
-            
-            // Alternatively, you can run this SQL in H2 console:
-            console.log('🧪 To manually create test notifications, run SQL in H2 console and refresh page');
         }
     </script>
 </body>

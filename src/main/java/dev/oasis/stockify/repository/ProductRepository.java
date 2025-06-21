@@ -26,9 +26,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     @Query("SELECT p FROM Product p WHERE p.isActive = true")
     List<Product> findActiveProducts();
-    
-    @Query("SELECT p FROM Product p WHERE p.category = :category")
+      @Query("SELECT p FROM Product p WHERE p.category = :category")
     List<Product> findByCategory(@Param("category") String category);
+    
+    @Query("SELECT COUNT(p) FROM Product p WHERE LOWER(p.category) = LOWER(:category)")
+    long countByCategoryIgnoreCase(@Param("category") String category);
       // Tenant-aware queries (commented out until database migration adds tenant_id column)
     // @Query("SELECT p FROM Product p WHERE p.tenantId = :tenantId")
     // List<Product> findByTenantId(@Param("tenantId") String tenantId);

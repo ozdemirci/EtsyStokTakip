@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management - Stockify Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-brand { font-weight: bold; }
+        .sidebar { height: 100vh; background-color: #f8f9fa; }
+        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
+        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
+        .sidebar .nav-link.active { background-color: #007bff; color: white; }
+        .main-content { padding: 20px; }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .table th { background-color: #f8f9fa; border-top: none; font-weight: 600; }
+        .btn-action { padding: 4px 8px; margin: 2px; }
+        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
+        .category-color { width: 20px; height: 20px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/dashboard">
+                <i class="bi bi-boxes"></i> Stockify Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                          id="navNotificationBadge" 
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
+                <span class="navbar-text me-3">
+                    <i class="bi bi-building"></i> 
+                    <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
+                </span>
+                <a class="nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/dashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/products">
+                                <i class="bi bi-box-seam"></i> Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="bi bi-people"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/categories">
+                                <i class="bi bi-tags"></i> Categories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                                <span class="badge bg-danger ms-2" id="sidebarNotificationBadge" 
+                                      th:if="${unreadNotifications > 0}"
+                                      th:text="${unreadNotifications}" style="display: none;">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto main-content">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-tags"></i> Category Management
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <a href="/admin/categories/add" class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i> Add Category
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Categories Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Products</th>
+                                        <th>Sort Order</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${categories == null or categories.empty}">
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox display-4"></i>
+                                            <div class="mt-2">No categories found</div>
+                                            <a href="/admin/categories/add" class="btn btn-primary mt-2">
+                                                <i class="bi bi-plus-circle"></i> Add First Category
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:each="category : ${categories}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div th:if="${category.hexColor}" 
+                                                     class="category-color me-2" 
+                                                     th:style="'background-color: ' + ${category.hexColor}"></div>
+                                                <div>
+                                                    <div class="fw-bold" th:text="${category.name}">Category Name</div>
+                                                    <small class="text-muted" th:text="'ID: ' + ${category.id}">ID: 1</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span th:text="${category.description}" class="text-truncate" style="max-width: 200px;">Description</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${category.productCount ?: 0}">0</span>
+                                            <small class="text-muted">products</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${category.sortOrder}">0</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${category.isActive}" class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Active
+                                            </span>
+                                            <span th:unless="${category.isActive}" class="badge bg-secondary">
+                                                <i class="bi bi-pause-circle"></i> Inactive
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/admin/categories/{id}/edit (id=${category.id})}" 
+                                                   class="btn btn-outline-primary btn-action" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger btn-action" 
+                                                        title="Delete" data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#deleteModal' + ${category.id}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Delete Modals -->
+    <div th:each="category : ${categories}" class="modal fade" th:id="'deleteModal' + ${category.id}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the category:</p>
+                    <p class="fw-bold" th:text="${category.name}">Category Name</p>
+                    <div th:if="${category.productCount > 0}" class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        This category has <strong th:text="${category.productCount}">0</strong> products. 
+                        The category will be marked as inactive instead of deleted.
+                    </div>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form th:action="@{/admin/categories/{id}/delete (id=${category.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

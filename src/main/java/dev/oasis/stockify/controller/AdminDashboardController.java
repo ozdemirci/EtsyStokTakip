@@ -4,9 +4,11 @@ import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
 import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
+import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.DashboardService;
 import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.AppUserService;
+import dev.oasis.stockify.service.StockNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,14 +24,13 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/dashboard")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
-public class AdminDashboardController {
-
-    private final DashboardService dashboardService;
+public class AdminDashboardController {    private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
-    private final AppUserService appUserService;    @GetMapping
+    private final AppUserService appUserService;
+    private final StockNotificationService stockNotificationService;@GetMapping
 
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
@@ -44,22 +45,17 @@ public class AdminDashboardController {
             log.warn("Could not get tenant info for: {}, error: {}", currentTenantId, e.getMessage());
         }
           // Get dashboard metrics
-        DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();
-          // Get all users in current tenant
+        DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();        // Get all users in current tenant
         List<UserResponseDTO> tenantUsers = appUserService.getAllUsers();
         log.debug("Found {} users for tenant: {}", tenantUsers.size(), currentTenantId);
         
-        // Mock notification data (in real implementation, this would come from NotificationService)
-        int totalNotifications = 12;
-        int unreadNotifications = 3;
-        int criticalNotifications = 2;
-        
-        // Calculate notification data based on stock levels
-        if (metrics.getLowStockProducts() > 10) {
-            criticalNotifications = (int) (metrics.getLowStockProducts() / 5);
-            unreadNotifications = Math.max(unreadNotifications, criticalNotifications);
-            totalNotifications = Math.max(totalNotifications, unreadNotifications + 5);
-        }        // Add individual metrics for template
+        // Get real notification data
+        List<StockNotification> notifications = stockNotificationService.getAllNotifications();
+        long totalNotifications = notifications.size();
+        long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
+        long criticalNotifications = notifications.stream()
+            .filter(n -> "HIGH".equals(n.getPriority()) || "OUT_OF_STOCK".equals(n.getNotificationType()))
+            .count();// Add individual metrics for template
         model.addAttribute("totalProducts", metrics.getTotalProducts());
         model.addAttribute("activeProducts", Math.max(0, metrics.getTotalProducts() - metrics.getLowStockProducts()));
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
