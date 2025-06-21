@@ -565,32 +565,33 @@
 
         // ================================
         // TAB MANAGEMENT FUNCTIONS
-        // ================================
-
-        /**
+        // ================================        /**
          * Activates the All Products tab and updates URL
          */
-        function activateAllProductsTab() {
+        window.activateAllProductsTab = function() {
             switchToTab('all-products-tab', 'all-products');
             updateUrl(null); // Remove tab parameter for default tab
-        }
+        };
 
         /**
          * Activates the Low Stock tab, loads data, and updates URL
          */
-        function activateLowStockTab() {
+        window.activateLowStockTab = function() {
             switchToTab('low-stock-tab', 'low-stock');
             loadLowStockProducts();
             updateUrl('low-stock');
-        }
-
-        /**
+        };        /**
          * Activates the Categories tab and updates URL
          */
-        function activateCategoriesTab() {
+        window.activateCategoriesTab = function() {
             switchToTab('categories-tab', 'categories');
             updateUrl('categories');
-        }
+        };
+
+        // Legacy global function aliases for immediate availability
+        var activateAllProductsTab = window.activateAllProductsTab;
+        var activateLowStockTab = window.activateLowStockTab;
+        var activateCategoriesTab = window.activateCategoriesTab;
 
         /**
          * Generic function to switch between tabs
@@ -635,13 +636,11 @@
 
         // ================================
         // CATEGORY MANAGEMENT FUNCTIONS
-        // ================================
-
-        /**
+        // ================================        /**
          * Opens the edit category modal with populated data
          * @param {number} categoryId - ID of the category to edit
          */
-        function editCategory(categoryId) {
+        window.editCategory = function(categoryId) {
             if (!categoryId) {
                 console.error('Category ID is required');
                 return;
@@ -667,14 +666,14 @@
                 .finally(() => {
                     hideLoadingState();
                 });
-        }
+        };
 
         /**
          * Deletes a category after confirmation
          * @param {number} categoryId - ID of the category to delete
          * @param {string} categoryName - Name of the category for confirmation
          */
-        function deleteCategory(categoryId, categoryName) {
+        window.deleteCategory = function(categoryId, categoryName) {
             if (!categoryId || !categoryName) {
                 console.error('Category ID and name are required');
                 return;
@@ -687,12 +686,10 @@
             }
 
             submitDeleteForm(categoryId);
-        }
-
-        /**
+        };        /**
          * Refreshes the categories list and updates badge count
          */
-        function loadCategories() {
+        window.loadCategories = function() {
             fetch('/admin/products/categories/list')
                 .then(response => {
                     if (!response.ok) {
@@ -706,7 +703,12 @@
                 .catch(error => {
                     console.error('Error loading categories:', error);
                 });
-        }
+        };
+
+        // Legacy global function aliases for immediate availability
+        var editCategory = window.editCategory;
+        var deleteCategory = window.deleteCategory;
+        var loadCategories = window.loadCategories;
 
         /**
          * Populates the edit form with category data
@@ -934,13 +936,11 @@
             if (badge) {
                 badge.textContent = count;
             }
-        }
-
-        /**
+        }        /**
          * Handles quick restock functionality (placeholder)
          * @param {number} productId - ID of the product to restock
          */
-        function quickRestock(productId) {
+        window.quickRestock = function(productId) {
             const quantity = prompt('Enter quantity to add to stock:');
             
             if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
@@ -955,7 +955,10 @@
             
             // After successful update, reload the low stock products
             // loadLowStockProducts();
-        }
+        };
+
+        // Legacy global function alias for immediate availability
+        var quickRestock = window.quickRestock;
 
         // ================================
         // UTILITY FUNCTIONS
@@ -1026,9 +1029,7 @@
 
         // ================================
         // INITIALIZATION
-        // ================================
-
-        /**
+        // ================================        /**
          * Initializes the page based on URL parameters
          */
         function initializeActiveTab() {
@@ -1039,18 +1040,18 @@
             switch (activeTab) {
                 case 'low-stock':
                     if (document.getElementById('low-stock-tab')) {
-                        activateLowStockTab();
+                        window.activateLowStockTab();
                     }
                     break;
                 case 'categories':
                     if (document.getElementById('categories-tab')) {
-                        activateCategoriesTab();
+                        window.activateCategoriesTab();
                     }
                     break;
                 default:
                     // Default to all products tab
                     if (document.getElementById('all-products-tab')) {
-                        activateAllProductsTab();
+                        window.activateAllProductsTab();
                     }
                     break;
             }
