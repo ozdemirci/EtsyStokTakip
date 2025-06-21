@@ -28,8 +28,14 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/admin/dashboard">
                 <i class="bi bi-boxes"></i> Stockify Admin
-            </a>
-            <div class="navbar-nav ms-auto">
+            </a>            <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                          id="navNotificationBadge" 
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i> 
                     <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
@@ -45,8 +51,7 @@
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-2 sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
+                <div class="position-sticky pt-3">                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
@@ -56,15 +61,17 @@
                             <a class="nav-link active" href="/admin/products">
                                 <i class="bi bi-box-seam"></i> Products
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        <li class="nav-item">
                             <a class="nav-link" href="/admin/users">
                                 <i class="bi bi-people"></i> Users
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/products/low-stock">
-                                <i class="bi bi-exclamation-triangle"></i> Low Stock
+                            <a class="nav-link" href="/admin/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                                <span class="badge bg-danger ms-2" id="sidebarNotificationBadge" 
+                                      th:if="${unreadNotifications > 0}"
+                                      th:text="${unreadNotifications}" style="display: none;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -72,13 +79,10 @@
             </nav>
 
             <!-- Main Content -->
-            <main class="col-md-10 ms-sm-auto main-content">
-                <!-- Header -->
+            <main class="col-md-10 ms-sm-auto main-content">                <!-- Header -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
-                        <i class="bi bi-box-seam"></i> 
-                        <span th:if="${isLowStockView}">Low Stock Products</span>
-                        <span th:unless="${isLowStockView}">Product Management</span>
+                        <i class="bi bi-box-seam"></i> Product Management
                     </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
@@ -98,7 +102,27 @@
                     </div>
                 </div>
 
-                <!-- Success/Error Messages -->
+                <!-- Product Tabs -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="all-products-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#all-products" type="button" role="tab">
+                                    <i class="bi bi-box-seam"></i> All Products
+                                    <span class="badge bg-secondary ms-2" th:text="${totalProducts ?: 0}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="low-stock-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#low-stock" type="button" role="tab">
+                                    <i class="bi bi-exclamation-triangle"></i> Low Stock
+                                    <span class="badge bg-warning ms-2" th:text="${lowStockCount ?: 0}">0</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>                <!-- Success/Error Messages -->
                 <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -108,144 +132,196 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
-                <!-- Search and Filters -->
-                <div class="card mb-4" th:unless="${isLowStockView}">
-                    <div class="card-body">
-                        <form method="get" action="/admin/products" class="row g-3">
-                            <div class="col-md-6">
-                                <div class="input-group search-box">
-                                    <input type="text" class="form-control" name="search" th:value="${search}" 
-                                           placeholder="Search products...">
-                                    <button class="btn btn-outline-secondary" type="submit">
-                                        <i class="bi bi-search"></i>
-                                    </button>
+                <!-- Tab Content -->
+                <div class="tab-content" id="productTabsContent">
+                    <!-- All Products Tab -->
+                    <div class="tab-pane fade show active" id="all-products" role="tabpanel">
+                        <!-- Search and Filters -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <form method="get" action="/admin/products" class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="input-group search-box">
+                                            <input type="text" class="form-control" name="search" th:value="${search}" 
+                                                   placeholder="Search products...">
+                                            <button class="btn btn-outline-secondary" type="submit">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="sortBy" th:value="${sortBy}">
+                                            <option value="title" th:selected="${sortBy == 'title'}">Sort by Title</option>
+                                            <option value="category" th:selected="${sortBy == 'category'}">Sort by Category</option>
+                                            <option value="price" th:selected="${sortBy == 'price'}">Sort by Price</option>
+                                            <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock</option>
+                                            <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by Date</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="sortDir" th:value="${sortDir}">
+                                            <option value="asc" th:selected="${sortDir == 'asc'}">Ascending</option>
+                                            <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- All Products Table -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Category</th>
+                                                <th>SKU</th>
+                                                <th>Price</th>
+                                                <th>Stock</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:if="${products != null and products.totalElements == 0}">
+                                                <td colspan="7" class="text-center text-muted py-4">
+                                                    <i class="bi bi-inbox display-4"></i>
+                                                    <div class="mt-2">No products found</div>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${products == null or products.empty}">
+                                                <td colspan="7" class="text-center text-muted py-4">
+                                                    <i class="bi bi-inbox display-4"></i>
+                                                    <div class="mt-2">No products available</div>
+                                                </td>
+                                            </tr>
+                                            <tr th:each="product : ${products}" 
+                                                th:class="${product.stockLevel == 0} ? 'out-of-stock' : (${product.stockLevel <= product.lowStockThreshold} ? 'low-stock' : '')">
+                                                <td>
+                                                    <div class="fw-bold" th:text="${product.title}">Product Title</div>
+                                                    <small class="text-muted" th:text="${product.description}">Description</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary" th:text="${product.category}">Category</span>
+                                                </td>
+                                                <td>
+                                                    <code th:text="${product.sku}">SKU123</code>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-bold" th:text="'$' + ${product.price}">$0.00</span>
+                                                </td>
+                                                <td>
+                                                    <span th:class="${product.stockLevel == 0} ? 'badge bg-danger' : (${product.stockLevel <= product.lowStockThreshold} ? 'badge bg-warning' : 'badge bg-success')" 
+                                                          th:text="${product.stockLevel}">0</span>
+                                                    <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${product.isActive}" class="badge bg-success">
+                                                        <i class="bi bi-check-circle"></i> Active
+                                                    </span>
+                                                    <span th:unless="${product.isActive}" class="badge bg-secondary">
+                                                        <i class="bi bi-pause-circle"></i> Inactive
+                                                    </span>
+                                                    <div th:if="${product.isFeatured}" class="mt-1">
+                                                        <span class="badge bg-warning">
+                                                            <i class="bi bi-star"></i> Featured
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a th:href="@{/admin/products/{id}/edit (id=${product.id})}" 
+                                                           class="btn btn-outline-primary btn-action" title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger btn-action" 
+                                                                title="Delete" data-bs-toggle="modal" 
+                                                                th:data-bs-target="'#deleteModal' + ${product.id}">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav th:if="${products != null and products.totalPages > 1}">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:class="${products.first} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/products(page=${products.number - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                        <li th:each="page : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                                            class="page-item" th:class="${page == products.number} ? 'active'">
+                                            <a class="page-link" th:text="${page + 1}" 
+                                               th:href="@{/admin/products(page=${page}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">1</a>
+                                        </li>
+                                        <li class="page-item" th:class="${products.last} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/products(page=${products.number + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+
+                                <!-- Summary -->
+                                <div class="mt-3 text-muted text-center" th:if="${products != null and products.totalElements > 0}">
+                                    Showing <span th:text="${products.number * products.size + 1}">1</span> to 
+                                    <span th:text="${(products.number + 1) * products.size > products.totalElements ? products.totalElements : (products.number + 1) * products.size}">10</span>
+                                    of <span th:text="${products.totalElements}">100</span> results
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <select class="form-select" name="sortBy" th:value="${sortBy}">
-                                    <option value="title" th:selected="${sortBy == 'title'}">Sort by Title</option>
-                                    <option value="category" th:selected="${sortBy == 'category'}">Sort by Category</option>
-                                    <option value="price" th:selected="${sortBy == 'price'}">Sort by Price</option>
-                                    <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock</option>
-                                    <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by Date</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-select" name="sortDir" th:value="${sortDir}">
-                                    <option value="asc" th:selected="${sortDir == 'asc'}">Ascending</option>
-                                    <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
-                                </select>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Products Table -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Category</th>
-                                        <th>SKU</th>
-                                        <th>Price</th>
-                                        <th>Stock</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:if="${products != null and products.totalElements == 0}">
-                                        <td colspan="7" class="text-center text-muted py-4">
-                                            <i class="bi bi-inbox display-4"></i>
-                                            <div class="mt-2">No products found</div>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${products == null or products.empty}">
-                                        <td colspan="7" class="text-center text-muted py-4">
-                                            <i class="bi bi-inbox display-4"></i>
-                                            <div class="mt-2">No products available</div>
-                                        </td>
-                                    </tr>
-                                    <tr th:each="product : ${products}" 
-                                        th:class="${product.stockLevel == 0} ? 'out-of-stock' : (${product.stockLevel <= product.lowStockThreshold} ? 'low-stock' : '')">
-                                        <td>
-                                            <div class="fw-bold" th:text="${product.title}">Product Title</div>
-                                            <small class="text-muted" th:text="${product.description}">Description</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary" th:text="${product.category}">Category</span>
-                                        </td>
-                                        <td>
-                                            <code th:text="${product.sku}">SKU123</code>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold" th:text="'$' + ${product.price}">$0.00</span>
-                                        </td>
-                                        <td>
-                                            <span th:class="${product.stockLevel == 0} ? 'badge bg-danger' : (${product.stockLevel <= product.lowStockThreshold} ? 'badge bg-warning' : 'badge bg-success')" 
-                                                  th:text="${product.stockLevel}">0</span>
-                                            <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
-                                        </td>                                        <td>
-                                            <span th:if="${product.isActive}" class="badge bg-success">
-                                                <i class="bi bi-check-circle"></i> Active
-                                            </span>
-                                            <span th:unless="${product.isActive}" class="badge bg-secondary">
-                                                <i class="bi bi-pause-circle"></i> Inactive
-                                            </span>
-                                            <div th:if="${product.isFeatured}" class="mt-1">
-                                                <span class="badge bg-warning">
-                                                    <i class="bi bi-star"></i> Featured
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a th:href="@{/admin/products/{id}/edit (id=${product.id})}" 
-                                                   class="btn btn-outline-primary btn-action" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-outline-danger btn-action" 
-                                                        title="Delete" data-bs-toggle="modal" 
-                                                        th:data-bs-target="'#deleteModal' + ${product.id}">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <!-- Low Stock Tab -->
+                    <div class="tab-pane fade" id="low-stock" role="tabpanel">
+                        <!-- Low Stock Alert -->
+                        <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>
+                                <strong>Low Stock Alert!</strong> These products need immediate attention for restocking.
+                            </div>
                         </div>
 
-                        <!-- Pagination -->
-                        <nav th:if="${products != null and products.totalPages > 1}">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item" th:class="${products.first} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/products(page=${products.number - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
-                                        <i class="bi bi-chevron-left"></i>
-                                    </a>
-                                </li>
-                                <li th:each="page : ${#numbers.sequence(0, products.totalPages - 1)}" 
-                                    class="page-item" th:class="${page == products.number} ? 'active'">
-                                    <a class="page-link" th:text="${page + 1}" 
-                                       th:href="@{/admin/products(page=${page}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">1</a>
-                                </li>
-                                <li class="page-item" th:class="${products.last} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/products(page=${products.number + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
-                                        <i class="bi bi-chevron-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-
-                        <!-- Summary -->
-                        <div class="mt-3 text-muted text-center" th:if="${products != null and products.totalElements > 0}">
-                            Showing <span th:text="${products.number * products.size + 1}">1</span> to 
-                            <span th:text="${(products.number + 1) * products.size > products.totalElements ? products.totalElements : (products.number + 1) * products.size}">10</span>
-                            of <span th:text="${products.totalElements}">100</span> results
-                        </div>
+                        <!-- Low Stock Products -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-exclamation-triangle text-warning"></i> Low Stock Products
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Category</th>
+                                                <th>Current Stock</th>
+                                                <th>Threshold</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lowStockTableBody">
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted py-4">
+                                                    <div class="spinner-border" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    <div class="mt-2">Loading low stock products...</div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>                        </div>
                     </div>
                 </div>
             </main>
@@ -312,5 +388,142 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Low Stock functionality
+        function loadLowStockProducts() {
+            const tableBody = document.getElementById('lowStockTableBody');
+            
+            // Show loading state
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2">Loading low stock products...</div>
+                    </td>
+                </tr>
+            `;
+            
+            // Fetch low stock products from server
+            fetch('/admin/products/low-stock-data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center text-success py-4">
+                                    <i class="bi bi-check-circle display-4"></i>
+                                    <div class="mt-2">Great! No products are currently low on stock.</div>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        tableBody.innerHTML = data.map(product => `
+                            <tr class="low-stock">
+                                <td>
+                                    <div class="fw-bold">${product.title}</div>
+                                    <small class="text-muted">${product.description || ''}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">${product.category}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger">${product.stockLevel}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">${product.lowStockThreshold}</span>
+                                </td>
+                                <td>
+                                    ${product.stockLevel === 0 ? 
+                                        '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Out of Stock</span>' :
+                                        '<span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock</span>'
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/products/${product.id}/edit" 
+                                           class="btn btn-outline-primary btn-action" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-success btn-action" 
+                                                title="Quick Restock" onclick="quickRestock(${product.id})">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                        
+                        // Update badge count
+                        const badge = document.querySelector('#low-stock-tab .badge');
+                        if (badge) {
+                            badge.textContent = data.length;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading low stock products:', error);
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger py-4">
+                                <i class="bi bi-exclamation-triangle display-4"></i>
+                                <div class="mt-2">Error loading low stock products. Please try again.</div>
+                                <button class="btn btn-outline-primary mt-2" onclick="loadLowStockProducts()">
+                                    <i class="bi bi-arrow-clockwise"></i> Retry
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+        
+        function quickRestock(productId) {
+            const quantity = prompt('Enter quantity to add to stock:');
+            if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+                // This would normally make an AJAX call to update the stock
+                alert(`Added ${quantity} items to product stock. This feature will be implemented with backend integration.`);
+                // After successful update, reload the low stock products
+                // loadLowStockProducts();
+            }
+        }
+          // Event listener for tab switching and initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            const lowStockTab = document.getElementById('low-stock-tab');
+            const allProductsTab = document.getElementById('all-products-tab');
+            
+            // Check if we should activate the low-stock tab based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab') || '[[${activeTab}]]';
+            
+            if (activeTab === 'low-stock' && lowStockTab) {
+                // Switch to low-stock tab
+                const lowStockTabInstance = new bootstrap.Tab(lowStockTab);
+                lowStockTabInstance.show();
+                loadLowStockProducts();
+            }
+            
+            // Add event listener for when low-stock tab is shown
+            if (lowStockTab) {
+                lowStockTab.addEventListener('shown.bs.tab', function() {
+                    loadLowStockProducts();
+                    // Update URL to reflect active tab
+                    const url = new URL(window.location);
+                    url.searchParams.set('tab', 'low-stock');
+                    window.history.pushState({}, '', url);
+                });
+            }
+            
+            // Add event listener for when all-products tab is shown
+            if (allProductsTab) {
+                allProductsTab.addEventListener('shown.bs.tab', function() {
+                    // Remove tab parameter from URL
+                    const url = new URL(window.location);
+                    url.searchParams.delete('tab');
+                    window.history.pushState({}, '', url);
+                });
+            }
+        });
+    </script>
 </body>
 </html>

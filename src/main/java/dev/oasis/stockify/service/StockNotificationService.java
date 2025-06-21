@@ -61,4 +61,30 @@ public class StockNotificationService {
             notificationRepository.save(notification);
         });
     }
+
+    @Transactional
+    public int markAllAsRead() {
+        int count = notificationRepository.markAllAsRead();
+        logger.info("Marked {} notifications as read", count);
+        return count;
+    }
+
+    @Transactional
+    public int deleteAllRead() {
+        int count = notificationRepository.deleteAllRead();
+        logger.info("Deleted {} read notifications", count);
+        return count;
+    }
+
+    @Transactional
+    public boolean deleteNotification(Long notificationId) {
+        try {
+            notificationRepository.deleteById(notificationId);
+            logger.info("Deleted notification with ID: {}", notificationId);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to delete notification with ID: {}", notificationId, e);
+            return false;
+        }
+    }
 }

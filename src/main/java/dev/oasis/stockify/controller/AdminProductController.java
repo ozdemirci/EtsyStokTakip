@@ -71,9 +71,7 @@ public class AdminProductController {
 
         log.info("🎯 Using tenant ID: {}", tenantId);
         return tenantId;
-    }
-
-    /**
+    }    /**
      * Display paginated and searchable list of products
      */
     @GetMapping
@@ -83,6 +81,7 @@ public class AdminProductController {
             @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String tab,
             HttpServletRequest request,
             Model model) {
         
@@ -94,7 +93,7 @@ public class AdminProductController {
             Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
         
         Pageable pageable = PageRequest.of(page, size, sort);
-          Page<ProductResponseDTO> products;
+        Page<ProductResponseDTO> products;
         if (search != null && !search.trim().isEmpty()) {
             products = productService.searchProducts(search, pageable);
             model.addAttribute("search", search);
@@ -104,6 +103,13 @@ public class AdminProductController {
             log.debug("📋 Listing all products for tenant: {}", tenantId);
         }
 
+        // Get counts for badges
+        List<ProductResponseDTO> allProducts = productService.getAllProducts();
+        long totalProducts = allProducts.size();
+        long lowStockCount = allProducts.stream()
+            .filter(p -> p.getStockLevel() <= p.getLowStockThreshold())
+            .count();
+
         model.addAttribute("products", products);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
@@ -112,8 +118,12 @@ public class AdminProductController {
         model.addAttribute("totalPages", products.getTotalPages());
         model.addAttribute("totalElements", products.getTotalElements());
         model.addAttribute("tenantId", tenantId);
+        model.addAttribute("totalProducts", totalProducts);
+        model.addAttribute("lowStockCount", lowStockCount);
+        model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
 
-        log.debug("📊 Found {} products for tenant: {}", products.getTotalElements(), tenantId);
+        log.debug("📊 Found {} total products, {} low stock for tenant: {}", 
+            totalProducts, lowStockCount, tenantId);
         return "admin/products";
     }
 
@@ -313,31 +323,40 @@ public class AdminProductController {
             log.error("❌ Failed to export products for tenant: {}", tenantId, e);
             throw new FileOperationException("Failed to export products: " + e.getMessage());
         }
+    }    /**
+     * Redirect to products page with low-stock tab active
+     */
+    @GetMapping("/low-stock")
+    public String getLowStockProducts(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("⚠️ Redirecting to products page with low-stock tab for tenant: {}", tenantId);
+        
+        // Add parameter to indicate low-stock tab should be active
+        redirectAttributes.addAttribute("tab", "low-stock");
+        return "redirect:/admin/products";
     }
 
     /**
-     * Get low stock products
+     * Get low stock products as JSON data for AJAX calls
      */
-    @GetMapping("/low-stock")
-    public String getLowStockProducts(HttpServletRequest request, Model model) {
+    @GetMapping("/low-stock-data")
+    @ResponseBody
+    public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request) {
         String tenantId = getCurrentTenantId(request);
-        log.info("⚠️ Getting low stock products for tenant: {}", tenantId);        try {
-            // TODO: Implement low stock functionality with proper repository method
+        log.info("📊 Getting low stock products data for tenant: {}", tenantId);
+        
+        try {
             List<ProductResponseDTO> lowStockProducts = productService.getAllProducts()
                 .stream()
                 .filter(p -> p.getStockLevel() <= p.getLowStockThreshold())
                 .toList();
                 
-            model.addAttribute("products", lowStockProducts);
-            model.addAttribute("tenantId", tenantId);
-            model.addAttribute("isLowStockView", true);
-            log.info("📊 Found {} low stock products for tenant: {}", 
+            log.info("🔍 Found {} low stock products for tenant: {}", 
                 lowStockProducts.size(), tenantId);
-            return "admin/products";
+            return lowStockProducts;
         } catch (Exception e) {
-            log.error("❌ Failed to get low stock products for tenant: {}", tenantId, e);
-            model.addAttribute("errorMessage", "Failed to load low stock products: " + e.getMessage());
-            return "admin/products";
+            log.error("❌ Failed to get low stock products data for tenant: {}", tenantId, e);
+            return List.of(); // Return empty list on error
         }
     }
 }

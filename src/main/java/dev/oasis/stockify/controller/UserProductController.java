@@ -6,7 +6,6 @@ import dev.oasis.stockify.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,10 +13,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * User controller for product viewing operations
@@ -94,14 +93,14 @@ public class UserProductController {
 
     /**
      * Display paginated and searchable list of products (read-only for users)
-     */
-    @GetMapping
+     */    @GetMapping
     public String listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String tab,
             HttpServletRequest request,
             Model model) {
         
@@ -122,7 +121,12 @@ public class UserProductController {
         } else {
             products = productService.getProductsPage(pageable);
             log.debug("📋 User listing all products for tenant: {}", tenantId);
-        }
+        }        // Get counts for badges
+        List<ProductResponseDTO> allProducts = productService.getAllProducts();
+        long totalProducts = allProducts.size();
+        long lowStockCount = allProducts.stream()
+            .filter(p -> p.getStockLevel() <= 10) // Using simplified low stock logic for user view
+            .count();
 
         // Add attributes to model
         model.addAttribute("products", products);
@@ -131,50 +135,50 @@ public class UserProductController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("totalPages", products.getTotalPages());
-        model.addAttribute("totalElements", products.getTotalElements());
-        model.addAttribute("tenantId", tenantId);
+        model.addAttribute("totalElements", products.getTotalElements());        model.addAttribute("tenantId", tenantId);
+        model.addAttribute("totalProducts", totalProducts);
+        model.addAttribute("lowStockCount", lowStockCount);
+        model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
+
+        log.debug("📊 Found {} total products, {} low stock for tenant: {}", 
+            totalProducts, lowStockCount, tenantId);
 
         log.debug("📊 Found {} products for tenant: {}", products.getTotalElements(), tenantId);
         return "user/products";
+    }    /**
+     * Redirect to products page with low-stock tab active
+     */
+    @GetMapping("/low-stock")
+    public String getLowStockProducts(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        String tenantId = getCurrentTenantId(request);
+        log.info("⚠️ Redirecting to products page with low-stock tab for tenant: {}", tenantId);
+        
+        // Add parameter to indicate low-stock tab should be active
+        redirectAttributes.addAttribute("tab", "low-stock");
+        return "redirect:/user/products";
     }
 
     /**
-     * Get low stock products (read-only for users)
+     * Get low stock products as JSON data for AJAX calls
      */
-    @GetMapping("/low-stock")
-    public String getLowStockProducts(HttpServletRequest request, Model model) {
+    @GetMapping("/low-stock-data")
+    @ResponseBody
+    public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request) {
         String tenantId = getCurrentTenantId(request);
-        log.info("⚠️ User checking low stock products for tenant: {}", tenantId);        try {
-            // For user view, we'll show all products and filter for low stock on the frontend
-            // Since getLowStockProducts(Pageable) doesn't exist, we'll use getProductsPage and filter
-            Pageable pageable = PageRequest.of(0, 100, Sort.by("quantity").ascending());
-            Page<ProductResponseDTO> allProducts = productService.getProductsPage(pageable);
-              // Filter for low stock products using isLowStock() method
-            List<ProductResponseDTO> lowStockProducts = allProducts.getContent().stream()
-                .filter(ProductResponseDTO::isLowStock)
-                .collect(Collectors.toList());
-            
-            // Create a new Page object for low stock products
-            Page<ProductResponseDTO> lowStockPage = new PageImpl<>(
-                lowStockProducts, pageable, lowStockProducts.size());
-
-            model.addAttribute("products", lowStockPage);
-            model.addAttribute("currentPage", 0);
-            model.addAttribute("pageSize", 20);
-            model.addAttribute("sortBy", "quantity");
-            model.addAttribute("sortDir", "asc");
-            model.addAttribute("totalPages", lowStockPage.getTotalPages());
-            model.addAttribute("totalElements", lowStockPage.getTotalElements());
-            model.addAttribute("tenantId", tenantId);
-            model.addAttribute("isLowStockView", true);            log.info("📊 Found {} low stock products for tenant: {}", 
-                lowStockPage.getTotalElements(), tenantId);
-            
-            return "user/products";
-            
+        log.info("📊 Getting low stock products data for tenant: {}", tenantId);
+        
+        try {
+            List<ProductResponseDTO> lowStockProducts = productService.getAllProducts()
+                .stream()
+                .filter(p -> p.getStockLevel() <= 10) // Using simplified low stock logic for user view
+                .toList();
+                
+            log.info("� Found {} low stock products for tenant: {}", 
+                lowStockProducts.size(), tenantId);
+            return lowStockProducts;
         } catch (Exception e) {
-            log.error("❌ Failed to get low stock products for tenant: {}", tenantId, e);
-            model.addAttribute("errorMessage", "Failed to load low stock products: " + e.getMessage());
-            return "user/products";
+            log.error("❌ Failed to get low stock products data for tenant: {}", tenantId, e);
+            return List.of(); // Return empty list on error
         }
     }
 

@@ -66,20 +66,17 @@
                             <a class="nav-link" href="/admin/products">
                                 <i class="bi bi-box-seam"></i> Products
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        <li class="nav-item">
                             <a class="nav-link" href="/admin/users">
                                 <i class="bi bi-people"></i> Users
-                            </a>
-                        </li>                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/products/low-stock">
-                                <i class="bi bi-exclamation-triangle"></i> Low Stock
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/notifications">
                                 <i class="bi bi-bell"></i> Notifications
-                                <span class="badge bg-danger ms-2" id="notificationBadge" style="display: none;">0</span>
+                                <span class="badge bg-danger ms-2" id="notificationBadge" 
+                                      th:if="${unreadNotifications > 0}"
+                                      th:text="${unreadNotifications}" style="display: none;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -139,9 +136,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card stats-card">
+                    </div>                    <div class="col-md-3">
+                        <div class="card stats-card" style="cursor: pointer;" onclick="window.location.href='/admin/products?tab=low-stock'">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
@@ -159,7 +155,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>                    <div class="col-md-3">
+                    </div><div class="col-md-3">
                         <div class="card stats-card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
@@ -216,9 +212,8 @@
                                             <i class="bi bi-x-circle me-1"></i>
                                             <small><strong>5 products</strong> out of stock</small>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="alert alert-warning alert-sm mb-1 p-2">
+                                    </div>                                    <div class="col-md-4">
+                                        <div class="alert alert-warning alert-sm mb-1 p-2" style="cursor: pointer;" onclick="window.location.href='/admin/products?tab=low-stock'">
                                             <i class="bi bi-exclamation-triangle me-1"></i>
                                             <small><strong>12 products</strong> low stock</small>
                                         </div>
@@ -262,10 +257,10 @@
                                 <div class="d-grid gap-2">
                                     <a href="/admin/products/add" class="btn btn-success quick-action-btn">
                                         <i class="bi bi-plus-circle"></i> Add Product
-                                    </a>
-                                    <a href="/admin/users/add" class="btn btn-primary quick-action-btn">
+                                    </a>                                    <a href="/admin/users/add" class="btn btn-primary quick-action-btn">
                                         <i class="bi bi-person-plus"></i> Add User
-                                    </a>                                    <a href="/admin/products/low-stock" class="btn btn-warning quick-action-btn">
+                                    </a>
+                                    <a href="/admin/products?tab=low-stock" class="btn btn-warning quick-action-btn">
                                         <i class="bi bi-exclamation-triangle"></i> Check Low Stock
                                     </a>
                                     <a href="/admin/notifications" class="btn btn-secondary quick-action-btn">
@@ -306,8 +301,7 @@
                                         </div>
                                         <small class="text-muted">2 min ago</small>
                                     </div>
-                                </div>
-                                <div class="activity-item warning mb-3">
+                                </div>                                <div class="activity-item warning mb-3" style="cursor: pointer;" onclick="window.location.href='/admin/products?tab=low-stock'">
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <strong>Low Stock Alert</strong>

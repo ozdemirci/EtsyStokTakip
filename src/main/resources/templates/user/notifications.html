@@ -52,15 +52,9 @@
                             <a class="nav-link" href="/user/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        <li class="nav-item">
                             <a class="nav-link" href="/user/products">
                                 <i class="bi bi-box-seam"></i> Products
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/user/products/low-stock">
-                                <i class="bi bi-exclamation-triangle"></i> Low Stock
                             </a>
                         </li>
                         <li class="nav-item">
@@ -78,10 +72,15 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
                         <i class="bi bi-bell"></i> Notifications
-                    </h1>
-                    <div>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="markAllAsRead()">
+                    </h1>                    <div>
+                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="markAllAsRead(this)">
                             <i class="bi bi-check-all"></i> Mark All as Read
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm me-2" onclick="deleteAllRead(this)">
+                            <i class="bi bi-trash"></i> Delete All as Read
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="testNotificationEndpoint()">
+                            <i class="bi bi-bug"></i> Test API
                         </button>
                     </div>
                 </div>
@@ -94,64 +93,68 @@
                                 <h5 class="card-title mb-0">
                                     <i class="bi bi-inbox"></i> Recent Notifications
                                 </h5>
-                            </div>
-                            <div class="card-body">
-                                <!-- Sample Notifications -->
-                                <div class="notification-item warning p-3 mb-3 rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1">
-                                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                                                Low Stock Alert
-                                            </h6>
-                                            <p class="mb-1">Some products are running low on stock and may need restocking soon.</p>
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock"></i> 
-                                                <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}">16 Jun 2025 20:30</span>
-                                            </small>
-                                        </div>
-                                        <div>
-                                            <span class="badge bg-warning">Alert</span>
-                                            <button class="btn btn-sm btn-outline-secondary ms-2" title="Mark as read">
-                                                <i class="bi bi-check"></i>
-                                            </button>
+                            </div>                            <div class="card-body" id="notificationsList">
+                                <!-- Dynamic notifications from backend -->
+                                <div th:if="${notifications != null and !notifications.empty}">
+                                    <div th:each="notification : ${notifications}" 
+                                         class="notification-item p-3 mb-3 rounded border" 
+                                         th:classappend="${notification.read ? 'border-secondary' : 'border-warning'}"
+                                         th:style="${notification.read ? 'opacity: 0.8;' : ''}"
+                                         th:data-id="${notification.id}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">
+                                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                                    <span>Low Stock Alert</span>
+                                                </h6>
+                                                <p class="mb-2" th:text="${notification.message}">Notification message</p>
+                                                <div class="d-flex align-items-center">
+                                                    <small class="text-muted me-3">
+                                                        <i class="bi bi-clock"></i> 
+                                                        <span th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
+                                                    </small>
+                                                    <small class="text-muted me-3">
+                                                        <i class="bi bi-box"></i>
+                                                        <span th:text="${notification.product.title}">Product</span>
+                                                    </small>
+                                                    <small class="text-muted">
+                                                        <span th:if="${notification.read}">
+                                                            <i class="bi bi-eye"></i> Read
+                                                        </span>
+                                                        <span th:unless="${notification.read}">
+                                                            <i class="bi bi-eye-slash"></i> Unread
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <span class="badge bg-warning text-dark mb-2" th:text="${notification.notificationType}">LOW_STOCK</span>
+                                                <div class="btn-group d-block" role="group">
+                                                    <button class="btn btn-sm btn-outline-success me-1" title="Mark as read" 
+                                                            th:if="${!notification.read}"
+                                                            th:onclick="'markSingleAsRead(' + ${notification.id} + ', this)'">
+                                                        <i class="bi bi-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-primary me-1" title="View Product" 
+                                                            th:onclick="'window.open(\'/user/products?search=' + ${notification.product.title} + '\', \'_blank\')'">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" title="Delete" 
+                                                            th:onclick="'deleteSingleNotification(' + ${notification.id} + ', this)'">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="notification-item success p-3 mb-3 rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1">
-                                                <i class="bi bi-check-circle text-success me-2"></i>
-                                                Welcome to Stockify!
-                                            </h6>
-                                            <p class="mb-1">Welcome to your new Stockify dashboard. You can now manage your inventory efficiently.</p>
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock"></i> Today
-                                            </small>
-                                        </div>
-                                        <div>
-                                            <span class="badge bg-success">Welcome</span>
-                                            <button class="btn btn-sm btn-outline-secondary ms-2" title="Mark as read">
-                                                <i class="bi bi-check"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                                
+                                <!-- Empty state when no notifications -->
+                                <div th:if="${notifications == null or notifications.empty}" class="text-center py-5">
+                                    <i class="bi bi-bell-slash text-muted" style="font-size: 3rem;"></i>
+                                    <h5 class="text-muted mt-3">No notifications</h5>
+                                    <p class="text-muted">You're all caught up! No new notifications at this time.</p>
                                 </div>
-
-                                <div class="notification-item info p-3 mb-3 rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1">
-                                                <i class="bi bi-info-circle text-info me-2"></i>
-                                                System Update
-                                            </h6>
-                                            <p class="mb-1">Your dashboard data has been refreshed with the latest information.</p>
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock"></i> 
-                                                <span th:text="${#temporals.format(#temporals.createNow().minusMinutes(5), 'HH:mm')}">20:25</span>
-                                            </small>
                                         </div>
                                         <div>
                                             <span class="badge bg-info">System</span>
@@ -239,16 +242,207 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function markAllAsRead() {
-            // Mark all notifications as read
-            document.querySelectorAll('.notification-item').forEach(function(item) {
-                item.style.opacity = '0.7';
-            });
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>    <script>        function markAllAsRead(button) {
+            console.log('🔵 markAllAsRead function called with button:', button);
             
-            // Show toast message
-            showToast('All notifications marked as read!', 'success');
+            // Show loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="spinner-border spinner-border-sm"></i> Processing...';
+            button.disabled = true;
+            
+            console.log('🔵 Calling markAllAsRead endpoint...');
+            
+            // Call backend endpoint
+            fetch('/user/notifications/mark-all-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('🔵 Response status:', response.status);
+                console.log('🔵 Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            })
+            .then(data => {
+                console.log('🔵 Response data:', data);
+                if (data.success) {
+                    showToast(data.message || 'All notifications marked as read!', 'success');
+                    // Reload the page to refresh the notification list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Failed to mark notifications as read', 'danger');
+                    // Restore button state
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('🔵 Error details:', error);
+                showToast('Error marking notifications as read: ' + error.message, 'danger');
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }        function deleteAllRead(button) {
+            console.log('🟠 deleteAllRead function called with button:', button);
+            
+            // Show confirmation dialog
+            if (!confirm('Are you sure you want to permanently delete all read notifications? This action cannot be undone.')) {
+                console.log('🟠 User cancelled delete operation');
+                return;
+            }
+            
+            // Show loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="spinner-border spinner-border-sm"></i> Deleting...';
+            button.disabled = true;
+            
+            console.log('🟠 Calling deleteAllRead endpoint...');
+            
+            // Call backend endpoint
+            fetch('/user/notifications/delete-all-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('🟠 Response status:', response.status);
+                console.log('🟠 Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            })
+            .then(data => {
+                console.log('🟠 Response data:', data);
+                if (data.success) {
+                    showToast(data.message || 'Read notifications deleted successfully!', 'success');
+                    // Reload the page to refresh the notification list
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Failed to delete read notifications', 'danger');
+                    // Restore button state
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('🟠 Error details:', error);
+                showToast('Error deleting read notifications: ' + error.message, 'danger');
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function markSingleAsRead(notificationId, button) {
+            // Show loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-spinner-border"></i>';
+            button.disabled = true;
+            
+            // Call the existing single notification endpoint
+            fetch(`/notifications/${notificationId}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Update the notification item visually
+                    const notificationItem = button.closest('.notification-item');
+                    notificationItem.style.opacity = '0.8';
+                    notificationItem.classList.remove('border-warning');
+                    notificationItem.classList.add('border-secondary');
+                    
+                    // Update the read status text
+                    const unreadSpan = notificationItem.querySelector('small span:last-child');
+                    if (unreadSpan && unreadSpan.innerHTML.includes('Unread')) {
+                        unreadSpan.innerHTML = '<i class="bi bi-eye"></i> Read';
+                    }
+                    
+                    // Remove the button since it's now read
+                    button.remove();
+                    
+                    showToast('Notification marked as read!', 'success');
+                } else {
+                    throw new Error('Failed to mark notification as read');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error marking notification as read', 'danger');
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function deleteSingleNotification(notificationId, button) {
+            if (!confirm('Are you sure you want to delete this notification?')) {
+                return;
+            }
+            
+            // Show loading state
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-spinner-border"></i>';
+            button.disabled = true;
+            
+            // Call backend endpoint
+            fetch(`/user/notifications/${notificationId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const notificationItem = button.closest('.notification-item');
+                    notificationItem.remove();
+                    showToast('Notification deleted successfully!', 'success');
+                } else {
+                    showToast(data.message || 'Failed to delete notification', 'danger');
+                    // Restore button state
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error deleting notification', 'danger');
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
         }
 
         function saveNotificationSettings() {
@@ -278,6 +472,46 @@
         // Request notification permission
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
+        }
+
+        function testNotificationEndpoint() {
+            console.log('🧪 Testing notification endpoints...');
+            
+            // Test mark all as read
+            fetch('/user/notifications/mark-all-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('📧 Mark all as read response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📧 Mark all as read response data:', data);
+                showToast('Mark all test: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'danger');
+                
+                // Now test delete all read
+                return fetch('/user/notifications/delete-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            })
+            .then(response => {
+                console.log('🗑️ Delete all read response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('🗑️ Delete all read response data:', data);
+                showToast('Delete all test: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'danger');
+            })
+            .catch(error => {
+                console.error('❌ Test failed:', error);
+                showToast('Test failed: ' + error.message, 'danger');
+            });
         }
     </script>
 </body>
