@@ -42,7 +42,7 @@ public class DataLoader implements CommandLineRunner {
     private final DataSource dataSource;
 
     private static final List<String> TENANT_IDS = Arrays.asList(
-        "public", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions","company1"
+        "public","stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions","company1"
     );
     @Override
     public void run(String... args) {
