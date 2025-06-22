@@ -13,7 +13,7 @@ public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentif
     public String resolveCurrentTenantIdentifier() {
         String tenant = TenantContext.getCurrentTenant();
         String resolved = tenant != null ? tenant : DEFAULT_TENANT;
-        log.info("🔍 Hibernate resolving tenant identifier: '{}' (from context: '{}')", resolved, tenant);
+        log.debug("🔍 Hibernate resolving tenant identifier: '{}' (from context: '{}')", resolved, tenant);
         return resolved;
     }
 

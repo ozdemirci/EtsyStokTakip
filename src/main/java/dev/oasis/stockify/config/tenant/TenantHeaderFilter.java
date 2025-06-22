@@ -19,9 +19,7 @@ import java.io.IOException;
 public class TenantHeaderFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(TenantHeaderFilter.class);
-    private static final String TENANT_HEADER = "X-TenantId";
-    private static final String TENANT_PARAM = "tenant_id";
-    private static final String DEFAULT_TENANT = "public";
+    private static final String TENANT_HEADER = "X-TenantId";    private static final String TENANT_PARAM = "tenant_id";
     private final AntPathRequestMatcher loginRequestMatcher = new AntPathRequestMatcher("/login", "POST");    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                   @NonNull FilterChain filterChain) throws ServletException, IOException {        try {
@@ -41,12 +39,22 @@ public class TenantHeaderFilter extends OncePerRequestFilter {
             if (tenantId == null || tenantId.isEmpty()) {
                 tenantId = (String) request.getSession().getAttribute("tenantId");
                 logger.debug("Tenant from session: {}", tenantId);
-            }
-
-            // 4. If still not found, use default
+            }            // 4. If still not found, DON'T use default - this breaks tenant isolation
             if (tenantId == null || tenantId.isEmpty()) {
-                tenantId = DEFAULT_TENANT;
-                logger.debug("Using default tenant: {}", tenantId);
+                // For login pages, allow no tenant (will be set after successful login)
+                if (request.getRequestURI().equals("/login") || 
+                    request.getRequestURI().equals("/") || 
+                    request.getRequestURI().startsWith("/css/") ||
+                    request.getRequestURI().startsWith("/js/") ||
+                    request.getRequestURI().startsWith("/images/")) {
+                    tenantId = "public"; // Only for public resources and login
+                    logger.debug("Public resource or login page - using public tenant");
+                } else {
+                    logger.error("❌ CRITICAL: No tenant found for protected resource: {}", request.getRequestURI());
+                    // Don't set any tenant context - let controllers handle the error
+                    filterChain.doFilter(request, response);
+                    return;
+                }
             }
 
             // Set tenant context

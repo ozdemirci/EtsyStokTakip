@@ -26,13 +26,10 @@ public class TenantAwareAuthenticationSuccessHandler extends SimpleUrlAuthentica
             TenantContext.setCurrentTenant(tenantId);
             // Session'a da ekle ki sonraki request'lerde kullanabilelim
             request.getSession().setAttribute("tenantId", tenantId);
-            logger.info("✅ Successfully set tenant ID in context and session: {}", tenantId);
-        } else {
-            // Default tenant for fallback
-            String defaultTenant = "public";
-            TenantContext.setCurrentTenant(defaultTenant);
-            request.getSession().setAttribute("tenantId", defaultTenant);
-            logger.warn("⚠️ No tenant_id provided, using default tenant: {}", defaultTenant);
+            logger.info("✅ Successfully set tenant ID in context and session: {}", tenantId);        } else {
+            // CRITICAL: Tenant ID is required for multi-tenant operation
+            logger.error("❌ CRITICAL: No tenant_id provided in login form!");
+            throw new IllegalArgumentException("Tenant ID is required for login. Please ensure tenant_id parameter is included in the login form.");
         }
 
         // Super Admin için özel dashboard

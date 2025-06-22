@@ -79,12 +79,10 @@ public class AdminProductController {
         if (tenantId == null || tenantId.trim().isEmpty()) {
             tenantId = TenantContext.getCurrentTenant();
             log.debug("🏢 Tenant from context: {}", tenantId);
-        }
-
-        // Use default tenant if still empty
+        }        // Don't default to "public" - this breaks tenant isolation!
         if (tenantId == null || tenantId.trim().isEmpty()) {
-            tenantId = "public";
-            log.warn("⚠️ No tenant found, defaulting to: {}", tenantId);
+            log.error("❌ CRITICAL: No tenant found in request! This violates tenant isolation.");
+            throw new IllegalStateException("Tenant ID is required for admin operations. Session may have expired.");
         }
 
         log.info("🎯 Using tenant ID: {}", tenantId);
