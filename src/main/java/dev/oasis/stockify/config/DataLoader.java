@@ -41,7 +41,7 @@ public class DataLoader implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final StockNotificationRepository stockNotificationRepository;  
     private static final List<String> TENANT_IDS = Arrays.asList(
-        "public", "company1"
+        "public","stockify","acme_corp","global_trade","artisan_crafts","tech_solutions",company1
     );
     
     // Sample users using DTO directly

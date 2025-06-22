@@ -361,12 +361,11 @@
                                                     <div class="mt-2">No categories available</div>
                                                     <div class="text-muted">Create your first category to get started</div>
                                                 </td>
-                                            </tr>
-                                            <tr th:each="category : ${categories}">
+                                            </tr>                                            <tr th:each="category : ${categories}">
                                                 <td>
                                                     <span class="category-color" 
-                                                          th:style="'background-color: ' + ${category.color ?: '#6c757d'}" 
-                                                          th:title="${category.color ?: 'No color'}"></span>
+                                                          th:style="'background-color: ' + ${category.hexColor ?: '#6c757d'}" 
+                                                          th:title="${category.hexColor ?: 'No color'}"></span>
                                                 </td>
                                                 <td>
                                                     <strong th:text="${category.name}">Category Name</strong>
@@ -379,11 +378,10 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-info" th:text="${category.productCount ?: 0}">0</span>
-                                                </td>
-                                                <td>
-                                                    <span th:if="${category.active}" class="badge bg-success">Active</span>
-                                                    <span th:unless="${category.active}" class="badge bg-secondary">Inactive</span>
                                                 </td>                                                <td>
+                                                    <span th:if="${category.isActive}" class="badge bg-success">Active</span>
+                                                    <span th:unless="${category.isActive}" class="badge bg-secondary">Inactive</span>
+                                                </td><td>
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-outline-primary btn-action" 
                                                                 title="Edit" 
@@ -492,14 +490,14 @@
                         </div>
                         <div class="mb-3">
                             <label for="categoryColor" class="form-label">Color</label>
-                            <input type="color" class="form-control form-control-color" id="categoryColor" name="color" value="#6c757d">
+                            <input type="color" class="form-control form-control-color" id="categoryColor" name="hexColor" value="#6c757d">
                         </div>
                         <div class="mb-3">
                             <label for="categorySortOrder" class="form-label">Sort Order</label>
                             <input type="number" class="form-control" id="categorySortOrder" name="sortOrder" value="1" min="1">
                         </div>
                         <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="categoryActive" name="active" checked>
+                            <input type="checkbox" class="form-check-input" id="categoryActive" name="isActive" checked>
                             <label class="form-check-label" for="categoryActive">
                                 Active
                             </label>
@@ -538,14 +536,14 @@
                         </div>
                         <div class="mb-3">
                             <label for="editCategoryColor" class="form-label">Color</label>
-                            <input type="color" class="form-control form-control-color" id="editCategoryColor" name="color">
+                            <input type="color" class="form-control form-control-color" id="editCategoryColor" name="hexColor">
                         </div>
                         <div class="mb-3">
                             <label for="editCategorySortOrder" class="form-label">Sort Order</label>
                             <input type="number" class="form-control" id="editCategorySortOrder" name="sortOrder" min="1">
                         </div>
                         <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="editCategoryActive" name="active">
+                            <input type="checkbox" class="form-check-input" id="editCategoryActive" name="isActive">
                             <label class="form-check-label" for="editCategoryActive">
                                 Active
                             </label>
@@ -561,10 +559,7 @@
             </div>
         </div>
     </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        console.log('JavaScript loading...');
-
         // ================================
         // TAB MANAGEMENT
         // ================================
@@ -576,10 +571,8 @@
          */
         function switchToTab(tabId, contentId) {
             const targetTab = document.getElementById(tabId);
-            if (!targetTab) {
-                console.error(`Tab button with ID '${tabId}' not found.`);
-                return;
-            }
+            if (!targetTab) return;
+            
             // Bootstrap'in kendi tab mekanizmasını kullanarak sekmeyi göster
             const tab = new bootstrap.Tab(targetTab);
             tab.show();
@@ -601,30 +594,24 @@
 
         // --- Onclick Functions ---
         function activateAllProductsTab() {
-            console.log('Activating all products tab');
             updateUrl(null); // 'All Products' varsayılan olduğu için URL'den tab parametresini kaldır
         }
         
         function activateLowStockTab() {
-            console.log('Activating low stock tab');
             loadLowStockProducts();
             updateUrl('low-stock');
         }
         
         function activateCategoriesTab() {
-            console.log('Activating categories tab');
             updateUrl('categories');
         }
 
         // ================================
         // DATA LOADING & API CALLS
-        // ================================
-
-        /**
+        // ================================        /**
          * Düşük stoklu ürünleri sunucudan çeker ve tabloyu doldurur.
          */
         function loadLowStockProducts() {
-            console.log('Loading low stock products...');
             const tableBody = document.getElementById('lowStockTableBody');
             if (!tableBody) return;
 
@@ -656,14 +643,10 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error loading low stock products:', error);
                     tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu.</div></td></tr>`;
                 });
-        }
-
-        /**
-         * Kategori düzenleme modal'ını sunucudan gelen veriyle doldurur.
-         * @param {number} categoryId - Düzenlenecek kategorinin ID'si
+        }        /**
+         * Kategori düzenleme modalını sunucudan gelen veriyle doldurur.
          */
         function editCategory(categoryId) {
             if (!categoryId) return;
@@ -675,9 +658,9 @@
                 .then(category => {
                     document.getElementById('editCategoryName').value = category.name || '';
                     document.getElementById('editCategoryDescription').value = category.description || '';
-                    document.getElementById('editCategoryColor').value = category.color || '#6c757d';
+                    document.getElementById('editCategoryColor').value = category.hexColor || '#6c757d';
                     document.getElementById('editCategorySortOrder').value = category.sortOrder || 1;
-                    document.getElementById('editCategoryActive').checked = category.active === true;
+                    document.getElementById('editCategoryActive').checked = category.isActive === true;
                     
                     const form = document.getElementById('editCategoryForm');
                     form.action = `/admin/products/categories/${categoryId}`;
@@ -686,15 +669,10 @@
                     modal.show();
                 })
                 .catch(error => {
-                    console.error('Error fetching category:', error);
                     alert('Kategori verileri yüklenirken bir hata oluştu.');
                 });
-        }
-
-        /**
+        }        /**
          * Kullanıcıdan onay alarak kategoriyi siler.
-         * @param {number} categoryId - Silinecek kategorinin ID'si
-         * @param {string} categoryName - Onay mesajında gösterilecek kategori adı
          */
         function deleteCategory(categoryId, categoryName) {
             if (!categoryId) return;
@@ -706,11 +684,8 @@
                 document.body.appendChild(form);
                 form.submit();
             }
-        }
-
-        /**
+        }        /**
          * Hızlı stok ekleme işlemini gerçekleştirir.
-         * @param {number} productId - Stok eklenecek ürünün ID'si
          */
         function quickRestock(productId) {
             const quantity = prompt('Stoğa eklenecek adedi girin:');
@@ -719,16 +694,11 @@
                 return;
             }
             alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
-            // Backend entegrasyonu için fetch kodunu buraya ekleyebilirsiniz.
         }
 
         // ================================
         // PAGE INITIALIZATION
-        // ================================
-
-        /**
-         * Sayfa yüklendiğinde URL'deki parametreye göre doğru sekmeyi aktif eder.
-         */
+        // ================================        // PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const activeTabName = urlParams.get('tab');
@@ -736,7 +706,6 @@
             let tabToActivate;
             if (activeTabName === 'low-stock') {
                 tabToActivate = document.getElementById('low-stock-tab');
-                // Fonksiyonu doğrudan çağırmak yerine, bootstrap'in tab'ını göster
                 if (tabToActivate) {
                     new bootstrap.Tab(tabToActivate).show();
                     loadLowStockProducts();
@@ -748,11 +717,7 @@
                 tabToActivate = document.getElementById('all-products-tab');
                 if (tabToActivate) new bootstrap.Tab(tabToActivate).show();
             }
-
-            console.log('Page initialization complete!');
         });
-
-        console.log('JavaScript loaded successfully!');
     </script>
 </body>
 </html>
