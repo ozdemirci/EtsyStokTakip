@@ -50,6 +50,15 @@ public class AdminProductController {
       private final ProductCategoryService categoryService;
 
     /**
+     * Test endpoint for JavaScript debugging
+     */
+    @GetMapping("/test-js")
+    public String testJavaScript() {
+        log.info("📊 Serving JavaScript test page");
+        return "admin/test-js";
+    }
+
+    /**
      * Get current tenant ID from various sources
      */
     private String getCurrentTenantId(HttpServletRequest request) {

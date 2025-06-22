@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Management - Stockify Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <style>        .navbar-brand { font-weight: bold; }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">   
+     <style>        .navbar-brand { font-weight: bold; }
         .sidebar { height: 100vh; background-color: #f8f9fa; }
         .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
         .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
@@ -20,9 +20,10 @@
         .search-box { max-width: 300px; }
         .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
         .category-color { width: 20px; height: 20px; border-radius: 50%; display: inline-block; border: 1px solid #dee2e6; }
-    </style>
+    </style>    
 </head>
 <body>
+    
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
@@ -118,7 +119,7 @@
                                     <i class="bi bi-exclamation-triangle"></i> Low Stock
                                     <span class="badge bg-warning ms-2" th:text="${lowStockCount ?: 0}">0</span>
                                 </button>
-                            </li><li class="nav-item" role="presentation">
+                            </li>                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="categories-tab" data-bs-toggle="tab" 
                                         data-bs-target="#categories" type="button" role="tab"
                                         onclick="activateCategoriesTab()">
@@ -560,191 +561,33 @@
             </div>
         </div>
     </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        /**
-         * Product Management Admin Panel JavaScript
-         * Handles tab navigation, category management, low stock monitoring, and form interactions
-         */
+        console.log('JavaScript loading...');
 
         // ================================
-        // GLOBAL FUNCTION DECLARATIONS (for onclick events)
-        // ================================
-        
-        /**
-         * Activates the All Products tab and updates URL
-         */
-        function activateAllProductsTab() {
-            switchToTab('all-products-tab', 'all-products');
-            updateUrl(null); // Remove tab parameter for default tab
-        }
-
-        /**
-         * Activates the Low Stock tab, loads data, and updates URL
-         */
-        function activateLowStockTab() {
-            switchToTab('low-stock-tab', 'low-stock');
-            loadLowStockProducts();
-            updateUrl('low-stock');
-        }
-
-        /**
-         * Activates the Categories tab and updates URL
-         */
-        function activateCategoriesTab() {
-            switchToTab('categories-tab', 'categories');
-            updateUrl('categories');
-        }
-
-        /**
-         * Opens the edit category modal with populated data
-         * @param {number} categoryId - ID of the category to edit
-         */
-        function editCategory(categoryId) {
-            if (!categoryId) {
-                console.error('Category ID is required');
-                return;
-            }
-
-            showLoadingState('Loading category data...');
-
-            fetch(`/admin/products/categories/${categoryId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(category => {
-                    populateEditForm(category);
-                    showEditModal(categoryId);
-                })
-                .catch(error => {
-                    console.error('Error fetching category:', error);
-                    showErrorMessage('Error loading category data. Please try again.');
-                })
-                .finally(() => {
-                    hideLoadingState();
-                });
-        }
-
-        /**
-         * Deletes a category after confirmation
-         * @param {number} categoryId - ID of the category to delete
-         * @param {string} categoryName - Name of the category for confirmation
-         */
-        function deleteCategory(categoryId, categoryName) {
-            if (!categoryId || !categoryName) {
-                console.error('Category ID and name are required');
-                return;
-            }
-
-            const confirmMessage = `Are you sure you want to delete the category "${categoryName}"?\n\nThis action cannot be undone.`;
-            
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-
-            submitDeleteForm(categoryId);
-        }        /**
-         * Handles quick restock functionality with backend integration
-         * @param {number} productId - ID of the product to restock
-         */
-        function quickRestock(productId) {
-            const quantity = prompt('Enter quantity to add to stock:');
-            
-            if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
-                if (quantity !== null) { // User didn't cancel
-                    showErrorMessage('Please enter a valid positive number.');
-                }
-                return;
-            }
-
-            const parsedQuantity = parseInt(quantity);
-            
-            // Show loading state
-            showLoadingState(`Adding ${parsedQuantity} items to stock...`);
-            
-            // Create request body
-            const requestBody = {
-                productId: productId,
-                quantity: parsedQuantity,
-                operation: 'ADD' // ADD or SET
-            };            // Make API call to backend
-            fetch('/admin/products/quick-restock', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(requestBody)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => {
-                        throw new Error(error.message || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Success response
-                showSuccessMessage(`Successfully added ${parsedQuantity} items to stock. New stock level: ${data.newStockLevel}`);
-                
-                // Reload the low stock products table if we're on that tab
-                const lowStockTab = document.querySelector('#low-stock-tab');
-                if (lowStockTab && lowStockTab.classList.contains('active')) {
-                    loadLowStockProducts();
-                }
-                
-                // Update the main products table if visible
-                updateProductStockInTable(productId, data.newStockLevel);
-                
-                // Update notification badges
-                updateNotificationBadges();
-            })
-            .catch(error => {
-                console.error('Error during quick restock:', error);
-                showErrorMessage(`Failed to update stock: ${error.message}`);
-            })
-            .finally(() => {
-                hideLoadingState();
-            });
-        }
-
-        // ================================
-        // TAB MANAGEMENT FUNCTIONS
+        // TAB MANAGEMENT
         // ================================
 
         /**
-         * Generic function to switch between tabs
-         * @param {string} tabId - ID of the tab button to activate
-         * @param {string} contentId - ID of the tab content to show
+         * Belirtilen sekmeyi aktif hale getirir.
+         * @param {string} tabId - Aktif edilecek sekme butonunun ID'si
+         * @param {string} contentId - Gösterilecek sekme içeriğinin ID'si
          */
         function switchToTab(tabId, contentId) {
             const targetTab = document.getElementById(tabId);
-            const targetContent = document.getElementById(contentId);
-            
-            if (!targetTab || !targetContent) {
-                console.warn(`Tab elements not found: ${tabId}, ${contentId}`);
+            if (!targetTab) {
+                console.error(`Tab button with ID '${tabId}' not found.`);
                 return;
             }
-
-            // Deactivate all tabs and content
-            document.querySelectorAll('.nav-link').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-pane').forEach(content => {
-                content.classList.remove('show', 'active');
-            });
-
-            // Activate target tab and content
-            targetTab.classList.add('active');
-            targetContent.classList.add('show', 'active');
+            // Bootstrap'in kendi tab mekanizmasını kullanarak sekmeyi göster
+            const tab = new bootstrap.Tab(targetTab);
+            tab.show();
         }
 
         /**
-         * Updates the browser URL with the active tab parameter
-         * @param {string|null} tabName - Name of the tab or null to remove parameter
+         * URL'yi, aktif sekmeyi yansıtacak şekilde günceller.
+         * @param {string|null} tabName - URL'ye eklenecek sekme adı
          */
         function updateUrl(tabName) {
             const url = new URL(window.location);
@@ -754,489 +597,162 @@
                 url.searchParams.delete('tab');
             }
             window.history.pushState({}, '', url);
-        }        // ================================
-        // CATEGORY MANAGEMENT FUNCTIONS
-        // ================================        /**
-         * Refreshes the categories list and updates badge count
-         */
-        function loadCategories() {
-            fetch('/admin/products/categories/list')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(categories => {
-                    updateCategoriesBadge(categories.length);
-                })
-                .catch(error => {
-                    console.error('Error loading categories:', error);
-                });
         }
 
-        /**
-         * Populates the edit form with category data
-         * @param {Object} category - Category data object
-         */
-        function populateEditForm(category) {
-            const fields = {
-                'editCategoryName': category.name || '',
-                'editCategoryDescription': category.description || '',
-                'editCategoryColor': category.color || '#6c757d',
-                'editCategorySortOrder': category.sortOrder || 1
-            };
-
-            Object.entries(fields).forEach(([fieldId, value]) => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.value = value;
-                }
-            });
-
-            const activeCheckbox = document.getElementById('editCategoryActive');
-            if (activeCheckbox) {
-                activeCheckbox.checked = category.active === true;
-            }
+        // --- Onclick Functions ---
+        function activateAllProductsTab() {
+            console.log('Activating all products tab');
+            updateUrl(null); // 'All Products' varsayılan olduğu için URL'den tab parametresini kaldır
         }
-
-        /**
-         * Shows the edit modal and sets the form action
-         * @param {number} categoryId - ID of the category being edited
-         */
-        function showEditModal(categoryId) {
-            const form = document.getElementById('editCategoryForm');
-            const modal = document.getElementById('editCategoryModal');
-            
-            if (form) {
-                form.action = `/admin/products/categories/${categoryId}`;
-            }
-            
-            if (modal) {
-                new bootstrap.Modal(modal).show();
-            }
+        
+        function activateLowStockTab() {
+            console.log('Activating low stock tab');
+            loadLowStockProducts();
+            updateUrl('low-stock');
         }
-
-        /**
-         * Creates and submits a delete form for the category
-         * @param {number} categoryId - ID of the category to delete
-         */
-        function submitDeleteForm(categoryId) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/admin/products/categories/${categoryId}/delete`;
-
-            // Add CSRF token if available
-            const csrfToken = document.querySelector('meta[name="_csrf"]');
-            if (csrfToken) {
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = csrfToken.content;
-                form.appendChild(csrfInput);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        /**
-         * Updates the categories tab badge with the count
-         * @param {number} count - Number of categories
-         */
-        function updateCategoriesBadge(count) {
-            const badge = document.querySelector('#categories-tab .badge');
-            if (badge) {
-                badge.textContent = count;
-            }
+        
+        function activateCategoriesTab() {
+            console.log('Activating categories tab');
+            updateUrl('categories');
         }
 
         // ================================
-        // LOW STOCK MANAGEMENT FUNCTIONS
+        // DATA LOADING & API CALLS
         // ================================
 
         /**
-         * Loads and displays low stock products
+         * Düşük stoklu ürünleri sunucudan çeker ve tabloyu doldurur.
          */
         function loadLowStockProducts() {
+            console.log('Loading low stock products...');
             const tableBody = document.getElementById('lowStockTableBody');
-            
-            if (!tableBody) {
-                console.error('Low stock table body not found');
-                return;
-            }
+            if (!tableBody) return;
 
-            showLowStockLoading(tableBody);
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border"></div></td></tr>`;
 
             fetch('/admin/products/low-stock-data')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
-                    displayLowStockProducts(tableBody, data);
-                    updateLowStockBadge(data.length);
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-success py-4"><i class="bi bi-check-circle display-4"></i><div class="mt-2">Harika! Stok seviyesi düşük ürün yok.</div></td></tr>`;
+                    } else {
+                        tableBody.innerHTML = data.map(product => `
+                            <tr>
+                                <td>${product.title}</td>
+                                <td>${product.category}</td>
+                                <td><span class="badge bg-danger">${product.stockLevel}</span></td>
+                                <td><span class="badge bg-warning">${product.lowStockThreshold}</span></td>
+                                <td><span class="badge bg-warning">Low Stock</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="quickRestock(${product.id})">
+                                        <i class="bi bi-plus-circle"></i> Restock
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading low stock products:', error);
-                    showLowStockError(tableBody);
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu.</div></td></tr>`;
                 });
         }
 
         /**
-         * Shows loading state in the low stock table
-         * @param {HTMLElement} tableBody - Table body element
+         * Kategori düzenleme modal'ını sunucudan gelen veriyle doldurur.
+         * @param {number} categoryId - Düzenlenecek kategorinin ID'si
          */
-        function showLowStockLoading(tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        <div class="spinner-border" role="status" aria-hidden="true">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <div class="mt-2">Loading low stock products...</div>
-                    </td>
-                </tr>
-            `;
+        function editCategory(categoryId) {
+            if (!categoryId) return;
+            fetch(`/admin/products/categories/${categoryId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(category => {
+                    document.getElementById('editCategoryName').value = category.name || '';
+                    document.getElementById('editCategoryDescription').value = category.description || '';
+                    document.getElementById('editCategoryColor').value = category.color || '#6c757d';
+                    document.getElementById('editCategorySortOrder').value = category.sortOrder || 1;
+                    document.getElementById('editCategoryActive').checked = category.active === true;
+                    
+                    const form = document.getElementById('editCategoryForm');
+                    form.action = `/admin/products/categories/${categoryId}`;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error fetching category:', error);
+                    alert('Kategori verileri yüklenirken bir hata oluştu.');
+                });
         }
 
         /**
-         * Displays low stock products in the table
-         * @param {HTMLElement} tableBody - Table body element
-         * @param {Array} products - Array of low stock products
+         * Kullanıcıdan onay alarak kategoriyi siler.
+         * @param {number} categoryId - Silinecek kategorinin ID'si
+         * @param {string} categoryName - Onay mesajında gösterilecek kategori adı
          */
-        function displayLowStockProducts(tableBody, products) {
-            if (products.length === 0) {
-                showNoLowStockProducts(tableBody);
-                return;
+        function deleteCategory(categoryId, categoryName) {
+            if (!categoryId) return;
+            const confirmMessage = `"${categoryName}" adlı kategoriyi silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.`;
+            if (confirm(confirmMessage)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/products/categories/${categoryId}/delete`;
+                document.body.appendChild(form);
+                form.submit();
             }
-
-            tableBody.innerHTML = products.map(product => createLowStockProductRow(product)).join('');
         }
 
         /**
-         * Shows message when no low stock products are found
-         * @param {HTMLElement} tableBody - Table body element
+         * Hızlı stok ekleme işlemini gerçekleştirir.
+         * @param {number} productId - Stok eklenecek ürünün ID'si
          */
-        function showNoLowStockProducts(tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center text-success py-4">
-                        <i class="bi bi-check-circle display-4" aria-hidden="true"></i>
-                        <div class="mt-2">Great! No products are currently low on stock.</div>
-                    </td>
-                </tr>
-            `;
-        }
-
-        /**
-         * Creates a table row for a low stock product
-         * @param {Object} product - Product data object
-         * @returns {string} HTML string for the table row
-         */
-        function createLowStockProductRow(product) {
-            const isOutOfStock = product.stockLevel === 0;
-            const statusBadge = isOutOfStock
-                ? '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Out of Stock</span>'
-                : '<span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock</span>';
-
-            return `
-                <tr class="low-stock">
-                    <td>
-                        <div class="fw-bold">${escapeHtml(product.title)}</div>
-                        <small class="text-muted">${escapeHtml(product.description || '')}</small>
-                    </td>
-                    <td>
-                        <span class="badge bg-secondary">${escapeHtml(product.category)}</span>
-                    </td>
-                    <td>
-                        <span class="badge bg-danger">${product.stockLevel}</span>
-                    </td>
-                    <td>
-                        <span class="badge bg-warning">${product.lowStockThreshold}</span>
-                    </td>
-                    <td>${statusBadge}</td>
-                    <td>
-                        <div class="btn-group" role="group">
-                            <a href="/admin/products/${product.id}/edit" 
-                               class="btn btn-outline-primary btn-action" title="Edit Product">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <button type="button" class="btn btn-outline-success btn-action" 
-                                    title="Quick Restock" onclick="quickRestock(${product.id})">
-                                <i class="bi bi-plus-circle"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }
-
-        /**
-         * Shows error state in the low stock table
-         * @param {HTMLElement} tableBody - Table body element
-         */
-        function showLowStockError(tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center text-danger py-4">
-                        <i class="bi bi-exclamation-triangle display-4" aria-hidden="true"></i>
-                        <div class="mt-2">Error loading low stock products. Please try again.</div>
-                        <button class="btn btn-outline-primary mt-2" onclick="loadLowStockProducts()">
-                            <i class="bi bi-arrow-clockwise"></i> Retry
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }
-
-        /**
-         * Updates the low stock tab badge with the count
-         * @param {number} count - Number of low stock products
-         */
-        function updateLowStockBadge(count) {
-            const badge = document.querySelector('#low-stock-tab .badge');
-            if (badge) {
-                badge.textContent = count;
-            }
-        }        /**
-         * Handles quick restock functionality (placeholder)
-         * @param {number} productId - ID of the product to restock
-         */
-        window.quickRestock = function(productId) {
-            const quantity = prompt('Enter quantity to add to stock:');
-            
+        function quickRestock(productId) {
+            const quantity = prompt('Stoğa eklenecek adedi girin:');
             if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
-                if (quantity !== null) { // User didn't cancel
-                    alert('Please enter a valid positive number.');
-                }
+                if (quantity !== null) alert('Lütfen geçerli bir pozitif sayı girin.');
                 return;
             }
-
-            // TODO: Implement actual restock API call
-            alert(`Added ${quantity} items to product stock. This feature will be implemented with backend integration.`);
-            
-            // After successful update, reload the low stock products
-            // loadLowStockProducts();
-        };
-
-        // Legacy global function alias for immediate availability
-        var quickRestock = window.quickRestock;
-
-        // ================================
-        // UTILITY FUNCTIONS
-        // ================================
-
-        /**
-         * Escapes HTML special characters to prevent XSS
-         * @param {string} text - Text to escape
-         * @returns {string} Escaped text
-         */
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        /**
-         * Shows a loading state message
-         * @param {string} message - Loading message to display
-         */
-        function showLoadingState(message) {
-            // TODO: Implement global loading state if needed
-            console.log('Loading:', message);
-        }
-
-        /**
-         * Hides the loading state
-         */
-        function hideLoadingState() {
-            // TODO: Implement global loading state if needed
-            console.log('Loading complete');
-        }        /**
-         * Shows an error message to the user
-         * @param {string} message - Error message to display
-         */
-        function showErrorMessage(message) {
-            // Create or update alert div
-            showAlert(message, 'danger');
-        }
-
-        /**
-         * Shows a success message to the user
-         * @param {string} message - Success message to display
-         */
-        function showSuccessMessage(message) {
-            // Create or update alert div
-            showAlert(message, 'success');
-        }
-
-        /**
-         * Shows alert message at the top of main content
-         * @param {string} message - Message to display
-         * @param {string} type - Alert type (success, danger, warning, info)
-         */
-        function showAlert(message, type) {
-            // Remove existing temporary alerts
-            const existingAlert = document.querySelector('.alert-temporary');
-            if (existingAlert) {
-                existingAlert.remove();
-            }
-
-            // Create new alert
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-temporary`;
-            alertDiv.innerHTML = `
-                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-
-            // Insert at the top of main content
-            const mainContent = document.querySelector('.main-content');
-            const firstChild = mainContent.firstElementChild;
-            mainContent.insertBefore(alertDiv, firstChild);
-
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-
-        /**
-         * Updates product stock in the main products table
-         * @param {number} productId - ID of the product to update
-         * @param {number} newStockLevel - New stock level
-         */
-        function updateProductStockInTable(productId, newStockLevel) {
-            // Find the product row in the main table
-            const productRows = document.querySelectorAll('#all-products tr[data-product-id]');
-            productRows.forEach(row => {
-                if (row.dataset.productId == productId) {
-                    const stockCell = row.querySelector('.stock-cell');
-                    if (stockCell) {
-                        const stockBadge = stockCell.querySelector('.badge');
-                        if (stockBadge) {
-                            stockBadge.textContent = newStockLevel;
-                            
-                            // Update badge color based on stock level
-                            const lowThreshold = parseInt(stockCell.dataset.lowThreshold) || 10;
-                            stockBadge.className = newStockLevel == 0 ? 'badge bg-danger' : 
-                                                 newStockLevel <= lowThreshold ? 'badge bg-warning' : 
-                                                 'badge bg-success';
-                        }
-                    }
-                }
-            });
-        }
-
-        /**
-         * Updates notification badges (placeholder for now)
-         */
-        function updateNotificationBadges() {
-            // This would typically make an API call to get updated notification counts
-            console.log('Notification badges updated');
+            alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
+            // Backend entegrasyonu için fetch kodunu buraya ekleyebilirsiniz.
         }
 
         // ================================
-        // FORM HANDLING
+        // PAGE INITIALIZATION
         // ================================
 
         /**
-         * Sets up auto-submit functionality for sorting dropdowns
-         */
-        function setupSortingAutoSubmit() {
-            const sortBySelect = document.getElementById('sortBySelect');
-            const sortDirSelect = document.getElementById('sortDirSelect');
-            const productSearchForm = document.getElementById('productSearchForm');
-
-            if (!productSearchForm) {
-                console.warn('Product search form not found');
-                return;
-            }
-
-            [sortBySelect, sortDirSelect].forEach(select => {
-                if (select) {
-                    select.addEventListener('change', () => {
-                        productSearchForm.submit();
-                    });
-                }
-            });
-        }
-
-        // ================================
-        // INITIALIZATION
-        // ================================        /**
-         * Initializes the page based on URL parameters
-         */
-        function initializeActiveTab() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab');            // Switch to the appropriate tab based on URL parameter
-            switch (activeTab) {
-                case 'low-stock':
-                    if (document.getElementById('low-stock-tab')) {
-                        activateLowStockTab();
-                    }
-                    break;
-                case 'categories':
-                    if (document.getElementById('categories-tab')) {
-                        activateCategoriesTab();
-                    }
-                    break;
-                default:
-                    // Default to all products tab
-                    if (document.getElementById('all-products-tab')) {
-                        activateAllProductsTab();
-                    }
-                    break;
-            }
-        }
-
-        /**
-         * Sets up Bootstrap tab event listeners
-         */
-        function setupTabEventListeners() {
-            const tabs = [
-                { id: 'low-stock-tab', action: loadLowStockProducts, urlParam: 'low-stock' },
-                { id: 'categories-tab', action: null, urlParam: 'categories' },
-                { id: 'all-products-tab', action: null, urlParam: null }
-            ];
-
-            tabs.forEach(({ id, action, urlParam }) => {
-                const tabElement = document.getElementById(id);
-                if (tabElement) {
-                    tabElement.addEventListener('shown.bs.tab', () => {
-                        if (action) action();
-                        updateUrl(urlParam);
-                    });
-                }
-            });
-        }
-
-        // ================================
-        // DOCUMENT READY
-        // ================================
-
-        /**
-         * Main initialization function
+         * Sayfa yüklendiğinde URL'deki parametreye göre doğru sekmeyi aktif eder.
          */
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Product Management Admin Panel initialized');
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTabName = urlParams.get('tab');
 
-            // Setup form interactions
-            setupSortingAutoSubmit();
+            let tabToActivate;
+            if (activeTabName === 'low-stock') {
+                tabToActivate = document.getElementById('low-stock-tab');
+                // Fonksiyonu doğrudan çağırmak yerine, bootstrap'in tab'ını göster
+                if (tabToActivate) {
+                    new bootstrap.Tab(tabToActivate).show();
+                    loadLowStockProducts();
+                }
+            } else if (activeTabName === 'categories') {
+                tabToActivate = document.getElementById('categories-tab');
+                if (tabToActivate) new bootstrap.Tab(tabToActivate).show();
+            } else {
+                tabToActivate = document.getElementById('all-products-tab');
+                if (tabToActivate) new bootstrap.Tab(tabToActivate).show();
+            }
 
-            // Setup tab event listeners
-            setupTabEventListeners();
-
-            // Initialize active tab based on URL
-            initializeActiveTab();
+            console.log('Page initialization complete!');
         });
+
+        console.log('JavaScript loaded successfully!');
     </script>
 </body>
 </html>
