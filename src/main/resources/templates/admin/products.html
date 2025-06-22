@@ -202,6 +202,7 @@
                                                     <div class="mt-2">No products available</div>
                                                 </td>
                                             </tr>                                            <tr th:each="product : ${products}" 
+                                                th:data-product-id="${product.id}"
                                                 th:class="${product.stockLevel == 0 ? 'out-of-stock' : (product.stockLevel <= product.lowStockThreshold ? 'low-stock' : '')}">
                                                 <td>
                                                     <div class="fw-bold" th:text="${product.title}">Product Title</div>
@@ -215,8 +216,7 @@
                                                 </td>
                                                 <td>
                                                     <span class="fw-bold" th:text="'$' + ${product.price}">$0.00</span>
-                                                </td>
-                                                <td>
+                                                </td>                                                <td class="stock-cell" th:data-low-threshold="${product.lowStockThreshold}">
                                                     <span th:class="${product.stockLevel == 0 ? 'badge bg-danger' : (product.stockLevel <= product.lowStockThreshold ? 'badge bg-warning' : 'badge bg-success')}" 
                                                           th:text="${product.stockLevel}">0</span>
                                                     <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
@@ -645,10 +645,8 @@
             }
 
             submitDeleteForm(categoryId);
-        }
-
-        /**
-         * Handles quick restock functionality (placeholder)
+        }        /**
+         * Handles quick restock functionality with backend integration
          * @param {number} productId - ID of the product to restock
          */
         function quickRestock(productId) {
@@ -656,16 +654,61 @@
             
             if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
                 if (quantity !== null) { // User didn't cancel
-                    alert('Please enter a valid positive number.');
+                    showErrorMessage('Please enter a valid positive number.');
                 }
                 return;
             }
 
-            // TODO: Implement actual restock API call
-            alert(`Added ${quantity} items to product stock. This feature will be implemented with backend integration.`);
+            const parsedQuantity = parseInt(quantity);
             
-            // After successful update, reload the low stock products
-            // loadLowStockProducts();
+            // Show loading state
+            showLoadingState(`Adding ${parsedQuantity} items to stock...`);
+            
+            // Create request body
+            const requestBody = {
+                productId: productId,
+                quantity: parsedQuantity,
+                operation: 'ADD' // ADD or SET
+            };            // Make API call to backend
+            fetch('/admin/products/quick-restock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => {
+                        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Success response
+                showSuccessMessage(`Successfully added ${parsedQuantity} items to stock. New stock level: ${data.newStockLevel}`);
+                
+                // Reload the low stock products table if we're on that tab
+                const lowStockTab = document.querySelector('#low-stock-tab');
+                if (lowStockTab && lowStockTab.classList.contains('active')) {
+                    loadLowStockProducts();
+                }
+                
+                // Update the main products table if visible
+                updateProductStockInTable(productId, data.newStockLevel);
+                
+                // Update notification badges
+                updateNotificationBadges();
+            })
+            .catch(error => {
+                console.error('Error during quick restock:', error);
+                showErrorMessage(`Failed to update stock: ${error.message}`);
+            })
+            .finally(() => {
+                hideLoadingState();
+            });
         }
 
         // ================================
@@ -1013,14 +1056,91 @@
         function hideLoadingState() {
             // TODO: Implement global loading state if needed
             console.log('Loading complete');
-        }
-
-        /**
+        }        /**
          * Shows an error message to the user
          * @param {string} message - Error message to display
          */
         function showErrorMessage(message) {
-            alert(message); // TODO: Replace with better error display
+            // Create or update alert div
+            showAlert(message, 'danger');
+        }
+
+        /**
+         * Shows a success message to the user
+         * @param {string} message - Success message to display
+         */
+        function showSuccessMessage(message) {
+            // Create or update alert div
+            showAlert(message, 'success');
+        }
+
+        /**
+         * Shows alert message at the top of main content
+         * @param {string} message - Message to display
+         * @param {string} type - Alert type (success, danger, warning, info)
+         */
+        function showAlert(message, type) {
+            // Remove existing temporary alerts
+            const existingAlert = document.querySelector('.alert-temporary');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-temporary`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Insert at the top of main content
+            const mainContent = document.querySelector('.main-content');
+            const firstChild = mainContent.firstElementChild;
+            mainContent.insertBefore(alertDiv, firstChild);
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        /**
+         * Updates product stock in the main products table
+         * @param {number} productId - ID of the product to update
+         * @param {number} newStockLevel - New stock level
+         */
+        function updateProductStockInTable(productId, newStockLevel) {
+            // Find the product row in the main table
+            const productRows = document.querySelectorAll('#all-products tr[data-product-id]');
+            productRows.forEach(row => {
+                if (row.dataset.productId == productId) {
+                    const stockCell = row.querySelector('.stock-cell');
+                    if (stockCell) {
+                        const stockBadge = stockCell.querySelector('.badge');
+                        if (stockBadge) {
+                            stockBadge.textContent = newStockLevel;
+                            
+                            // Update badge color based on stock level
+                            const lowThreshold = parseInt(stockCell.dataset.lowThreshold) || 10;
+                            stockBadge.className = newStockLevel == 0 ? 'badge bg-danger' : 
+                                                 newStockLevel <= lowThreshold ? 'badge bg-warning' : 
+                                                 'badge bg-success';
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Updates notification badges (placeholder for now)
+         */
+        function updateNotificationBadges() {
+            // This would typically make an API call to get updated notification counts
+            console.log('Notification badges updated');
         }
 
         // ================================

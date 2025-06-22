@@ -3,6 +3,7 @@ package dev.oasis.stockify.service;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
+import dev.oasis.stockify.dto.QuickRestockResponseDTO;
 import dev.oasis.stockify.mapper.ProductMapper;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.repository.ProductRepository;
@@ -190,5 +191,61 @@ public class ProductService {
         return productRepository.findBySku(sku)
                 .map(product -> !product.getId().equals(productId))
                 .orElse(false);
+    }
+
+    /**
+     * Quick restock operation - adds quantity to existing stock or sets new stock level
+     * @param productId the ID of the product to restock
+     * @param quantity the quantity to add or set
+     * @param operation "ADD" to add to existing stock, "SET" to set new stock level
+     * @return the updated product data with old and new stock levels
+     */
+    @Transactional
+    public QuickRestockResponseDTO quickRestock(Long productId, Integer quantity, String operation) {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.info("🔄 Quick restock for product ID: {} with quantity: {} operation: {} for tenant: {}", 
+                productId, quantity, operation, currentTenant);
+        
+        return productRepository.findById(productId)
+                .map(product -> {
+                    Integer oldStockLevel = product.getStockLevel();
+                    Integer newStockLevel;
+                    
+                    switch (operation.toUpperCase()) {
+                        case "ADD":
+                            newStockLevel = oldStockLevel + quantity;
+                            break;
+                        case "SET":
+                            newStockLevel = quantity;
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Invalid operation: " + operation + ". Use 'ADD' or 'SET'");
+                    }
+                    
+                    // Validate new stock level
+                    if (newStockLevel < 0) {
+                        throw new IllegalArgumentException("Stock level cannot be negative");
+                    }
+                    
+                    // Update stock level
+                    product.setStockLevel(newStockLevel);
+                    Product savedProduct = productRepository.save(product);
+                    
+                    // Check for low stock notifications
+                    stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
+                    
+                    log.info("✅ Quick restock completed - Product: {} Old Stock: {} New Stock: {} for tenant: {}", 
+                            product.getTitle(), oldStockLevel, newStockLevel, currentTenant);
+                    
+                    return QuickRestockResponseDTO.success(
+                        productId,
+                        product.getTitle(),
+                        oldStockLevel,
+                        newStockLevel,
+                        operation.equals("ADD") ? quantity : newStockLevel - oldStockLevel,
+                        operation
+                    );
+                })
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
     }
 }

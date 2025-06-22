@@ -5,18 +5,23 @@ import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
 import dev.oasis.stockify.dto.ProductCategoryCreateDTO;
+import dev.oasis.stockify.dto.QuickRestockRequestDTO;
+import dev.oasis.stockify.dto.QuickRestockResponseDTO;
 import dev.oasis.stockify.exception.FileOperationException;
 import dev.oasis.stockify.service.ProductService;
 import dev.oasis.stockify.service.ProductCategoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -466,6 +472,54 @@ public class AdminProductController {
         } catch (Exception e) {
             log.error("❌ Failed to get categories list for tenant: {}", tenantId, e);
             return List.of(); // Return empty list on error
+        }
+    }
+
+    /**
+     * Handle quick restock requests from the admin panel
+     */
+    @PostMapping("/quick-restock")
+    @ResponseBody
+    public ResponseEntity<?> quickRestock(@RequestBody @Valid QuickRestockRequestDTO request, 
+                                        HttpServletRequest httpRequest) {
+        String tenantId = getCurrentTenantId(httpRequest);
+        log.info("🔄 Quick restock request for product ID: {} with quantity: {} operation: {} for tenant: {}", 
+                request.getProductId(), request.getQuantity(), request.getOperation(), tenantId);
+
+        try {
+            // Validate operation
+            if (!request.getOperation().equalsIgnoreCase("ADD") && !request.getOperation().equalsIgnoreCase("SET")) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", true, "message", "Invalid operation. Use 'ADD' or 'SET'"));
+            }
+
+            // Perform quick restock
+            QuickRestockResponseDTO response = productService.quickRestock(
+                request.getProductId(), 
+                request.getQuantity(), 
+                request.getOperation()
+            );
+
+            log.info("✅ Quick restock completed successfully for product ID: {} for tenant: {}", 
+                    request.getProductId(), tenantId);
+
+            return ResponseEntity.ok(response);
+            
+        } catch (IllegalArgumentException e) {
+            log.warn("⚠️ Invalid quick restock request for tenant: {} - {}", tenantId, e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", true, "message", e.getMessage()));
+                
+        } catch (RuntimeException e) {
+            log.error("❌ Quick restock failed for product ID: {} for tenant: {}", 
+                     request.getProductId(), tenantId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", true, "message", "Failed to update stock: " + e.getMessage()));
+                
+        } catch (Exception e) {
+            log.error("❌ Unexpected error during quick restock for tenant: {}", tenantId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", true, "message", "An unexpected error occurred"));
         }
     }
 }
