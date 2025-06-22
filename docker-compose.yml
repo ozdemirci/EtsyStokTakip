@@ -17,7 +17,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
   stockify-app:
     build: .
     container_name: stockify-app
@@ -29,9 +28,18 @@ services:
       - POSTGRES_URL=jdbc:postgresql://postgres-prod:5432/stockify
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
+      - SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false
     ports:
       - "8080:8080"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
 volumes:
   postgres_prod_data:

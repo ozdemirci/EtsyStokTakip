@@ -18,8 +18,7 @@ STOCKIFY implements **schema-based multi-tenancy** where each tenant (company) g
 - `global_trade` → Global Trade Solutions  
 - `artisan_crafts` → Artisan Crafts Co.
 - `tech_solutions` → Tech Solutions Inc.
-- `tenant1` → Sample Tenant 1
-- `tenant2` → Sample Tenant 2
+
 
 ### How It Works
 1. **Schema Creation**: Each tenant gets its own schema with identical table structures

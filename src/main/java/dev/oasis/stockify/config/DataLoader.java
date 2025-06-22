@@ -39,10 +39,9 @@ public class DataLoader implements CommandLineRunner {
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
-    private final StockNotificationRepository stockNotificationRepository;
-    private static final List<String> TENANT_IDS = Arrays.asList(
-        "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions","company1"
-    );     // Sample users using DTO directly
+    private final StockNotificationRepository stockNotificationRepository;    private static final List<String> TENANT_IDS = Arrays.asList(
+        "public", "company1"
+    );// Sample users using DTO directly
     private static final List<UserCreateDTO> SAMPLE_USERS = Arrays.asList(
         createUserDTO("admin", "admin123", Role.ADMIN),
         createUserDTO("operator", "operator123", Role.USER),

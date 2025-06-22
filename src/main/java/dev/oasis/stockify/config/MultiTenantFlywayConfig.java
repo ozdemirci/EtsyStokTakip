@@ -29,36 +29,30 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@Component
-@Profile("dev")
 @Order(1) // Run before DataLoader
 @RequiredArgsConstructor
-public class MultiTenantFlywayConfig implements CommandLineRunner {
-
-    @Value("${spring.flyway.schemas:public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions}")
+public class MultiTenantFlywayConfig implements CommandLineRunner {    @Value("${spring.flyway.schemas:public,company1}")
     private String[] tenantSchemas;
 
     @Value("${spring.flyway.locations:classpath:db/migration}")
     private String[] migrationLocations;
-    private final DataSource dataSource;
-
-    public void run(String... args) {
-       // log.info("🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...");
+    private final DataSource dataSource;    public void run(String... args) {
+        log.info("🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...");
         
         try {
             // Step 1: Apply Flyway migrations to all tenant schemas
             // This will be handled by the FlywayMigrationStrategy bean
             
             // Step 2: Create super admin in 'stockify' tenant
-           // createSuperAdminIfNotExists();
+            createSuperAdminIfNotExists();
             
-           // log.info("✅ Multi-tenant setup completed successfully!");
+            log.info("✅ Multi-tenant setup completed successfully!");
             
         } catch (Exception e) {
             log.error("❌ Failed during multi-tenant setup: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to complete multi-tenant setup", e);
         }
-    }    /**
+    }/**
      * Custom Flyway migration strategy for multi-tenant setup
      */
     @Bean
@@ -112,42 +106,44 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
     }    /**
      * Create super admin user in 'stockify' tenant if not exists
      * Uses direct JDBC to avoid circular dependency issues
-     */    private void createSuperAdminIfNotExists() {
-        try {
-            log.info("🔧 Checking/creating super admin user in 'stockify' schema...");
-              // Use direct JDBC to avoid circular dependency with repositories
+     */    private void createSuperAdminIfNotExists() {        try {
+            log.info("🔧 Checking/creating admin user in 'company1' schema...");
+            
+            // Use direct JDBC to avoid circular dependency with repositories
             try (Connection connection = dataSource.getConnection()) {
-                  // Switch to stockify schema using connection.setSchema() method
-                // Use lowercase schema name as created by Flyway
-                connection.setSchema("stockify");
                 
-                // Check if super admin already exists
-                boolean superAdminExists = false;
+                // Switch to company1 schema using connection.setSchema() method
+                // Use lowercase schema name as created by Flyway
+                connection.setSchema("company1");
+                
+                // Check if admin already exists
+                boolean adminExists = false;
                 try (PreparedStatement checkStmt = connection.prepareStatement(
                     "SELECT COUNT(*) FROM app_user WHERE username = ?")) {
-                    checkStmt.setString(1, "superadmin");
+                    checkStmt.setString(1, "admin");
                     try (ResultSet rs = checkStmt.executeQuery()) {
                         if (rs.next() && rs.getInt(1) > 0) {
-                            superAdminExists = true;
+                            adminExists = true;
                         }
                     }
-                }                  if (!superAdminExists) {
-                    log.info("🔧 Creating super admin user in 'stockify' schema...");
+                }
+                
+                if (!adminExists) {
+                    log.info("🔧 Creating admin user in 'company1' schema...");
                     
                     // Create BCrypt password encoder for password hashing
                     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-                    String hashedPassword = passwordEncoder.encode("superadmin123");
+                    String hashedPassword = passwordEncoder.encode("admin123");
 
                     // Determine accessible tenants from configured schemas
                     String accessibleTenants = String.join(",", tenantSchemas).toLowerCase();
-                    log.debug("Using accessible tenants for super admin: {}", accessibleTenants);
-                    
-                    // Insert super admin user with full tenant management capabilities
+                    log.debug("Using accessible tenants for admin: {}", accessibleTenants);
+                      // Insert admin user with tenant management capabilities
                     try (PreparedStatement insertStmt = connection.prepareStatement(
                         "INSERT INTO app_user (username, password, role, is_active, can_manage_all_tenants, accessible_tenants, is_global_user, primary_tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
-                        insertStmt.setString(1, "superadmin");
+                        insertStmt.setString(1, "admin");
                         insertStmt.setString(2, hashedPassword);
-                        insertStmt.setString(3, "SUPER_ADMIN");
+                        insertStmt.setString(3, "ADMIN");
                         insertStmt.setBoolean(4, true);
                         insertStmt.setBoolean(5, true); // can_manage_all_tenants
                         // Avoid unset parameter when property is empty
@@ -157,35 +153,36 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                             insertStmt.setString(6, accessibleTenants);
                         }
                         insertStmt.setBoolean(7, true); // is_global_user
-                        insertStmt.setString(8, "stockify"); // primary_tenant (lowercase)
+                        insertStmt.setString(8, "company1"); // primary_tenant (lowercase)
                         insertStmt.setObject(9, LocalDateTime.now());
                         insertStmt.setObject(10, LocalDateTime.now());
                         
                         int rowsAffected = insertStmt.executeUpdate();
-                        if (rowsAffected > 0) {                            log.info("✅ Super admin user created successfully in 'stockify' schema");
-                            log.info("📋 Super Admin Credentials:");
-                            log.info("   Schema: stockify");
-                            log.info("   Username: superadmin");
-                            log.info("   Password: superadmin123");
-                            log.info("   Role: SUPER_ADMIN");
-                            log.info("   Can Manage All Tenants: YES");
-                            log.info("   Accessible Tenants: ALL");                            log.info("   Primary Tenant: stockify");
+                        if (rowsAffected > 0) {
+                            log.info("✅ Admin user created successfully in 'company1' schema");
+                            log.info("📋 Admin Credentials:");
+                            log.info("   Schema: company1");
+                            log.info("   Username: admin");
+                            log.info("   Password: admin123");
+                            log.info("   Role: ADMIN");
+                            log.info("   Can Manage All Tenants: YES");                            log.info("   Accessible Tenants: ALL");
+                            log.info("   Primary Tenant: company1");
                             log.info("⚠️  Please change the password after first login!");
                         } else {
-                            log.warn("⚠️  Super admin user creation returned 0 rows affected");
+                            log.warn("⚠️  Admin user creation returned 0 rows affected");
                         }
                     }
                 } else {
-                    log.info("✓ Super admin user already exists in 'stockify' schema");
+                    log.info("✓ Admin user already exists in 'company1' schema");
                 }
             }
             
         } catch (SQLException e) {
-            log.error("❌ Database error while creating super admin user: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to initialize super admin", e);
+            log.error("❌ Database error while creating admin user: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize admin", e);
         } catch (Exception e) {
-            log.error("❌ Failed to create super admin user in 'stockify' schema: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to initialize super admin", e);
+            log.error("❌ Failed to create admin user in 'company1' schema: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize admin", e);
         }
     }
 }
