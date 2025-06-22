@@ -22,11 +22,10 @@ public class TenantDTO {
     private String status;
     private String description;
     private String industry;
-    private String contactPhone;
-    private String address;
+    private String contactPhone;    private String address;
     private LocalDateTime createdAt;
     private LocalDateTime lastActivity;
-    private boolean isActive;
+    private boolean active;
     private long userCount;
     private long productCount;
 }

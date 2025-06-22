@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Slf4j
 @Controller
-@RequestMapping("/admin/tenants")
+@RequestMapping("/superadmin/tenant-management")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
 public class TenantManagementController {
@@ -42,7 +42,7 @@ public class TenantManagementController {
             model.addAttribute("activeTenants", tenants.stream()
                     .mapToLong(t -> "ACTIVE".equals(t.getStatus()) ? 1 : 0).sum());
             
-            return "admin/tenant-dashboard";
+            return "superadmin/tenant-dashboard";
         } catch (Exception e) {
             log.error("❌ Error loading tenant dashboard: {}", e.getMessage());
             model.addAttribute("error", "Failed to load tenant information");
@@ -52,11 +52,10 @@ public class TenantManagementController {
 
     /**
      * Show create tenant form
-     */
-    @GetMapping("/new")
+     */    @GetMapping("/new")
     public String showCreateTenantForm(Model model) {
         model.addAttribute("tenantCreateDTO", new TenantCreateDTO());
-        return "admin/tenant-form";
+        return "superadmin/tenant-form";
     }
 
     /**
@@ -67,10 +66,9 @@ public class TenantManagementController {
                               BindingResult bindingResult,
                               RedirectAttributes redirectAttributes,
                               Model model) {
-        
-        if (bindingResult.hasErrors()) {
+          if (bindingResult.hasErrors()) {
             model.addAttribute("tenantCreateDTO", tenantCreateDTO);
-            return "admin/tenant-form";
+            return "superadmin/tenant-form";
         }
 
         try {
@@ -78,15 +76,13 @@ public class TenantManagementController {
             
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Tenant '" + createdTenant.getCompanyName() + "' created successfully with ID: " + createdTenant.getTenantId());
+              log.info("✅ Tenant created successfully: {}", createdTenant.getTenantId());
+            return "redirect:/superadmin/tenant-management";
             
-            log.info("✅ Tenant created successfully: {}", createdTenant.getTenantId());
-            return "redirect:/admin/tenants";
-            
-        } catch (Exception e) {
-            log.error("❌ Error creating tenant: {}", e.getMessage());
+        } catch (Exception e) {            log.error("❌ Error creating tenant: {}", e.getMessage());
             model.addAttribute("error", "Failed to create tenant: " + e.getMessage());
             model.addAttribute("tenantCreateDTO", tenantCreateDTO);
-            return "admin/tenant-form";
+            return "superadmin/tenant-form";
         }
     }
 
@@ -98,11 +94,10 @@ public class TenantManagementController {
         try {
             TenantDTO tenant = tenantManagementService.getTenant(tenantId);
             model.addAttribute("tenant", tenant);
-            return "admin/tenant-details";
-        } catch (Exception e) {
-            log.error("❌ Error loading tenant details for {}: {}", tenantId, e.getMessage());
+            return "superadmin/tenant-details";
+        } catch (Exception e) {            log.error("❌ Error loading tenant details for {}: {}", tenantId, e.getMessage());
             model.addAttribute("error", "Tenant not found");
-            return "redirect:/admin/tenants";
+            return "redirect:/superadmin/tenant-management";
         }
     }
 
@@ -117,11 +112,10 @@ public class TenantManagementController {
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Tenant " + tenantId + " has been deactivated");
         } catch (Exception e) {
-            log.error("❌ Error deactivating tenant {}: {}", tenantId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
+            log.error("❌ Error deactivating tenant {}: {}", tenantId, e.getMessage());            redirectAttributes.addFlashAttribute("errorMessage", 
                 "Failed to deactivate tenant: " + e.getMessage());
         }
-        return "redirect:/admin/tenants";
+        return "redirect:/superadmin/tenant-management";
     }
 
     /**
@@ -135,11 +129,10 @@ public class TenantManagementController {
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Tenant " + tenantId + " has been activated");
         } catch (Exception e) {
-            log.error("❌ Error activating tenant {}: {}", tenantId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", 
+            log.error("❌ Error activating tenant {}: {}", tenantId, e.getMessage());            redirectAttributes.addFlashAttribute("errorMessage", 
                 "Failed to activate tenant: " + e.getMessage());
         }
-        return "redirect:/admin/tenants";
+        return "redirect:/superadmin/tenant-management";
     }
 
     // REST API Endpoints

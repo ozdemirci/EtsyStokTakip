@@ -106,13 +106,22 @@ public class GlobalExceptionHandler {
         body.put("validationErrors", errors);
         
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
-    // Handle request parameter exceptions
+    }    // Handle request parameter exceptions
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
         Map<String, Object> body = createErrorResponse(
             "Bad Request", 
+            ex.getMessage(), 
+            HttpStatus.BAD_REQUEST
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle tenant context and state exceptions
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
+        Map<String, Object> body = createErrorResponse(
+            "Invalid State", 
             ex.getMessage(), 
             HttpStatus.BAD_REQUEST
         );
@@ -184,8 +193,18 @@ public class GlobalExceptionHandler {
             "Resource Not Found", 
             ex.getMessage(), 
             HttpStatus.NOT_FOUND
+        );        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    // General exception handler as fallback
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGeneralException(Exception ex) {
+        Map<String, Object> body = createErrorResponse(
+            "Internal Server Error", 
+            "An unexpected error occurred: " + ex.getMessage(), 
+            HttpStatus.INTERNAL_SERVER_ERROR
         );
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // You can add more custom exception handlers here

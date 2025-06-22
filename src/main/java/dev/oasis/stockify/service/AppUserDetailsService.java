@@ -58,12 +58,16 @@ public class AppUserDetailsService implements UserDetailsService {
                 TenantContext.setCurrentTenant(tenantId);
             }
 
-            logger.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);
-
-            try {
+            logger.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);            try {
                 AppUser appUser = appUserRepository.findByUsername(username)
                         .orElseThrow(() -> new UsernameNotFoundException(
                                 String.format("Kullanıcı bulunamadı: %s (Tenant: %s)", username, tenantId)));
+
+                // Check if user is active
+                if (appUser.getIsActive() == null || !appUser.getIsActive()) {
+                    logger.warn("Inactive user attempted to login: {} for tenant: {}", username, tenantId);
+                    throw new UsernameNotFoundException("Kullanıcı hesabı aktif değil");
+                }
 
                 logger.debug("User found in database: {} for tenant: {}", username, tenantId);                return User.withUsername(appUser.getUsername())
                         .password(appUser.getPassword())

@@ -4,6 +4,9 @@ import dev.oasis.stockify.config.tenant.TenantHeaderFilter;
 import dev.oasis.stockify.config.tenant.TenantSecurityFilter;
 import dev.oasis.stockify.service.AppUserDetailsService;
 import dev.oasis.stockify.config.tenant.TenantAwareAuthenticationSuccessHandler;
+import dev.oasis.stockify.model.Role;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,20 +22,14 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {    private final AppUserDetailsService appUserDetailsService;
-    private final TenantHeaderFilter tenantHeaderFilter;
-    private final TenantSecurityFilter tenantSecurityFilter;
-    private final TenantAwareAuthenticationSuccessHandler successHandler;
+@RequiredArgsConstructor
+@Slf4j
+public class SecurityConfig {
 
-    public SecurityConfig(AppUserDetailsService appUserDetailsService,
-                        TenantHeaderFilter tenantHeaderFilter,
-                        TenantSecurityFilter tenantSecurityFilter,
-                        TenantAwareAuthenticationSuccessHandler successHandler) {
-        this.appUserDetailsService = appUserDetailsService;
-        this.tenantHeaderFilter = tenantHeaderFilter;
-        this.tenantSecurityFilter = tenantSecurityFilter;
-        this.successHandler = successHandler;
-    }
+    private final AppUserDetailsService appUserDetailsService;
+    private final TenantHeaderFilter tenantHeaderFilter;
+    private final TenantSecurityFilter tenantSecurityFilter;   
+    private final TenantAwareAuthenticationSuccessHandler successHandler;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -45,17 +42,22 @@ public class SecurityConfig {    private final AppUserDetailsService appUserDeta
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
-    }    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {        http
+    }   
+    
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        log.info("🔒 Configuring Security Filter Chain...");
+        
+        http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
-            .csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/register", "/css/**", "/js/**", "/images/**", "/error", "/h2-console/**").permitAll()
-                .requestMatchers("/login*").permitAll()
-                .requestMatchers("/superadmin/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/admin/tenants/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasRole("USER")
+            .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)             .csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth                // Public endpoints
+                .requestMatchers("/", "/register", "/login*", "/css/**", "/js/**", "/images/**", "/error", "/h2-console/**").permitAll()               
+                // SUPER_ADMIN can access everything 
+                .requestMatchers("/superadmin/**").hasRole(Role.SUPER_ADMIN.name())
+                // ADMIN area - accessible by SUPER_ADMIN and ADMIN 
+                .requestMatchers("/admin/**").hasAnyRole(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                // USER area - accessible by all authenticated users with appropriate roles
+                .requestMatchers("/user/**").hasAnyRole(Role.SUPER_ADMIN.name(), Role.ADMIN.name(), Role.USER.name())
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -68,12 +70,14 @@ public class SecurityConfig {    private final AppUserDetailsService appUserDeta
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
-            )
-            .exceptionHandling(ex -> ex
+            )            .exceptionHandling(ex -> ex
                 .accessDeniedPage("/access-denied")
             )
-            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.sameOrigin())
+            );
 
+        log.info("✅ Security Filter Chain configured successfully");
         return http.build();
     }
 

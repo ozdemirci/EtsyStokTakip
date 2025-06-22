@@ -226,7 +226,7 @@
                                             <div class="mt-2">No users found</div>
                                         </td>
                                     </tr>                                    <tr th:each="user : ${users}" th:if="${user != null}"
-                                        th:class="${user.isActive != null and !user.isActive} ? 'inactive-user' : ''">
+                                        th:class="${user.active != null and !user.active} ? 'inactive-user' : ''">
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="me-3">
@@ -247,10 +247,10 @@
                                             <span th:unless="${user.role != null}" class="badge bg-secondary">N/A</span>
                                         </td>
                                         <td>
-                                            <span th:if="${user.isActive != null and user.isActive}" class="badge bg-success">
+                                            <span th:if="${user.active != null and user.active}" class="badge bg-success">
                                                 <i class="bi bi-check-circle"></i> Active
                                             </span>
-                                            <span th:unless="${user.isActive != null and user.isActive}" class="badge bg-secondary">
+                                            <span th:unless="${user.active != null and user.active}" class="badge bg-secondary">
                                                 <i class="bi bi-pause-circle"></i> Inactive
                                             </span>
                                         </td>                                        <td>
@@ -326,7 +326,7 @@
                             <input type="file" class="form-control" id="importFile" name="file" accept=".csv" required>
                             <div class="form-text">
                                 Please select a CSV file to import users. 
-                                Expected format: username,email,role,isActive.
+                                Expected format: username,email,role,active.
                             </div>
                         </div>
                     </div>

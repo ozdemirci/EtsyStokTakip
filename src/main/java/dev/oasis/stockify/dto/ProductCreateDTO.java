@@ -5,18 +5,23 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * DTO for creating or updating a product
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductCreateDTO {  
     private Long id; 
     
@@ -39,14 +44,23 @@ public class ProductCreateDTO {
     private BigDecimal price;  
 
     @Min(value = 0, message = "Stok negatif olamaz")
-    private int stockLevel;   
+    private int stockLevel;       
     
     @Min(value = 1, message = "Düşük stok eşiği en az 1 olmalıdır")
+    @Builder.Default
     private int lowStockThreshold = 5;
-      private String etsyProductId;    
+    
+    private String etsyProductId;
+      @Builder.Default
     private Boolean isActive = true; 
+    
+    @Builder.Default
     private Boolean isFeatured = false;
-    private LocalDateTime createdAt;
+      private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // User tracking fields
+    private Long createdBy;
+    private Long updatedBy;
 }
 

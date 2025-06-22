@@ -1,19 +1,24 @@
 package dev.oasis.stockify.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 /**
  * Response DTO for quick restock operations
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class QuickRestockResponseDTO {
     
+    
     private Long productId;
-    private String productTitle;
+    private String productTitle;   
     private Integer oldStockLevel;
     private Integer newStockLevel;
     private Integer quantityAdded;

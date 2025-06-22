@@ -1,8 +1,9 @@
 package dev.oasis.stockify.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Positive;
  * DTO for quick restock requests from the admin panel
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuickRestockRequestDTO {

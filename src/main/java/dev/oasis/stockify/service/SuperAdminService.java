@@ -32,26 +32,27 @@ public class SuperAdminService {
         "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
     );    /**
      * Get all users across all tenants (SUPER_ADMIN only)
+     * Returns both active and inactive users for comprehensive management
      * Note: SUPER_ADMIN users are only shown for the 'public' tenant
      */
     @Transactional(readOnly = true)
     public Map<String, List<AppUser>> getAllUsersAcrossAllTenants() {
-        log.info("🔍 Super Admin: Fetching all users across all tenants");
+        log.info("🔍 Super Admin: Fetching all users (active and inactive) across all tenants");
         
         Map<String, List<AppUser>> tenantUsers = new HashMap<>();
-        
-        for (String tenant : ALL_TENANTS) {
+          for (String tenant : ALL_TENANTS) {
             try {
                 TenantContext.setCurrentTenant(tenant);
+                // SuperAdmin can see both active and inactive users
                 List<AppUser> users = appUserRepository.findAll();
                   // Filter out SUPER_ADMIN users from non-public tenants
                 if (!"public".equals(tenant)) {
                     users = users.stream()
                             .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
                             .collect(Collectors.toList());
-                    log.debug("📊 Tenant '{}': Filtered out SUPER_ADMIN users, showing {} users", tenant, users.size());
+                    log.debug("📊 Tenant '{}': Filtered out SUPER_ADMIN users, showing {} users (active and inactive)", tenant, users.size());
                 } else {
-                    log.debug("📊 Tenant '{}' (public): Showing all {} users including SUPER_ADMIN", tenant, users.size());
+                    log.debug("📊 Tenant '{}' (public): Showing all {} users including SUPER_ADMIN (active and inactive)", tenant, users.size());
                 }
                 
                 tenantUsers.put(tenant, users);
@@ -63,7 +64,7 @@ public class SuperAdminService {
             }
         }
         
-        log.info("✅ Successfully retrieved users from {} tenants (SUPER_ADMIN only in public)", tenantUsers.size());
+        log.info("✅ Successfully retrieved users from {} tenants (SUPER_ADMIN only in public, including inactive users)", tenantUsers.size());
         return tenantUsers;
     }
 

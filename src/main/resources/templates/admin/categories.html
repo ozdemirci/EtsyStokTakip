@@ -157,11 +157,10 @@
                                         <td>
                                             <span class="badge bg-secondary" th:text="${category.sortOrder}">0</span>
                                         </td>
-                                        <td>
-                                            <span th:if="${category.isActive}" class="badge bg-success">
+                                        <td>                                            <span th:if="${category.active}" class="badge bg-success">
                                                 <i class="bi bi-check-circle"></i> Active
                                             </span>
-                                            <span th:unless="${category.isActive}" class="badge bg-secondary">
+                                            <span th:unless="${category.active}" class="badge bg-secondary">
                                                 <i class="bi bi-pause-circle"></i> Inactive
                                             </span>
                                         </td>

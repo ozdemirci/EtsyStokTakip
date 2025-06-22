@@ -10,6 +10,8 @@ import dev.oasis.stockify.dto.QuickRestockResponseDTO;
 import dev.oasis.stockify.exception.FileOperationException;
 import dev.oasis.stockify.service.ProductService;
 import dev.oasis.stockify.service.ProductCategoryService;
+import dev.oasis.stockify.repository.AppUserRepository;
+import dev.oasis.stockify.model.AppUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -31,6 +33,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,10 +48,9 @@ import java.util.Optional;
 @RequestMapping("/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @RequiredArgsConstructor
-public class AdminProductController {
-
-      private final ProductService productService;
+public class AdminProductController {      private final ProductService productService;
       private final ProductCategoryService categoryService;
+      private final AppUserRepository appUserRepository;
 
     /**
      * Test endpoint for JavaScript debugging
@@ -100,49 +103,71 @@ public class AdminProductController {
             @RequestParam(required = false) String tab,
             HttpServletRequest request,
             Model model) {
-        
-        String tenantId = getCurrentTenantId(request);
-        log.info("📦 Listing products for tenant: {}", tenantId);
+          try {
+            log.info("🚀 Step 1: listProducts method started");
+            String tenantId = getCurrentTenantId(request);
+            log.info("📦 Step 2: Listing products for tenant: {}", tenantId);
 
-        // Create sort object
-        Sort sort = Sort.by(sortDir.equals("desc") ? 
-            Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
-        
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<ProductResponseDTO> products;
-        if (search != null && !search.trim().isEmpty()) {
-            products = productService.searchProducts(search, pageable);
-            model.addAttribute("search", search);
-            log.debug("🔍 Searching products with term: {} for tenant: {}", search, tenantId);
-        } else {
-            products = productService.getProductsPage(pageable);
-            log.debug("📋 Listing all products for tenant: {}", tenantId);
-        }        // Get counts for badges
-        List<ProductResponseDTO> allProducts = productService.getAllProducts();
-        long totalProducts = allProducts.size();
-        long lowStockCount = allProducts.stream()
-            .filter(p -> p.getStockLevel() <= p.getLowStockThreshold())
-            .count();
+            // Create sort object
+            Sort sort = Sort.by(sortDir.equals("desc") ? 
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+            log.debug("📊 Step 3: Created sort: {} {}", sortBy, sortDir);
+            
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<ProductResponseDTO> products;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                log.debug("🔍 Step 4a: Searching products with term: {} for tenant: {}", search, tenantId);
+                products = productService.searchProducts(search, pageable);
+                model.addAttribute("search", search);
+            } else {
+                log.debug("� Step 4b: Listing all products for tenant: {}", tenantId);
+                products = productService.getProductsPage(pageable);
+            }
+            log.info("� Step 5: Retrieved {} products (page {} of {})", 
+                products.getNumberOfElements(), page + 1, products.getTotalPages());
 
-        // Get categories for the categories tab
-        List<ProductCategoryResponseDTO> categories = categoryService.getAllCategories();
+            // Get counts for badges
+            log.debug("📊 Step 6: Getting all products for badge counts");
+            List<ProductResponseDTO> allProducts = productService.getAllProducts();
+            long totalProducts = allProducts.size();
+            log.debug("📊 Step 7: Calculating low stock count");
+            long lowStockCount = allProducts.stream()
+                .filter(p -> p.getStockLevel() <= p.getLowStockThreshold())
+                .count();
+            log.info("📊 Step 8: Badge counts - Total: {}, Low Stock: {}", totalProducts, lowStockCount);
 
-        model.addAttribute("products", products);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("pageSize", size);
-        model.addAttribute("sortBy", sortBy);
-        model.addAttribute("sortDir", sortDir);
-        model.addAttribute("totalPages", products.getTotalPages());
-        model.addAttribute("totalElements", products.getTotalElements());
-        model.addAttribute("tenantId", tenantId);
-        model.addAttribute("totalProducts", totalProducts);
-        model.addAttribute("lowStockCount", lowStockCount);
-        model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
-        model.addAttribute("categories", categories); // For categories tab
+            // Get categories for the categories tab
+            log.debug("📋 Step 9: Getting categories");
+            List<ProductCategoryResponseDTO> categories = categoryService.getAllCategories();
+            log.info("📋 Step 10: Found {} categories", categories.size());
 
-        log.debug("📊 Found {} total products, {} low stock, {} categories for tenant: {}", 
-            totalProducts, lowStockCount, categories.size(), tenantId);
-        return "admin/products";
+            model.addAttribute("products", products);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("sortBy", sortBy);
+            model.addAttribute("sortDir", sortDir);
+            model.addAttribute("totalPages", products.getTotalPages());
+            model.addAttribute("totalElements", products.getTotalElements());
+            model.addAttribute("tenantId", tenantId);
+            model.addAttribute("totalProducts", totalProducts);
+            model.addAttribute("lowStockCount", lowStockCount);
+            model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
+            model.addAttribute("categories", categories); // For categories tab
+
+            log.debug("📊 Found {} total products, {} low stock, {} categories for tenant: {}", 
+                totalProducts, lowStockCount, categories.size(), tenantId);
+            return "admin/products";
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to load products page: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Failed to load products: " + e.getMessage());
+            model.addAttribute("products", Page.empty());
+            model.addAttribute("totalProducts", 0);
+            model.addAttribute("lowStockCount", 0);
+            model.addAttribute("categories", List.of());
+            return "admin/products";
+        }
     }
 
     /**
@@ -156,18 +181,30 @@ public class AdminProductController {
         model.addAttribute("tenantId", tenantId);
         model.addAttribute("categories", categoryService.getAllActiveCategories());
         return "admin/product-form";
-    }
-
-    /**
+    }    /**
      * Handle product creation
      */
     @PostMapping
     public String createProduct(@ModelAttribute ProductCreateDTO productCreateDTO,
                                HttpServletRequest request,
-                               RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes,
+                               Principal principal) {
         String tenantId = getCurrentTenantId(request);
         log.info("💾 Creating product for tenant: {}", tenantId);
           try {
+            // Set created_by information from authenticated user
+            if (principal != null) {
+                Optional<AppUser> currentUser = appUserRepository.findByUsername(principal.getName());
+                if (currentUser.isPresent()) {
+                    productCreateDTO.setCreatedBy(currentUser.get().getId());
+                    productCreateDTO.setUpdatedBy(currentUser.get().getId());
+                }
+            }
+            
+            // Set timestamps
+            productCreateDTO.setCreatedAt(LocalDateTime.now());
+            productCreateDTO.setUpdatedAt(LocalDateTime.now());
+            
             ProductResponseDTO createdProduct = productService.saveProduct(productCreateDTO);
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Product '" + createdProduct.getTitle() + "' created successfully!");
@@ -209,20 +246,30 @@ public class AdminProductController {
             log.error("❌ Product not found with ID: {} for tenant: {}", id, tenantId, e);
             return "redirect:/admin/products";
         }
-    }
-
-    /**
+    }    /**
      * Handle product update
      */
     @PostMapping("/{id}")
     public String updateProduct(@PathVariable Long id,
                                @ModelAttribute ProductCreateDTO productCreateDTO,
                                HttpServletRequest request,
-                               RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes,
+                               Principal principal) {
         String tenantId = getCurrentTenantId(request);
         log.info("🔄 Updating product ID: {} for tenant: {}", id, tenantId);
         
         try {
+            // Set updated_by information from authenticated user
+            if (principal != null) {
+                Optional<AppUser> currentUser = appUserRepository.findByUsername(principal.getName());
+                if (currentUser.isPresent()) {
+                    productCreateDTO.setUpdatedBy(currentUser.get().getId());
+                }
+            }
+            
+            // Set timestamp
+            productCreateDTO.setUpdatedAt(LocalDateTime.now());
+            
             ProductResponseDTO updatedProduct = productService.updateProduct(id, productCreateDTO);
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Product '" + updatedProduct.getTitle() + "' updated successfully!");
@@ -352,28 +399,45 @@ public class AdminProductController {
         // Add parameter to indicate low-stock tab should be active
         redirectAttributes.addAttribute("tab", "low-stock");
         return "redirect:/admin/products";
-    }
-
-    /**
+    }    /**
      * Get low stock products as JSON data for AJAX calls
      */
     @GetMapping("/low-stock-data")
     @ResponseBody
-    public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);        log.info("📊 Getting low stock products data for tenant: {}", tenantId);
+    public ResponseEntity<List<ProductResponseDTO>> getLowStockProductsData(HttpServletRequest request) {
+        log.info("🔍 AJAX Call: getLowStockProductsData started");
         
         try {
-            List<ProductResponseDTO> lowStockProducts = productService.getAllProducts()
-                .stream()
-                .filter(p -> p.getStockLevel() <= p.getLowStockThreshold())
+            log.debug("📋 Step 1: Getting current tenant ID");
+            String tenantId = getCurrentTenantId(request);
+            log.info("📊 Step 2: Getting low stock products data for tenant: {}", tenantId);
+            
+            log.debug("📦 Step 3: Calling productService.getAllProducts()");
+            List<ProductResponseDTO> allProducts = productService.getAllProducts();
+            log.info("📦 Step 4: Found {} total products for tenant: {}", allProducts.size(), tenantId);
+            
+            log.debug("🔽 Step 5: Filtering low stock products");
+            List<ProductResponseDTO> lowStockProducts = allProducts.stream()
+                .filter(p -> {
+                    boolean isLowStock = p.getStockLevel() <= p.getLowStockThreshold();
+                    log.debug("🔍 Product {} - Stock: {}, Threshold: {}, IsLowStock: {}", 
+                        p.getTitle(), p.getStockLevel(), p.getLowStockThreshold(), isLowStock);
+                    return isLowStock;
+                })
                 .toList();
                 
-            log.info("🔍 Found {} low stock products for tenant: {}", 
+            log.info("🔍 Step 6: Found {} low stock products for tenant: {}", 
                 lowStockProducts.size(), tenantId);
-            return lowStockProducts;
+            
+            log.debug("✅ Step 7: Returning successful response");
+            return ResponseEntity.ok(lowStockProducts);
+            
         } catch (Exception e) {
-            log.error("❌ Failed to get low stock products data for tenant: {}", tenantId, e);
-            return List.of(); // Return empty list on error
+            log.error("❌ CRITICAL: Failed to get low stock products data at step: {}", 
+                e.getStackTrace()[0].getMethodName(), e);
+            log.error("❌ Full error details: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(List.of()); // Return empty list with error status
         }
     }
 
@@ -404,15 +468,24 @@ public class AdminProductController {
         return "redirect:/admin/products?tab=categories";
     }    /**
      * Get category details for editing
-     */
-    @GetMapping("/categories/{id}")
+     */    @GetMapping("/categories/{id}")
     @ResponseBody
-    public ProductCategoryResponseDTO getCategoryDetails(@PathVariable Long id, HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);
-        log.info("📝 Getting category details for ID: {} for tenant: {}", id, tenantId);
-        
-        return categoryService.getCategoryById(id)
-            .orElseThrow(() -> new RuntimeException("Category not found with ID: " + id));
+    public ResponseEntity<ProductCategoryResponseDTO> getCategoryDetails(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            String tenantId = getCurrentTenantId(request);
+            log.info("📝 Getting category details for ID: {} for tenant: {}", id, tenantId);
+            
+            Optional<ProductCategoryResponseDTO> category = categoryService.getCategoryById(id);
+            if (category.isPresent()) {
+                return ResponseEntity.ok(category.get());
+            } else {
+                log.warn("⚠️ Category not found with ID: {} for tenant: {}", id, tenantId);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            log.error("❌ Failed to get category details for ID: {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
@@ -461,24 +534,23 @@ public class AdminProductController {
         }
 
         return "redirect:/admin/products?tab=categories";
-    }
-
-    /**
+    }    /**
      * Get categories list for AJAX requests
      */
     @GetMapping("/categories/list")
     @ResponseBody
-    public List<ProductCategoryResponseDTO> getCategoriesList(HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);
-        log.info("📋 Getting categories list for tenant: {}", tenantId);
-        
+    public ResponseEntity<List<ProductCategoryResponseDTO>> getCategoriesList(HttpServletRequest request) {
         try {
+            String tenantId = getCurrentTenantId(request);
+            log.info("📋 Getting categories list for tenant: {}", tenantId);
+            
             List<ProductCategoryResponseDTO> categories = categoryService.getAllCategories();
             log.info("📊 Found {} categories for tenant: {}", categories.size(), tenantId);
-            return categories;
+            return ResponseEntity.ok(categories);
         } catch (Exception e) {
-            log.error("❌ Failed to get categories list for tenant: {}", tenantId, e);
-            return List.of(); // Return empty list on error
+            log.error("❌ Failed to get categories list: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(List.of()); // Return empty list with error status
         }
     }
 

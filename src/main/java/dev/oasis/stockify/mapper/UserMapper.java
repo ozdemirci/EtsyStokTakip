@@ -3,6 +3,7 @@ package dev.oasis.stockify.mapper;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.AppUser;
+import dev.oasis.stockify.model.Role;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,8 +25,21 @@ public class UserMapper {
         appUser.setPassword(userCreateDTO.getPassword());
         appUser.setRole(userCreateDTO.getRole());
         appUser.setEmail(userCreateDTO.getEmail());
-        appUser.setIsActive(userCreateDTO.getIsActive());
+        appUser.setIsActive(userCreateDTO.getActive());
         appUser.setPrimaryTenant(userCreateDTO.getPrimaryTenant());
+        
+        // Set tenant-specific fields based on role
+        if (userCreateDTO.getRole() == Role.SUPER_ADMIN) {
+            // Super admin can access all tenants
+            appUser.setCanManageAllTenants(true);
+            appUser.setIsGlobalUser(true);
+            // Note: accessibleTenants should be set separately for super admin
+        } else {
+            // Regular users only access their own tenant
+            appUser.setCanManageAllTenants(false);
+            appUser.setIsGlobalUser(false);
+            appUser.setAccessibleTenants(userCreateDTO.getPrimaryTenant()); // Only own tenant
+        }
         
         return appUser;
     }
@@ -39,12 +53,26 @@ public class UserMapper {
     public AppUser updateEntity(AppUser appUser, UserCreateDTO userCreateDTO) {
         if (userCreateDTO == null) {
             return appUser;
-        }        appUser.setUsername(userCreateDTO.getUsername());
-        appUser.setPassword(userCreateDTO.getPassword());
+        }
+
+        appUser.setUsername(userCreateDTO.getUsername());        appUser.setPassword(userCreateDTO.getPassword());
         appUser.setRole(userCreateDTO.getRole());
         appUser.setEmail(userCreateDTO.getEmail());
-        appUser.setIsActive(userCreateDTO.getIsActive());
+        appUser.setIsActive(userCreateDTO.getActive());
         appUser.setPrimaryTenant(userCreateDTO.getPrimaryTenant());
+        
+        // Update tenant-specific fields based on role
+        if (userCreateDTO.getRole() == Role.SUPER_ADMIN) {
+            // Super admin can access all tenants
+            appUser.setCanManageAllTenants(true);
+            appUser.setIsGlobalUser(true);
+            // Note: accessibleTenants should be set separately for super admin
+        } else {
+            // Regular users only access their own tenant
+            appUser.setCanManageAllTenants(false);
+            appUser.setIsGlobalUser(false);
+            appUser.setAccessibleTenants(userCreateDTO.getPrimaryTenant()); // Only own tenant
+        }
         
         return appUser;
     }    /**
@@ -58,11 +86,10 @@ public class UserMapper {
         }
 
         UserResponseDTO userResponseDTO = new UserResponseDTO();
-        userResponseDTO.setId(appUser.getId());
-        userResponseDTO.setUsername(appUser.getUsername());
+        userResponseDTO.setId(appUser.getId());        userResponseDTO.setUsername(appUser.getUsername());
         userResponseDTO.setRole(appUser.getRole());
         userResponseDTO.setEmail(appUser.getEmail());
-        userResponseDTO.setIsActive(appUser.getIsActive());
+        userResponseDTO.setActive(appUser.getIsActive());
         userResponseDTO.setCreatedAt(appUser.getCreatedAt());
         
         return userResponseDTO;

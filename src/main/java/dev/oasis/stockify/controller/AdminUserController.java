@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Admin controller for comprehensive user management operations
@@ -77,9 +78,8 @@ public class AdminUserController {
         List<Role> availableRoles = List.of(Role.ADMIN, Role.USER);
         
         // Calculate user statistics from all users (not just current page)
-        List<UserResponseDTO> allUsersForStats = appUserService.getAllUsers();
-        long activeUsersCount = allUsersForStats.stream()
-                .filter(user -> user.getIsActive() != null && user.getIsActive())
+        List<UserResponseDTO> allUsersForStats = appUserService.getAllUsers();        long activeUsersCount = allUsersForStats.stream()
+                .filter(user -> user.getActive() != null && user.getActive())
                 .count();
         long adminUsersCount = allUsersForStats.stream()
                 .filter(user -> user.getRole() != null && user.getRole() == Role.ADMIN)
@@ -117,9 +117,7 @@ public class AdminUserController {
         model.addAttribute("availableRoles", List.of(Role.ADMIN, Role.USER));
         model.addAttribute("isEdit", false);
         return "admin/user-form";
-    }
-
-    /**
+    }    /**
      * Process form submission to add a new user
      */
     @PostMapping("/add")
@@ -139,8 +137,15 @@ public class AdminUserController {
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Kullanıcı başarıyla oluşturuldu: " + createdUser.getUsername());
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Kullanıcı oluşturulurken hata oluştu: " + e.getMessage());
+            log.error("❌ Error creating user: {}", e.getMessage());
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("zaten mevcut")) {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "Bu kullanıcı adı zaten kullanılıyor. Lütfen farklı bir kullanıcı adı seçin.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "Kullanıcı oluşturulurken hata oluştu: " + e.getMessage());
+            }
         }
         
         return "redirect:/admin/users";
@@ -153,11 +158,10 @@ public class AdminUserController {
     public String showEditUserForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             UserResponseDTO user = appUserService.getUserById(id);
-            UserCreateDTO userDTO = new UserCreateDTO();
-            userDTO.setUsername(user.getUsername());
+            UserCreateDTO userDTO = new UserCreateDTO();            userDTO.setUsername(user.getUsername());
             userDTO.setEmail(user.getEmail());
             userDTO.setRole(user.getRole());
-            userDTO.setIsActive(user.getIsActive());
+            userDTO.setActive(user.getActive());
             
             model.addAttribute("user", userDTO);
             model.addAttribute("userId", id);
@@ -169,9 +173,7 @@ public class AdminUserController {
                 "Kullanıcı bulunamadı: " + e.getMessage());
             return "redirect:/admin/users";
         }
-    }
-
-    /**
+    }    /**
      * Process form submission to update an existing user
      */
     @PostMapping("/edit/{id}")
@@ -193,8 +195,15 @@ public class AdminUserController {
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Kullanıcı başarıyla güncellendi: " + updatedUser.getUsername());
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Kullanıcı güncellenirken hata oluştu: " + e.getMessage());
+            log.error("❌ Error updating user: {}", e.getMessage());
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("zaten mevcut")) {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "Bu kullanıcı adı zaten kullanılıyor. Lütfen farklı bir kullanıcı adı seçin.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "Kullanıcı güncellenirken hata oluştu: " + e.getMessage());
+            }
         }
         
         return "redirect:/admin/users";
@@ -239,6 +248,16 @@ public class AdminUserController {
     @ResponseBody
     public UserResponseDTO getUserDetails(@PathVariable Long id) {
         return appUserService.getUserById(id);
+    }
+
+    /**
+     * Check if username exists (AJAX endpoint)
+     */
+    @GetMapping("/check-username")
+    @ResponseBody
+    public Map<String, Boolean> checkUsername(@RequestParam String username) {
+        boolean exists = appUserService.existsByUsername(username);
+        return Map.of("exists", exists);
     }
 
     /**

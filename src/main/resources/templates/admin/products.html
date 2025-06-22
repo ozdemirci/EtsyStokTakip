@@ -379,9 +379,8 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-info" th:text="${category.productCount ?: 0}">0</span>
-                                                </td>                                                <td>
-                                                    <span th:if="${category.isActive}" class="badge bg-success">Active</span>
-                                                    <span th:unless="${category.isActive}" class="badge bg-secondary">Inactive</span>
+                                                </td>                                                <td>                                                    <span th:if="${category.active}" class="badge bg-success">Active</span>
+                                                    <span th:unless="${category.active}" class="badge bg-secondary">Inactive</span>
                                                 </td><td>
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-outline-primary btn-action" 
@@ -607,9 +606,10 @@
             updateUrl('categories');
         }
 
+        // ================================        // DATA LOADING & API CALLS
         // ================================
-        // DATA LOADING & API CALLS
-        // ================================        /**
+        
+        /**
          * Düşük stoklu ürünleri sunucudan çeker ve tabloyu doldurur.
          */
         function loadLowStockProducts() {
@@ -620,7 +620,9 @@
 
             fetch('/admin/products/low-stock-data')
                 .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
@@ -644,16 +646,19 @@
                     }
                 })
                 .catch(error => {
-                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu.</div></td></tr>`;
-                });
-        }        /**
+                    console.error('Error loading low stock products:', error);
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu: ${error.message}</div></td></tr>`;                });
+        }
+
+        /**
          * Kategori düzenleme modalını sunucudan gelen veriyle doldurur.
          */
         function editCategory(categoryId) {
-            if (!categoryId) return;
-            fetch(`/admin/products/categories/${categoryId}`)
+            if (!categoryId) return;            fetch(`/admin/products/categories/${categoryId}`)
                 .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
                     return response.json();
                 })
                 .then(category => {
@@ -661,16 +666,16 @@
                     document.getElementById('editCategoryDescription').value = category.description || '';
                     document.getElementById('editCategoryColor').value = category.hexColor || '#6c757d';
                     document.getElementById('editCategorySortOrder').value = category.sortOrder || 1;
-                    document.getElementById('editCategoryActive').checked = category.isActive === true;
+                    document.getElementById('editCategoryActive').checked = category.active === true;
                     
                     const form = document.getElementById('editCategoryForm');
                     form.action = `/admin/products/categories/${categoryId}`;
                     
                     const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
                     modal.show();
-                })
-                .catch(error => {
-                    alert('Kategori verileri yüklenirken bir hata oluştu.');
+                })                .catch(error => {
+                    console.error('Error loading category:', error);
+                    alert(`Kategori verileri yüklenirken bir hata oluştu: ${error.message}`);
                 });
         }        /**
          * Kullanıcıdan onay alarak kategoriyi siler.
@@ -695,9 +700,7 @@
                 return;
             }
             alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
-        }
-
-        // ================================
+        }        // ================================
         // PAGE INITIALIZATION
         // ================================        // PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
@@ -717,6 +720,25 @@
             } else {
                 tabToActivate = document.getElementById('all-products-tab');
                 if (tabToActivate) new bootstrap.Tab(tabToActivate).show();
+            }            // ================================
+            // AUTO-SUBMIT FORM ON SORT CHANGE
+            // ================================
+            const sortBySelect = document.getElementById('sortBySelect');
+            const sortDirSelect = document.getElementById('sortDirSelect');
+            const searchForm = document.getElementById('productSearchForm'); // Target the specific search form
+
+            if (sortBySelect && searchForm) {
+                sortBySelect.addEventListener('change', function() {
+                    console.log('Sort by changed to:', this.value);
+                    searchForm.submit();
+                });
+            }
+
+            if (sortDirSelect && searchForm) {
+                sortDirSelect.addEventListener('change', function() {
+                    console.log('Sort direction changed to:', this.value);
+                    searchForm.submit();
+                });
             }
         });
     </script>

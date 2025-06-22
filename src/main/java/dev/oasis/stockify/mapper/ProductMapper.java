@@ -30,8 +30,14 @@ public class ProductMapper {
         product.setStockLevel(productCreateDTO.getStockLevel());
         product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());
         product.setEtsyProductId(productCreateDTO.getEtsyProductId());
-        product.setIsActive(true);
-        product.setIsFeatured(false);
+        product.setIsActive(productCreateDTO.getIsActive() != null ? productCreateDTO.getIsActive() : true);
+        product.setIsFeatured(productCreateDTO.getIsFeatured() != null ? productCreateDTO.getIsFeatured() : false);
+        
+        // Set audit fields
+        product.setCreatedAt(productCreateDTO.getCreatedAt());
+        product.setUpdatedAt(productCreateDTO.getUpdatedAt());
+        product.setCreatedBy(productCreateDTO.getCreatedBy());
+        product.setUpdatedBy(productCreateDTO.getUpdatedBy());
 
         return product;
     }
@@ -45,18 +51,31 @@ public class ProductMapper {
     public Product updateEntity(Product product, ProductCreateDTO productCreateDTO) {
         if (productCreateDTO == null) {
             return product;
-        }
-
-        product.setTitle(productCreateDTO.getTitle());
+        }        product.setTitle(productCreateDTO.getTitle());
         product.setDescription(productCreateDTO.getDescription());
         product.setCategory(productCreateDTO.getCategory());
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
-        product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());  // Bu satırı ekledim
+        product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());
+          // Update isActive and isFeatured if provided
+        if (productCreateDTO.getIsActive() != null) {
+            product.setIsActive(productCreateDTO.getIsActive());
+        }
+        if (productCreateDTO.getIsFeatured() != null) {
+            product.setIsFeatured(productCreateDTO.getIsFeatured());
+        }
 
         // SKU değişmişse ve yeni SKU null değilse güncelle
         if (productCreateDTO.getSku() != null && !productCreateDTO.getSku().equals(product.getSku())) {
             product.setSku(productCreateDTO.getSku());
+        }
+
+        // Set audit fields for update
+        if (productCreateDTO.getUpdatedBy() != null) {
+            product.setUpdatedBy(productCreateDTO.getUpdatedBy());
+        }
+        if (productCreateDTO.getUpdatedAt() != null) {
+            product.setUpdatedAt(productCreateDTO.getUpdatedAt());
         }
 
 
@@ -79,11 +98,15 @@ public class ProductMapper {
         productResponseDTO.setDescription(product.getDescription());
         productResponseDTO.setSku(product.getSku());
         productResponseDTO.setCategory(product.getCategory());        productResponseDTO.setPrice(product.getPrice());
-        productResponseDTO.setStockLevel(product.getStockLevel());
-        productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());
-        productResponseDTO.setEtsyProductId(product.getEtsyProductId());
+        productResponseDTO.setStockLevel(product.getStockLevel());        productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());        productResponseDTO.setEtsyProductId(product.getEtsyProductId());
         productResponseDTO.setIsActive(product.getIsActive());
         productResponseDTO.setIsFeatured(product.getIsFeatured());
+        
+        // Set audit fields
+        productResponseDTO.setCreatedAt(product.getCreatedAt());
+        productResponseDTO.setUpdatedAt(product.getUpdatedAt());
+        productResponseDTO.setCreatedBy(product.getCreatedBy());
+        productResponseDTO.setUpdatedBy(product.getUpdatedBy());
 
         return productResponseDTO;
     }

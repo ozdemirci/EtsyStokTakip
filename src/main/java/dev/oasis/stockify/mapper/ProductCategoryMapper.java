@@ -18,12 +18,11 @@ public class ProductCategoryMapper {
         if (category == null) {
             return null;
         }
-        
-        ProductCategoryResponseDTO dto = new ProductCategoryResponseDTO();
+          ProductCategoryResponseDTO dto = new ProductCategoryResponseDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
-        dto.setIsActive(category.getIsActive());
+        dto.setActive(category.getIsActive());
         dto.setSortOrder(category.getSortOrder());
         dto.setHexColor(category.getHexColor());
         dto.setCreatedAt(category.getCreatedAt());
@@ -40,12 +39,11 @@ public class ProductCategoryMapper {
         if (dto == null) {
             return null;
         }
-        
-        ProductCategory category = new ProductCategory();
+          ProductCategory category = new ProductCategory();
         category.setId(dto.getId());
         category.setName(dto.getName());
         category.setDescription(dto.getDescription());
-        category.setIsActive(dto.getIsActive());
+        category.setIsActive(dto.getActive());
         category.setSortOrder(dto.getSortOrder());
         category.setHexColor(dto.getHexColor());
         
@@ -59,12 +57,11 @@ public class ProductCategoryMapper {
         if (category == null) {
             return null;
         }
-        
-        ProductCategoryCreateDTO dto = new ProductCategoryCreateDTO();
+          ProductCategoryCreateDTO dto = new ProductCategoryCreateDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
-        dto.setIsActive(category.getIsActive());
+        dto.setActive(category.getIsActive());
         dto.setSortOrder(category.getSortOrder());
         dto.setHexColor(category.getHexColor());
         
@@ -78,10 +75,9 @@ public class ProductCategoryMapper {
         if (category == null || dto == null) {
             return;
         }
-        
-        category.setName(dto.getName());
+          category.setName(dto.getName());
         category.setDescription(dto.getDescription());
-        category.setIsActive(dto.getIsActive());
+        category.setIsActive(dto.getActive());
         category.setSortOrder(dto.getSortOrder());
         category.setHexColor(dto.getHexColor());
     }

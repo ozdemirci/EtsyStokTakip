@@ -43,7 +43,7 @@ public class AppUser {
     private Boolean isGlobalUser = false; // Can access multiple tenants
     
     @Column(name = "primary_tenant", length = 50)
-    private String primaryTenant; // Primary tenant for this user
+    private String primaryTenant; 
 
     // Audit fields
     @Column(name = "created_at")
@@ -56,7 +56,9 @@ public class AppUser {
     private Boolean isActive = true;
     
     @Column(name = "last_login")
-    private LocalDateTime lastLogin;    @PrePersist
+    private LocalDateTime lastLogin;    
+    
+    @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();

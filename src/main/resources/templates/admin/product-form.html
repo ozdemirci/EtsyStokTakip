@@ -191,10 +191,8 @@
                                                 </label>
                                                 <div class="form-text">Product is available for sale</div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="isFeatured" name="isFeatured" th:checked="${product.isFeatured}" value="true">
+                                        </div>                                        <div class="col-md-6">
+                                            <div class="form-check form-switch">                                                <input class="form-check-input" type="checkbox" id="isFeatured" name="isFeatured" th:checked="${product.isFeatured}" value="true">
                                                 <input type="hidden" name="_isFeatured" value="on">
                                                 <label class="form-check-label" for="isFeatured">
                                                     <i class="bi bi-star"></i> Featured Product
@@ -300,8 +298,7 @@
             
             // Initial status update
             updateStockStatus();
-            
-            // Fix checkbox toggle behavior
+              // Fix checkbox toggle behavior
             const isActiveCheckbox = document.getElementById('isActive');
             const isFeaturedCheckbox = document.getElementById('isFeatured');
             
@@ -311,8 +308,7 @@
                     console.log('Active checkbox changed to:', this.checked);
                 });
             }
-            
-            if (isFeaturedCheckbox) {
+              if (isFeaturedCheckbox) {
                 isFeaturedCheckbox.addEventListener('change', function() {
                     console.log('Featured checkbox changed to:', this.checked);
                 });

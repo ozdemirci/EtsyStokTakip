@@ -13,8 +13,7 @@
             <a class="navbar-brand" href="#">
                 <i class="fas fa-cubes me-2"></i>Stockify - Tenant Management
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/admin/dashboard">
+            <div class="navbar-nav ms-auto">                <a class="nav-link" href="/superadmin/dashboard">
                     <i class="fas fa-dashboard me-1"></i>Dashboard
                 </a>
                 <a class="nav-link" href="/logout">
@@ -46,8 +45,7 @@
                 </h2>
                 <p class="text-muted">Manage all tenant organizations and their configurations</p>
             </div>
-            <div class="col-md-4 text-end">
-                <a href="/admin/tenants/new" class="btn btn-primary">
+            <div class="col-md-4 text-end">                <a href="/superadmin/tenant-management/new" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Create New Tenant
                 </a>
             </div>
@@ -107,8 +105,7 @@
                 <div th:if="${#lists.isEmpty(tenants)}" class="text-center py-4">
                     <i class="fas fa-building fa-3x text-muted mb-3"></i>
                     <h5 class="text-muted">No tenants found</h5>
-                    <p class="text-muted">Create your first tenant to get started</p>
-                    <a href="/admin/tenants/new" class="btn btn-primary">
+                    <p class="text-muted">Create your first tenant to get started</p>                    <a href="/superadmin/tenant-management/new" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Create First Tenant
                     </a>
                 </div>
@@ -152,23 +149,20 @@
                                     <span th:if="${tenant.createdAt == null}" class="text-muted">-</span>
                                 </td>
                                 <td>
-                                    <div class="btn-group" role="group">
-                                        <a th:href="@{'/admin/tenants/' + ${tenant.tenantId}}" 
+                                    <div class="btn-group" role="group">                                        <a th:href="@{'/superadmin/tenant-management/' + ${tenant.tenantId}}" 
                                            class="btn btn-sm btn-outline-primary" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        
-                                        <form th:if="${tenant.status == 'ACTIVE'}" 
-                                              th:action="@{'/admin/tenants/' + ${tenant.tenantId} + '/deactivate'}" 
+                                          <form th:if="${tenant.status == 'ACTIVE'}" 
+                                              th:action="@{'/superadmin/tenant-management/' + ${tenant.tenantId} + '/deactivate'}" 
                                               method="post" class="d-inline"
-                                              onsubmit="return confirm('Are you sure you want to deactivate this tenant?')">
+                                              onsubmit="return confirm('Are you sure you want to deactivate this tenant?')">>
                                             <button type="submit" class="btn btn-sm btn-outline-warning" title="Deactivate">
                                                 <i class="fas fa-pause"></i>
                                             </button>
                                         </form>
-                                        
-                                        <form th:if="${tenant.status != 'ACTIVE'}" 
-                                              th:action="@{'/admin/tenants/' + ${tenant.tenantId} + '/activate'}" 
+                                          <form th:if="${tenant.status != 'ACTIVE'}" 
+                                              th:action="@{'/superadmin/tenant-management/' + ${tenant.tenantId} + '/activate'}" 
                                               method="post" class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-outline-success" title="Activate">
                                                 <i class="fas fa-play"></i>

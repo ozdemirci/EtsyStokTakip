@@ -114,8 +114,7 @@
 
                     <form th:action="${isEdit ? '/admin/users/edit/' + userId : '/admin/users/add'}" 
                           th:object="${user}" method="post">
-                        
-                        <!-- Username -->
+                          <!-- Username -->
                         <div class="mb-3">
                             <label for="username" class="form-label required">Kullanıcı Adı</label>
                             <div class="input-group">
@@ -129,8 +128,19 @@
                                 <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
                                     <span th:errors="*{username}"></span>
                                 </div>
+                                <div id="usernameExistsError" class="invalid-feedback" style="display: none;">
+                                    Bu kullanıcı adı zaten kullanılıyor
+                                </div>
                             </div>
-                            <div class="form-text">3-20 karakter arası, benzersiz olmalıdır</div>
+                            <div class="form-text">
+                                <span id="usernameHelp">3-20 karakter arası, benzersiz olmalıdır</span>
+                                <span id="usernameAvailable" class="text-success" style="display: none;">
+                                    <i class="bi bi-check-circle"></i> Kullanılabilir
+                                </span>
+                                <span id="usernameChecking" class="text-muted" style="display: none;">
+                                    <i class="bi bi-hourglass-split"></i> Kontrol ediliyor...
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Email -->
@@ -203,10 +213,9 @@
 
                         <!-- Active Status (only for edit) -->
                         <div th:if="${isEdit}" class="mb-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="isActive" 
-                                       th:field="*{isActive}" th:checked="*{isActive}">
-                                <label class="form-check-label" for="isActive">
+                            <div class="form-check form-switch">                                <input class="form-check-input" type="checkbox" id="active" 
+                                       th:field="*{active}" th:checked="*{active}">
+                                <label class="form-check-label" for="active">
                                     Kullanıcı Aktif
                                 </label>
                             </div>
@@ -243,9 +252,8 @@
                                 <div class="col-md-6">
                                     <p class="mb-1"><strong>Kullanıcı ID:</strong> <span th:text="${userId}">-</span></p>
                                     <p class="mb-1"><strong>Mevcut Durum:</strong> 
-                                        <span class="badge" 
-                                              th:class="'badge ' + (${user.isActive} ? 'bg-success' : 'bg-secondary')"
-                                              th:text="${user.isActive ? 'Aktif' : 'Pasif'}">-</span>
+                                        <span class="badge"                                              th:class="'badge ' + (${user.active} ? 'bg-success' : 'bg-secondary')"
+                                              th:text="${user.active ? 'Aktif' : 'Pasif'}">-</span>
                                     </p>
                                 </div>
                                 <div class="col-md-6">
@@ -263,8 +271,10 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
+      <script>
+        let usernameCheckTimeout;
+        const originalUsername = document.getElementById('username').value; // Store original username for edit mode
+        
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const passwordIcon = document.getElementById('passwordIcon');
@@ -278,6 +288,84 @@
             }
         }
 
+        function checkUsername(username) {
+            // Don't check if it's the original username in edit mode
+            if (username === originalUsername) {
+                resetUsernameStatus();
+                return;
+            }
+            
+            if (username.length < 3) {
+                resetUsernameStatus();
+                return;
+            }
+            
+            showUsernameChecking();
+            
+            fetch(`/admin/users/check-username?username=${encodeURIComponent(username)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        showUsernameExists();
+                    } else {
+                        showUsernameAvailable();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking username:', error);
+                    resetUsernameStatus();
+                });
+        }
+        
+        function showUsernameChecking() {
+            document.getElementById('usernameHelp').style.display = 'none';
+            document.getElementById('usernameAvailable').style.display = 'none';
+            document.getElementById('usernameChecking').style.display = 'inline';
+            document.getElementById('usernameExistsError').style.display = 'none';
+            document.getElementById('username').classList.remove('is-invalid', 'is-valid');
+        }
+        
+        function showUsernameExists() {
+            document.getElementById('usernameHelp').style.display = 'none';
+            document.getElementById('usernameAvailable').style.display = 'none';
+            document.getElementById('usernameChecking').style.display = 'none';
+            document.getElementById('usernameExistsError').style.display = 'block';
+            document.getElementById('username').classList.add('is-invalid');
+            document.getElementById('username').classList.remove('is-valid');
+        }
+        
+        function showUsernameAvailable() {
+            document.getElementById('usernameHelp').style.display = 'none';
+            document.getElementById('usernameAvailable').style.display = 'inline';
+            document.getElementById('usernameChecking').style.display = 'none';
+            document.getElementById('usernameExistsError').style.display = 'none';
+            document.getElementById('username').classList.add('is-valid');
+            document.getElementById('username').classList.remove('is-invalid');
+        }
+        
+        function resetUsernameStatus() {
+            document.getElementById('usernameHelp').style.display = 'inline';
+            document.getElementById('usernameAvailable').style.display = 'none';
+            document.getElementById('usernameChecking').style.display = 'none';
+            document.getElementById('usernameExistsError').style.display = 'none';
+            document.getElementById('username').classList.remove('is-invalid', 'is-valid');
+        }
+
+        // Username input event listener
+        document.getElementById('username').addEventListener('input', function(e) {
+            const username = e.target.value.trim();
+            
+            // Clear previous timeout
+            if (usernameCheckTimeout) {
+                clearTimeout(usernameCheckTimeout);
+            }
+            
+            // Set new timeout for debounced checking
+            usernameCheckTimeout = setTimeout(() => {
+                checkUsername(username);
+            }, 500); // 500ms delay
+        });
+
         // Form validation feedback
         (function() {
             'use strict';
@@ -285,6 +373,14 @@
                 const forms = document.getElementsByTagName('form');
                 Array.prototype.filter.call(forms, function(form) {
                     form.addEventListener('submit', function(event) {
+                        // Check if username exists before submitting
+                        const usernameInput = document.getElementById('username');
+                        if (usernameInput.classList.contains('is-invalid')) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return false;
+                        }
+                        
                         if (form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
