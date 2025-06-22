@@ -27,17 +27,24 @@ public class HibernateConfig implements HibernatePropertiesCustomizer {
                           CurrentTenantIdentifierResolverImpl currentTenantIdentifierResolver) {
         this.multiTenantConnectionProvider = multiTenantConnectionProvider;
         this.currentTenantIdentifierResolver = currentTenantIdentifierResolver;
-    }
-
-    @Override
+    }    @Override
     public void customize(Map<String, Object> hibernateProperties) {
-        log.info("Configuring Hibernate multi-tenancy properties");        // Configure multi-tenancy strategy
+        log.info("Configuring Hibernate multi-tenancy properties");
+        
+        // Configure multi-tenancy strategy
+        hibernateProperties.put("hibernate.multiTenancy", "SCHEMA");
         hibernateProperties.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
         hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
-        hibernateProperties.put("hibernate.multiTenancy", "SCHEMA");
         
         // Disable schema validation for multi-tenant setup
         hibernateProperties.put(AvailableSettings.HBM2DDL_AUTO, "none");
+        
+        // Force connection provider usage for all operations
+        hibernateProperties.put("hibernate.connection.provider_disables_autocommit", false);
+        hibernateProperties.put("hibernate.connection.autocommit", false);
+        
+        // Set default schema back
+        hibernateProperties.put(AvailableSettings.DEFAULT_SCHEMA, "public");
         
         log.info("Multi-tenancy configuration completed");
     }

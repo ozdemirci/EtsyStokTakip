@@ -85,15 +85,17 @@ public class ProductService {
      */
     public boolean isSkuExists(String sku) {
         return productRepository.findBySku(sku).isPresent();
-    }
-
-    /**
+    }    /**
      * Saves a product to the database
      * @param productCreateDTO the product data to save
      * @return the saved product data
      */
     @Transactional
     public ProductResponseDTO saveProduct(ProductCreateDTO productCreateDTO) {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.info("🔧 ProductService.saveProduct starting for tenant: {}", currentTenant);
+        log.debug("📝 Product data: {}", productCreateDTO);
+        
         validateProductData(productCreateDTO);
 
         if (isSkuExists(productCreateDTO.getSku())) {
@@ -102,10 +104,16 @@ public class ProductService {
 
         try {
             Product product = productMapper.toEntity(productCreateDTO);
+            log.info("🚀 About to save product to repository for tenant: {}", currentTenant);
             Product savedProduct = productRepository.save(product);
+            log.info("✅ Product saved successfully with ID: {} for tenant: {}", savedProduct.getId(), currentTenant);
+            
             stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
-            return productMapper.toDto(savedProduct);
+            ProductResponseDTO result = productMapper.toDto(savedProduct);
+            log.info("🎯 ProductService.saveProduct completed for tenant: {}", currentTenant);
+            return result;
         } catch (Exception e) {
+            log.error("❌ Error saving product for tenant {}: {}", currentTenant, e.getMessage(), e);
             throw new RuntimeException("Error saving product: " + e.getMessage(), e);
         }
     }

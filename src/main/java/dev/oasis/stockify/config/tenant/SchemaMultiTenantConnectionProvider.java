@@ -42,17 +42,36 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
         String schemaName = mapTenantToSchema(tenantIdentifier);
         
         try {
-            // Schema switching only - Flyway handles table creation
-            connection.setSchema(schemaName);
-            
-            log.debug("Successfully set connection schema to: {}", schemaName);
+            // Always set the schema, even if connection is reused
+            String currentSchema = connection.getSchema();
+            if (!schemaName.equals(currentSchema)) {
+                log.debug("Connection schema mismatch. Current: {}, Required: {}", currentSchema, schemaName);
+            }            // Force schema switch every time
+            connection.setSchema(schemaName);            // For H2, also execute SET SCHEMA command to ensure it takes effect
+            try (var stmt = connection.createStatement()) {
+                // Check if schema exists, if not create it (except for public)
+                if (!"public".equals(schemaName)) {
+                    try {
+                        // Create schema - H2 with DATABASE_TO_LOWER=TRUE will handle lowercase
+                        stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schemaName);
+                        log.debug("Ensured schema {} exists", schemaName);
+                    } catch (SQLException e) {
+                        log.debug("Schema {} might already exist: {}", schemaName, e.getMessage());
+                    }
+                }
+                
+                // Set schema
+                stmt.execute("SET SCHEMA " + schemaName);
+                log.debug("Executed SET SCHEMA {} command for H2", schemaName);
+            }// Verify the schema was set correctly
+            String verifiedSchema = connection.getSchema();
+            log.debug("Successfully set connection schema to: {} (verified: {})", schemaName, verifiedSchema);
         } catch (SQLException e) {
             log.error("Failed to set schema for tenant: {}", schemaName, e);
             throw new SQLException("Failed to set tenant schema: " + schemaName, e);
         }
         return connection;
-    }
-      /**
+    }    /**
      * Map tenant identifier to actual schema name in database
      * This handles the difference between logical tenant names and physical schema names
      */
@@ -61,12 +80,12 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
             return "public";
         }
         
-        // All schema names in lowercase for consistency with H2 settings
+        // Always return lowercase for consistency
         return tenantIdentifier.toLowerCase(Locale.ROOT);
     }    @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         try {
-            // Use public schema as default (lowercase for consistency)
+            // Use public schema as default when releasing connection (lowercase)
             connection.setSchema("public");
         } finally {
             connection.close();

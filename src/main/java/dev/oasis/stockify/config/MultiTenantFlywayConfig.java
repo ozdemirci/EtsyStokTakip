@@ -15,12 +15,11 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Combined Multi-tenant Setup Component
@@ -40,10 +39,17 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {    @Value("$
         log.info("🚀 Starting multi-tenant setup: Flyway migrations + Super admin creation...");
         
         try {
-            // Step 1: Apply Flyway migrations to all tenant schemas
-            // This will be handled by the FlywayMigrationStrategy bean
+            // Step 1: Apply Flyway migrations to all tenant schemas first
+            log.info("🗄️ Starting Flyway migrations for all tenant schemas...");
             
-            // Step 2: Create super admin in 'stockify' tenant
+            // Migrate each tenant schema
+            for (String schema : tenantSchemas) {
+                migrateSchema(dataSource, schema);
+            }
+            
+            log.info("✅ Flyway migrations completed for {} schemas", tenantSchemas.length);
+            
+            // Step 2: Create super admin in 'company1' tenant (after migrations are done)
             createSuperAdminIfNotExists();
             
             log.info("✅ Multi-tenant setup completed successfully!");
@@ -52,36 +58,38 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {    @Value("$
             log.error("❌ Failed during multi-tenant setup: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to complete multi-tenant setup", e);
         }
-    }/**
+    }    /**
      * Custom Flyway migration strategy for multi-tenant setup
+     * Since we handle migrations manually in run(), this just does a no-op
      */
     @Bean
     public FlywayMigrationStrategy flywayMigrationStrategy() {
         return new FlywayMigrationStrategy() {
             @Override
             public void migrate(Flyway flyway) {
-                log.info("🗄️ Starting Flyway migrations for all tenant schemas...");
-                
-                // Use the injected datasource
-                DataSource ds = dataSource;
-                
-                // Migrate each tenant schema
-                List<String> schemas = Arrays.asList(tenantSchemas);
-                for (String schema : schemas) {
-                    migrateSchema(ds, schema);
-                }
-                
-                log.info("✅ Flyway migrations completed for {} schemas", schemas.size());
+                // No-op: migrations are handled in run() method to ensure proper order
+                log.debug("Flyway auto-migration disabled - handled manually in CommandLineRunner");
             }
         };
-    }
-
-    /**
+    }    /**
      * Migrate a specific schema
      */
     private void migrateSchema(DataSource dataSource, String schemaName) {
         try {
             log.info("🏗️ Migrating schema: {}", schemaName);
+            
+            // First, ensure the schema exists
+            try (Connection connection = dataSource.getConnection();
+                 var stmt = connection.createStatement()) {
+                
+                // Create schema if it doesn't exist (except for public which should exist by default)
+                if (!"public".equals(schemaName)) {
+                    stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schemaName);
+                    log.debug("Ensured schema {} exists", schemaName);
+                }
+            } catch (SQLException e) {
+                log.debug("Schema {} might already exist: {}", schemaName, e.getMessage());
+            }
             
             Flyway tenantFlyway = Flyway.configure()
                 .dataSource(dataSource)
@@ -91,10 +99,10 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {    @Value("$
                 .createSchemas(true)
                 .baselineOnMigrate(true)
                 .cleanOnValidationError(true)
-                .table("flyway_schema_history_" + schemaName.toLowerCase())
+                .table("flyway_schema_history_" + schemaName.toLowerCase().replace("-", "_"))
                 .load();
             
-            // Create schema if it doesn't exist and migrate
+            // Migrate the schema
             tenantFlyway.migrate();
             
             log.info("✅ Successfully migrated schema: {}", schemaName);
@@ -103,7 +111,7 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {    @Value("$
             log.error("❌ Failed to migrate schema {}: {}", schemaName, e.getMessage(), e);
             throw new RuntimeException("Failed to migrate schema: " + schemaName, e);
         }
-    }    /**
+    }/**
      * Create super admin user in 'stockify' tenant if not exists
      * Uses direct JDBC to avoid circular dependency issues
      */    private void createSuperAdminIfNotExists() {        try {

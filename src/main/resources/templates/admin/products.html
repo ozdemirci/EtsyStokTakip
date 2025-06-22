@@ -189,8 +189,7 @@
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
-                                        </thead>
-                                        <tbody>
+                                        </thead>                                        <tbody>
                                             <tr th:if="${products != null and products.totalElements == 0}">
                                                 <td colspan="7" class="text-center text-muted py-4">
                                                     <i class="bi bi-inbox display-4"></i>
@@ -201,25 +200,27 @@
                                                 <td colspan="7" class="text-center text-muted py-4">
                                                     <i class="bi bi-inbox display-4"></i>
                                                     <div class="mt-2">No products available</div>
+                                                    <div class="text-muted">Click "Add Product" to get started</div>
                                                 </td>
                                             </tr>                                            <tr th:each="product : ${products}" 
                                                 th:data-product-id="${product.id}"
                                                 th:class="${product.stockLevel == 0 ? 'out-of-stock' : (product.stockLevel <= product.lowStockThreshold ? 'low-stock' : '')}">
                                                 <td>
-                                                    <div class="fw-bold" th:text="${product.title}">Product Title</div>
-                                                    <small class="text-muted" th:text="${product.description}">Description</small>
+                                                    <div class="fw-bold" th:text="${product.title}"></div>
+                                                    <small class="text-muted" th:text="${product.description}"></small>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-secondary" th:text="${product.category}">Category</span>
+                                                    <span class="badge bg-secondary" th:text="${product.category}"></span>
                                                 </td>
                                                 <td>
-                                                    <code th:text="${product.sku}">SKU123</code>
+                                                    <code th:text="${product.sku}"></code>
                                                 </td>
                                                 <td>
-                                                    <span class="fw-bold" th:text="'$' + ${product.price}">$0.00</span>
-                                                </td>                                                <td class="stock-cell" th:data-low-threshold="${product.lowStockThreshold}">
+                                                    <span class="fw-bold" th:text="'$' + ${product.price}"></span>
+                                                </td>
+                                                <td class="stock-cell" th:data-low-threshold="${product.lowStockThreshold}">
                                                     <span th:class="${product.stockLevel == 0 ? 'badge bg-danger' : (product.stockLevel <= product.lowStockThreshold ? 'badge bg-warning' : 'badge bg-success')}" 
-                                                          th:text="${product.stockLevel}">0</span>
+                                                          th:text="${product.stockLevel}"></span>
                                                     <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
                                                 </td>
                                                 <td>
