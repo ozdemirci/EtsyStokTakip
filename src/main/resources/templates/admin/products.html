@@ -567,34 +567,110 @@
          */
 
         // ================================
-        // TAB MANAGEMENT FUNCTIONS
-        // ================================        /**
+        // GLOBAL FUNCTION DECLARATIONS (for onclick events)
+        // ================================
+        
+        /**
          * Activates the All Products tab and updates URL
          */
-        window.activateAllProductsTab = function() {
+        function activateAllProductsTab() {
             switchToTab('all-products-tab', 'all-products');
             updateUrl(null); // Remove tab parameter for default tab
-        };
+        }
 
         /**
          * Activates the Low Stock tab, loads data, and updates URL
          */
-        window.activateLowStockTab = function() {
+        function activateLowStockTab() {
             switchToTab('low-stock-tab', 'low-stock');
             loadLowStockProducts();
             updateUrl('low-stock');
-        };        /**
+        }
+
+        /**
          * Activates the Categories tab and updates URL
          */
-        window.activateCategoriesTab = function() {
+        function activateCategoriesTab() {
             switchToTab('categories-tab', 'categories');
             updateUrl('categories');
-        };
+        }
 
-        // Legacy global function aliases for immediate availability
-        var activateAllProductsTab = window.activateAllProductsTab;
-        var activateLowStockTab = window.activateLowStockTab;
-        var activateCategoriesTab = window.activateCategoriesTab;
+        /**
+         * Opens the edit category modal with populated data
+         * @param {number} categoryId - ID of the category to edit
+         */
+        function editCategory(categoryId) {
+            if (!categoryId) {
+                console.error('Category ID is required');
+                return;
+            }
+
+            showLoadingState('Loading category data...');
+
+            fetch(`/admin/products/categories/${categoryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(category => {
+                    populateEditForm(category);
+                    showEditModal(categoryId);
+                })
+                .catch(error => {
+                    console.error('Error fetching category:', error);
+                    showErrorMessage('Error loading category data. Please try again.');
+                })
+                .finally(() => {
+                    hideLoadingState();
+                });
+        }
+
+        /**
+         * Deletes a category after confirmation
+         * @param {number} categoryId - ID of the category to delete
+         * @param {string} categoryName - Name of the category for confirmation
+         */
+        function deleteCategory(categoryId, categoryName) {
+            if (!categoryId || !categoryName) {
+                console.error('Category ID and name are required');
+                return;
+            }
+
+            const confirmMessage = `Are you sure you want to delete the category "${categoryName}"?\n\nThis action cannot be undone.`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            submitDeleteForm(categoryId);
+        }
+
+        /**
+         * Handles quick restock functionality (placeholder)
+         * @param {number} productId - ID of the product to restock
+         */
+        function quickRestock(productId) {
+            const quantity = prompt('Enter quantity to add to stock:');
+            
+            if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
+                if (quantity !== null) { // User didn't cancel
+                    alert('Please enter a valid positive number.');
+                }
+                return;
+            }
+
+            // TODO: Implement actual restock API call
+            alert(`Added ${quantity} items to product stock. This feature will be implemented with backend integration.`);
+            
+            // After successful update, reload the low stock products
+            // loadLowStockProducts();
+        }
+
+        // ================================
+        // TAB MANAGEMENT FUNCTIONS
+        // ================================
 
         /**
          * Generic function to switch between tabs
@@ -635,64 +711,12 @@
                 url.searchParams.delete('tab');
             }
             window.history.pushState({}, '', url);
-        }
-
-        // ================================
+        }        // ================================
         // CATEGORY MANAGEMENT FUNCTIONS
         // ================================        /**
-         * Opens the edit category modal with populated data
-         * @param {number} categoryId - ID of the category to edit
-         */
-        window.editCategory = function(categoryId) {
-            if (!categoryId) {
-                console.error('Category ID is required');
-                return;
-            }
-
-            showLoadingState('Loading category data...');
-
-            fetch(`/admin/products/categories/${categoryId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(category => {
-                    populateEditForm(category);
-                    showEditModal(categoryId);
-                })
-                .catch(error => {
-                    console.error('Error fetching category:', error);
-                    showErrorMessage('Error loading category data. Please try again.');
-                })
-                .finally(() => {
-                    hideLoadingState();
-                });
-        };
-
-        /**
-         * Deletes a category after confirmation
-         * @param {number} categoryId - ID of the category to delete
-         * @param {string} categoryName - Name of the category for confirmation
-         */
-        window.deleteCategory = function(categoryId, categoryName) {
-            if (!categoryId || !categoryName) {
-                console.error('Category ID and name are required');
-                return;
-            }
-
-            const confirmMessage = `Are you sure you want to delete the category "${categoryName}"?\n\nThis action cannot be undone.`;
-            
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-
-            submitDeleteForm(categoryId);
-        };        /**
          * Refreshes the categories list and updates badge count
          */
-        window.loadCategories = function() {
+        function loadCategories() {
             fetch('/admin/products/categories/list')
                 .then(response => {
                     if (!response.ok) {
@@ -706,12 +730,7 @@
                 .catch(error => {
                     console.error('Error loading categories:', error);
                 });
-        };
-
-        // Legacy global function aliases for immediate availability
-        var editCategory = window.editCategory;
-        var deleteCategory = window.deleteCategory;
-        var loadCategories = window.loadCategories;
+        }
 
         /**
          * Populates the edit form with category data
@@ -1037,24 +1056,22 @@
          */
         function initializeActiveTab() {
             const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab');
-
-            // Switch to the appropriate tab based on URL parameter
+            const activeTab = urlParams.get('tab');            // Switch to the appropriate tab based on URL parameter
             switch (activeTab) {
                 case 'low-stock':
                     if (document.getElementById('low-stock-tab')) {
-                        window.activateLowStockTab();
+                        activateLowStockTab();
                     }
                     break;
                 case 'categories':
                     if (document.getElementById('categories-tab')) {
-                        window.activateCategoriesTab();
+                        activateCategoriesTab();
                     }
                     break;
                 default:
                     // Default to all products tab
                     if (document.getElementById('all-products-tab')) {
-                        window.activateAllProductsTab();
+                        activateAllProductsTab();
                     }
                     break;
             }
