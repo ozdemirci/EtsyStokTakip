@@ -196,9 +196,8 @@ public class TenantManagementService {
              Statement statement = connection.createStatement()) {
             
             String schemaName = tenantId.toLowerCase(Locale.ROOT);
-            
-            // Create schema only - Flyway handles table creation
-            statement.execute(String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName));
+              // Create schema only - Flyway handles table creation
+            statement.execute(String.format("CREATE SCHEMA IF NOT EXISTS \"%s\"", schemaName));
             log.debug("🏗️ Created schema: {} (tables will be created by Flyway)", schemaName);
         }
     }
@@ -326,7 +325,7 @@ public class TenantManagementService {
              Statement statement = connection.createStatement()) {
             
             String schemaName = tenantId.toLowerCase(Locale.ROOT);
-            statement.execute(String.format("DROP SCHEMA IF EXISTS %s CASCADE", schemaName));
+            statement.execute(String.format("DROP SCHEMA IF EXISTS \"%s\" CASCADE", schemaName));
             log.info("🧹 Cleaned up failed tenant schema: {}", schemaName);
             
         } catch (SQLException e) {

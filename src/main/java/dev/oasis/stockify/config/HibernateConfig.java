@@ -1,13 +1,13 @@
 package dev.oasis.stockify.config;
 
 import dev.oasis.stockify.config.tenant.CurrentTenantIdentifierResolverImpl;
-import dev.oasis.stockify.config.tenant.SchemaMultiTenantConnectionProvider;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,15 +19,15 @@ public class HibernateConfig implements HibernatePropertiesCustomizer {
 
     private static final Logger log = LoggerFactory.getLogger(HibernateConfig.class);
 
-    private final SchemaMultiTenantConnectionProvider multiTenantConnectionProvider;
+    private final MultiTenantConnectionProvider<String> multiTenantConnectionProvider;
     private final CurrentTenantIdentifierResolverImpl currentTenantIdentifierResolver;
 
     @Autowired
-    public HibernateConfig(SchemaMultiTenantConnectionProvider multiTenantConnectionProvider,
+    public HibernateConfig(@Qualifier("multiTenantConnectionProvider") MultiTenantConnectionProvider<String> multiTenantConnectionProvider,
                           CurrentTenantIdentifierResolverImpl currentTenantIdentifierResolver) {
         this.multiTenantConnectionProvider = multiTenantConnectionProvider;
         this.currentTenantIdentifierResolver = currentTenantIdentifierResolver;
-    }    @Override
+    }@Override
     public void customize(Map<String, Object> hibernateProperties) {
         log.info("Configuring Hibernate multi-tenancy properties");
         
@@ -45,14 +45,10 @@ public class HibernateConfig implements HibernatePropertiesCustomizer {
         
         // Set default schema back
         hibernateProperties.put(AvailableSettings.DEFAULT_SCHEMA, "public");
-        
-        log.info("Multi-tenancy configuration completed");
+          log.info("Multi-tenancy configuration completed");
     }
 
     @Bean
-    public MultiTenantConnectionProvider<String> multiTenantConnectionProvider() {
-        return multiTenantConnectionProvider;
-    }    @Bean
     @SuppressWarnings("rawtypes")
     public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
         return currentTenantIdentifierResolver;

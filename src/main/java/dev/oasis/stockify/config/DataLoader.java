@@ -46,20 +46,29 @@ public class DataLoader implements CommandLineRunner {
     @Value("${spring.flyway.schemas}")   
     private final String[] TENANT_IDS;
 
-    
-
-    @Override
+        @Override
     public void run(String... args) {
         log.info("🚀 Starting Multi-Tenant Data Loader...");
         
         try {
+            // Add a small delay to ensure database is fully ready
+            Thread.sleep(2000);
+            
             // First, fix any existing incorrect accessible_tenants data
             fixAccessibleTenantsData();
             
             for (String tenantId : TENANT_IDS) {
                 log.info("🔄 Processing tenant: {}", tenantId);
-                initializeTenantData(tenantId);
-                log.info("✅ Completed processing tenant: {}", tenantId);
+                try {
+                    initializeTenantData(tenantId);
+                    log.info("✅ Completed processing tenant: {}", tenantId);
+                    
+                    // Add a small delay between tenants to avoid overwhelming the connection pool
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    log.error("❌ Failed to process tenant {}: {}", tenantId, e.getMessage());
+                    // Continue with other tenants instead of failing completely
+                }
             }
             
             log.info("✅ Multi-Tenant Data Loader completed successfully!");
@@ -67,10 +76,13 @@ public class DataLoader implements CommandLineRunner {
             log.warn("⚠️ Remember to change default passwords in production!");
             log.warn("⚠️ Remember to remove /h2-console/** in production where security config!");
            
-            
+              } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("❌ Data loading was interrupted: {}", e.getMessage());
+            throw new RuntimeException("Data loading interrupted", e);
         } catch (Exception e) {
             log.error("❌ Error during data loading: {}", e.getMessage(), e);
-            throw e;
+            throw new RuntimeException("Data loading failed", e);
         } finally {
             TenantContext.clear();
         }
@@ -398,12 +410,14 @@ public class DataLoader implements CommandLineRunner {
         dto.setLowStockThreshold(lowStockThreshold);
         return dto;
     }
-    
-    /**
+      /**
      * Verify that we're operating in the correct schema
      */
     private void verifyTenantSchema(String tenantId) {
         try (Connection connection = dataSource.getConnection()) {
+            // Add connection timeout to prevent hanging
+            connection.setNetworkTimeout(null, 10000); // 10 seconds timeout
+            
             String currentSchema = connection.getSchema();
             log.info("🔍 Schema verification for tenant {}: Database connection schema = '{}'", 
                 tenantId, currentSchema);
@@ -418,6 +432,9 @@ public class DataLoader implements CommandLineRunner {
             }
         } catch (SQLException e) {
             log.error("❌ Failed to verify schema for tenant {}: {}", tenantId, e.getMessage());
+            // Don't throw the exception, just log it and continue
+        } catch (Exception e) {
+            log.error("❌ Unexpected error verifying schema for tenant {}: {}", tenantId, e.getMessage());
         }
     }
 }

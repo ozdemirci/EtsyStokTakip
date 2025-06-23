@@ -1,0 +1,67 @@
+# Docker Compose override for development with better database monitoring
+version: '3.8'
+services:
+  postgres-prod:
+    # Add more robust health checks
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stockify"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    # Add database tuning for development
+    command: >
+      postgres
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+    # Add volume for better persistence
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./logs:/var/log
+    environment:
+      - POSTGRES_DB=stockify
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      # Enable logging for debugging
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+
+  stockify-app:
+    # Wait longer for database to be ready
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+    # Add better health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    # Add environment variables for debugging
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - POSTGRES_URL=jdbc:postgresql://postgres-prod:5432/stockify
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
+      - SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false
+      # Database connection tuning
+      - DB_POOL_SIZE=20
+      - DB_POOL_MIN_IDLE=5
+      - DB_CONNECTION_TIMEOUT=60000
+      - DB_IDLE_TIMEOUT=300000
+      - DB_MAX_LIFETIME=1200000
+      - DB_LEAK_DETECTION=120000
+    # Add volume for logs
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  postgres_prod_data:
+    name: stockify-postgres-prod-data

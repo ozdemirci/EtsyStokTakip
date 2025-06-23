@@ -39,16 +39,20 @@ public class TenantHeaderFilter extends OncePerRequestFilter {
             if (tenantId == null || tenantId.isEmpty()) {
                 tenantId = (String) request.getSession().getAttribute("tenantId");
                 logger.debug("Tenant from session: {}", tenantId);
-            }            // 4. If still not found, DON'T use default - this breaks tenant isolation
+            }            // 4. If still not found, check if this is a public/system endpoint
             if (tenantId == null || tenantId.isEmpty()) {
-                // For login pages, allow no tenant (will be set after successful login)
+                // Public endpoints that don't need tenant context
                 if (request.getRequestURI().equals("/login") || 
                     request.getRequestURI().equals("/") || 
                     request.getRequestURI().startsWith("/css/") ||
                     request.getRequestURI().startsWith("/js/") ||
-                    request.getRequestURI().startsWith("/images/")) {
-                    tenantId = "public"; // Only for public resources and login
-                    logger.debug("Public resource or login page - using public tenant");
+                    request.getRequestURI().startsWith("/images/") ||
+                    request.getRequestURI().startsWith("/actuator/") ||
+                    request.getRequestURI().equals("/favicon.ico") ||
+                    request.getRequestURI().equals("/register") ||
+                    request.getRequestURI().equals("/error")) {
+                    tenantId = "public"; // Use public tenant for system endpoints
+                    logger.debug("Public/system resource - using public tenant for: {}", request.getRequestURI());
                 } else {
                     logger.error("❌ CRITICAL: No tenant found for protected resource: {}", request.getRequestURI());
                     // Don't set any tenant context - let controllers handle the error
@@ -79,6 +83,8 @@ public class TenantHeaderFilter extends OncePerRequestFilter {
                path.startsWith("/js/") ||
                path.startsWith("/images/") ||
                path.startsWith("/h2-console/") ||
+               path.startsWith("/actuator/") ||
+               path.equals("/favicon.ico") ||
                path.equals("/error");
     }
 }

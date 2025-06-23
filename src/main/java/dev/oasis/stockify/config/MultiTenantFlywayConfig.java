@@ -74,10 +74,9 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
             // First, ensure the schema exists
             try (Connection connection = dataSource.getConnection();
                  var statement = connection.createStatement()) {
-                
-                // Create schema if it doesn't exist (except for public which should exist by default)
+                  // Create schema if it doesn't exist (except for public which should exist by default)
                 if (!"public".equals(schemaName)) {
-                    statement.execute("CREATE SCHEMA IF NOT EXISTS " + schemaName);
+                    statement.execute("CREATE SCHEMA IF NOT EXISTS \"" + schemaName + "\"");
                     log.debug("✅ Ensured schema {} exists", schemaName);
                 }
             } catch (SQLException e) {

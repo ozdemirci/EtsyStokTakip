@@ -52,17 +52,28 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
                 // Check if schema exists, if not create it (except for public)
                 if (!"public".equals(schemaName)) {
                     try {
-                        // Create schema - H2 with DATABASE_TO_LOWER=TRUE will handle lowercase
-                        stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schemaName);
+                        // Create schema - handle both H2 and PostgreSQL
+                        stmt.execute("CREATE SCHEMA IF NOT EXISTS \"" + schemaName + "\"");
                         log.debug("Ensured schema {} exists", schemaName);
                     } catch (SQLException e) {
                         log.debug("Schema {} might already exist: {}", schemaName, e.getMessage());
                     }
                 }
-                
-                // Set schema
-                stmt.execute("SET SCHEMA " + schemaName);
-                log.debug("Executed SET SCHEMA {} command for H2", schemaName);
+                  // Set schema - different syntax for different databases
+                try {
+                    // Try PostgreSQL/standard SQL first (SET search_path)
+                    stmt.execute("SET search_path TO \"" + schemaName + "\", \"public\"");
+                    log.debug("Executed SET search_path for schema: {}", schemaName);
+                } catch (SQLException e) {
+                    // Fallback to H2 syntax
+                    try {
+                        stmt.execute("SET SCHEMA \"" + schemaName + "\"");
+                        log.debug("Executed SET SCHEMA {} command for H2", schemaName);
+                    } catch (SQLException e2) {
+                        log.warn("Failed to set schema using both PostgreSQL and H2 syntax for: {}", schemaName);
+                        throw e2;
+                    }
+                }
             }// Verify the schema was set correctly
             String verifiedSchema = connection.getSchema();
             log.debug("Successfully set connection schema to: {} (verified: {})", schemaName, verifiedSchema);
