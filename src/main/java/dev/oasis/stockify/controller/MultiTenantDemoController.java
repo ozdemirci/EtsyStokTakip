@@ -7,8 +7,6 @@ import dev.oasis.stockify.model.ProductCategory;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.repository.ProductCategoryRepository;
-import dev.oasis.stockify.service.ProductCategoryService;
-import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +34,6 @@ public class MultiTenantDemoController {
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
-    private final ProductCategoryService productCategoryService;
     private final DataSource dataSource;
 
     /**

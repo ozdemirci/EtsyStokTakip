@@ -12,6 +12,14 @@ import java.util.Set;
 @Entity
 @Table(name = "app_user")
 public class AppUser {
+      // Static field to hold default tenant schemas from configuration
+    private static String flywaySchemas;
+    
+    // Static method to set default tenant schemas from configuration
+    public static void setDefaultAccessibleTenants(String flywaySchemas) {
+        AppUser.flywaySchemas = flywaySchemas;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -57,9 +65,9 @@ public class AppUser {
     
     @Column(name = "last_login")
     private LocalDateTime lastLogin;    
-    
+      
     @PrePersist
-    protected void onCreate() {
+    protected void onPrePersist() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         
@@ -67,10 +75,8 @@ public class AppUser {
         if (Role.SUPER_ADMIN.equals(role)) {
             canManageAllTenants = true;
             isGlobalUser = true;
-            accessibleTenants = "public,com,rezonans";
-            if (primaryTenant == null) {
-                primaryTenant = "stockify";
-            }
+            accessibleTenants = flywaySchemas;
+            primaryTenant = "public";
         }
     }
 

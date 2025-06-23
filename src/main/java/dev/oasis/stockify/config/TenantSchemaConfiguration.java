@@ -12,12 +12,12 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class TenantSchemaConfiguration {
 
-    @Value("${spring.flyway.schemas:public,com,rezonans}")
+    @Value("${spring.flyway.schemas}")
     private String flywaySchemas;
 
     @PostConstruct
     public void initializeTenantSchemas() {
-        // Set the default accessible tenants from flyway schemas
-        AppUser.setDefaultAccessibleTenants(flywaySchemas);
+                
+         AppUser.setDefaultAccessibleTenants(flywaySchemas);
     }
 }
