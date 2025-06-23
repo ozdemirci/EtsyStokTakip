@@ -148,19 +148,17 @@ public class SuperAdminService {
         } finally {
             TenantContext.clear();
         }
-    }
-
-    /**
+    }    /**
      * Switch to a specific tenant context for operations (SUPER_ADMIN only)
      */
     public void switchToTenant(String targetTenant) {
-        if (!ALL_TENANTS.contains(targetTenant)) {
+        if (!Arrays.asList(ALL_TENANTS).contains(targetTenant)) {
             throw new IllegalArgumentException("Invalid tenant: " + targetTenant);
         }
         
         log.info("🔄 Super Admin: Switching to tenant context '{}'", targetTenant);
         TenantContext.setCurrentTenant(targetTenant);
-    }    /**
+    }/**
      * Get tenant statistics (SUPER_ADMIN only)
      * Note: SUPER_ADMIN users are only counted for the 'public' tenant
      */
@@ -276,13 +274,11 @@ public class SuperAdminService {
         } finally {
             TenantContext.clear();
         }
-    }
-
-    /**
+    }    /**
      * Get available tenants for the super admin
      */
     public Set<String> getAvailableTenants() {
-        return new HashSet<>(ALL_TENANTS);
+        return new HashSet<>(Arrays.asList(ALL_TENANTS));
     }
 
     /**
