@@ -51,7 +51,7 @@ public class SecurityConfig {
         http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)             .csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth                // Public endpoints
-                .requestMatchers("/", "/register", "/login*", "/css/**", "/js/**", "/images/**", "/error","/actuator/**", "/favicon.ico","/admin/products").permitAll()
+                .requestMatchers("/", "/register", "/login*", "/css/**", "/js/**", "/images/**", "/error","/actuator/**", "/favicon.ico").permitAll()
                 // SUPER_ADMIN can access everything 
                 .requestMatchers("/superadmin/**").hasRole(Role.SUPER_ADMIN.name())
                 // ADMIN area - accessible by SUPER_ADMIN and ADMIN 

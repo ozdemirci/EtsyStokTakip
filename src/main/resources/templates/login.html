@@ -14,33 +14,40 @@
                 <div class="card-body p-4">
                     <h2 class="text-center mb-4">Giriş Yap</h2>
                     <form th:action="@{/login}" method="post" id="loginForm">
-                        <input type="hidden" id="error" th:value="${param.error}"/>
-
-                        <div class="mb-3">
-                            <label for="tenant_id" class="form-label">Kurum Kodu</label>
+                        <input type="hidden" id="error" th:value="${param.error}"/>                        <div class="mb-3">
+                            <label for="tenant_id" class="form-label">
+                                <strong>Şirket ID</strong>
+                                <span class="text-muted">(Kayıt sırasında aldığınız benzersiz ID)</span>
+                            </label>
                             <input type="text"
                                    class="form-control"
                                    id="tenant_id"
                                    name="tenant_id"
                                    th:value="${tenantId}"
-                                   placeholder="Örn: stockify"
+                                   placeholder="Örn: company_a1b2c3"
                                    required
-                                   pattern="[a-zA-Z0-9]+"
-                                   title="Sadece harf ve rakam kullanabilirsiniz"
-                                   maxlength="20"
+                                   pattern="[a-zA-Z0-9_]+"
+                                   title="Sadece harf, rakam ve alt çizgi kullanabilirsiniz"
+                                   maxlength="50"
                                    autocomplete="off">
-                            <div class="form-text"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Kullanıcı Adı</label>
+                            <div class="form-text" th:if="${tenantId}">
+                                <i class="bi bi-info-circle"></i> Şirket ID'niz otomatik olarak dolduruldu.
+                            </div>
+                        </div>                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                Kullanıcı Adı veya E-posta
+                            </label>
                             <input type="text"
                                    class="form-control"
                                    id="username"
                                    name="username"
+                                   placeholder="Kullanıcı adı veya e-posta adresiniz"
                                    required
                                    autocomplete="off">
-                            <div class="form-text"></div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> 
+                                Kayıt sırasında kullandığınız kullanıcı adı veya e-posta ile giriş yapabilirsiniz.
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -52,16 +59,27 @@
                                    required
                                    autocomplete="off">
                             <div class="form-text"></div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Giriş Yap</button>
+                        </div>                        <button type="submit" class="btn btn-primary w-100 mb-3">Giriş Yap</button>
 
                         <div th:if="${param.error}" class="alert alert-danger" role="alert">
                             <i class="bi bi-exclamation-triangle-fill"></i>
                             Hatalı tenant ID, kullanıcı adı veya şifre!
-                        </div>                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                        </div>
+                        
+                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
                             <i class="bi bi-check-circle-fill"></i>
                             Çıkış yapıldı.
+                        </div>                          <div th:if="${(registrationSuccess != null and registrationSuccess) or (param.registered != null and !param.registered.empty)}" class="alert alert-success border-0" role="alert" style="background: linear-gradient(45deg, #d4edda, #c3e6cb); border-left: 4px solid #28a745 !important;">
+                            <h6 class="alert-heading mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Kayıt Başarılı!
+                            </h6>
+                            <p class="mb-1" th:text="${successMessage ?: 'Hesabınız başarıyla oluşturuldu! Giriş yapabilirsiniz.'}"></p>
+                            <hr class="my-2">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> 
+                                Yukarıdaki Şirket ID alanı otomatik olarak doldurulmuştur.
+                            </small>
                         </div>
                         
                         <div class="text-center mt-3">

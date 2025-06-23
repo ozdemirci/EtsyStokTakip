@@ -16,6 +16,8 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsername(String username);
     
+    Optional<AppUser> findByEmail(String email);
+    
     List<AppUser> findByRole(Role role);
     
     List<AppUser> findByIsActive(Boolean isActive);
@@ -33,6 +35,12 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     
     @Query("SELECT COUNT(u) > 0 FROM AppUser u WHERE u.username = :username AND u.primaryTenant = :tenantId")
     boolean existsByUsernameAndPrimaryTenant(@Param("username") String username, @Param("tenantId") String tenantId);
+
+    // Email existence checks
+    boolean existsByEmail(String email);
+    
+    @Query("SELECT COUNT(u) > 0 FROM AppUser u WHERE u.email = :email AND u.primaryTenant = :tenantId")
+    boolean existsByEmailAndPrimaryTenant(@Param("email") String email, @Param("tenantId") String tenantId);
 
     // Tenant-aware queries (fallback if multi-tenant schema doesn't work)
     @Query("SELECT u FROM AppUser u WHERE u.primaryTenant = :tenantId")

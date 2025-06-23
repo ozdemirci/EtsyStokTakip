@@ -74,7 +74,7 @@ public class DataLoader implements CommandLineRunner {
             log.info("✅ Multi-Tenant Data Loader completed successfully!");
             log.info("📊 Initialized {} tenants with sample data", TENANT_IDS.length);
             log.warn("⚠️ Remember to change default passwords in production!");
-            log.warn("⚠️ Remember to remove /h2-console/** in production where security config!");
+            
            
               } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

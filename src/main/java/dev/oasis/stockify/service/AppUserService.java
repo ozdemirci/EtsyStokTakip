@@ -55,6 +55,25 @@ public class AppUserService {
     }
 
     /**
+     * Check if email exists in current tenant
+     *
+     * @param email the email to check
+     * @return true if email exists, false otherwise
+     */
+    public boolean existsByEmail(String email) {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("📧 Checking if email '{}' exists for tenant: {}", email, currentTenant);
+        
+        // Check if email exists across all tenants or in current tenant
+        try {
+            return appUserRepository.existsByEmail(email);
+        } catch (Exception e) {
+            log.warn("Could not check email existence: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Saves a user to the database
      *
      * @param userCreateDTO the user data to save
@@ -244,5 +263,16 @@ public class AppUserService {
         List<AppUser> users = appUserRepository.findAllById(userIds);
         users.forEach(user -> user.setIsActive(false));
         appUserRepository.saveAll(users);
+    }
+
+    /**
+     * Count active users in current tenant
+     */
+    public long countActiveUsers() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        if (currentTenant != null && !currentTenant.isEmpty()) {
+            return appUserRepository.countByPrimaryTenantAndIsActive(currentTenant, true);
+        }
+        return appUserRepository.countByIsActive(true);
     }
 }

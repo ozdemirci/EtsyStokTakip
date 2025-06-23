@@ -59,9 +59,31 @@ public class AppUserDetailsService implements UserDetailsService {
             }
 
             logger.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);            try {
-                AppUser appUser = appUserRepository.findByUsername(username)
-                        .orElseThrow(() -> new UsernameNotFoundException(
-                                String.format("Kullanıcı bulunamadı: %s (Tenant: %s)", username, tenantId)));
+                AppUser appUser = null;
+                
+                // Check if username looks like an email
+                if (username.contains("@")) {
+                    // Try to find by email first
+                    appUser = appUserRepository.findByEmail(username).orElse(null);
+                    
+                    if (appUser == null) {
+                        // If not found by email, try by username as fallback
+                        appUser = appUserRepository.findByUsername(username).orElse(null);
+                    }
+                } else {
+                    // Try to find by username first
+                    appUser = appUserRepository.findByUsername(username).orElse(null);
+                    
+                    if (appUser == null) {
+                        // If not found by username, try by email as fallback
+                        appUser = appUserRepository.findByEmail(username).orElse(null);
+                    }
+                }
+                
+                if (appUser == null) {
+                    throw new UsernameNotFoundException(
+                            String.format("Kullanıcı bulunamadı: %s (Tenant: %s)", username, tenantId));
+                }
 
                 // Check if user is active
                 if (appUser.getIsActive() == null || !appUser.getIsActive()) {

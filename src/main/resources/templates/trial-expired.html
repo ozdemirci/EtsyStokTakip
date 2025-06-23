@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Deneme Süresi Sona Erdi</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-clock-history text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h2 class="text-warning mb-4">Deneme Süresi Sona Erdi</h2>
+                    
+                    <p class="lead mb-4">
+                        30 günlük ücretsiz deneme süreniz sona ermiştir. 
+                        Hesabınızı kullanmaya devam etmek için bir abonelik planı seçmeniz gerekmektedir.
+                    </p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Professional</h5>
+                                    <h4 class="text-success">₺299/ay</h4>
+                                    <p class="card-text">
+                                        <small>
+                                            • 10 Kullanıcı<br>
+                                            • 1.000 Ürün<br>
+                                            • Gelişmiş Raporlar
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Enterprise</h5>
+                                    <h4 class="text-primary">₺999/ay</h4>
+                                    <p class="card-text">
+                                        <small>
+                                            • Sınırsız Kullanıcı<br>
+                                            • Sınırsız Ürün<br>
+                                            • Özel Raporlar
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Şirket ID'niz:</strong><br>
+                                <code th:text="${tenantId}">your-tenant-id</code>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <button type="button" class="btn btn-success btn-lg me-md-2" onclick="upgradePlan('professional')">
+                            <i class="bi bi-arrow-up-circle"></i> Professional'a Yükselt
+                        </button>
+                        <button type="button" class="btn btn-primary btn-lg" onclick="upgradePlan('enterprise')">
+                            <i class="bi bi-star"></i> Enterprise'a Yükselt
+                        </button>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <a href="/logout" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function upgradePlan(planType) {
+    // In a real implementation, this would integrate with a payment system
+    alert('Ödeme sistemi entegrasyonu için destek ekibiyle iletişime geçin.\n\nPlan: ' + planType + '\nE-posta: support@stockify.com');
+}
+</script>
+
+</body>
+</html>

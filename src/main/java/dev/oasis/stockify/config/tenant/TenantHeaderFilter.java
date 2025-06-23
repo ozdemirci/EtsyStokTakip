@@ -50,6 +50,7 @@ public class TenantHeaderFilter extends OncePerRequestFilter {
                     request.getRequestURI().startsWith("/actuator/") ||
                     request.getRequestURI().equals("/favicon.ico") ||
                     request.getRequestURI().equals("/register") ||
+                    request.getRequestURI().startsWith("/register/check-") ||
                     request.getRequestURI().equals("/error")) {
                     tenantId = "public"; // Use public tenant for system endpoints
                     logger.debug("Public/system resource - using public tenant for: {}", request.getRequestURI());

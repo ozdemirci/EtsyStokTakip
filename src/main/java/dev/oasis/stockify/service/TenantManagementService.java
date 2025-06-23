@@ -9,6 +9,8 @@ import dev.oasis.stockify.exception.TenantNotFoundException;
 import dev.oasis.stockify.model.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,9 @@ public class TenantManagementService {
 
     private final DataSource dataSource;
     private final AppUserService appUserService;
+    
+    @Value("${spring.flyway.locations}")
+    private String[] migrationLocations;
 
     /**
      * Create a new tenant with complete setup
@@ -176,29 +181,74 @@ public class TenantManagementService {
             log.error("❌ Error checking tenant existence: {}", e.getMessage());
             return false;
         }
-    }
-
-    // Private helper methods
+    }    // Private helper methods
 
     private String generateTenantId(String companyName) {
         // Generate tenant ID based on company name
         String sanitized = companyName.toLowerCase()
-                .replaceAll("[^a-zA-Z0-9]", "");
-        String baseId = sanitized.substring(0, Math.min(sanitized.length(), 10));
-
-        // Add random suffix to ensure uniqueness
+                .replaceAll("[^a-zA-Z0-9]", "")
+                .trim();
+        
+        // Ensure minimum length
+        if (sanitized.length() < 2) {
+            throw new RuntimeException("Şirket adı çok kısa. En az 2 karakter olmalıdır.");
+        }
+        
+        // First try to use the company name directly
+        String baseId = sanitized.substring(0, Math.min(sanitized.length(), 20));
+        
+        // Check if this tenant ID already exists
+        if (!tenantExists(baseId)) {
+            return baseId;
+        }
+        
+        // If exists, try with incrementing numbers
+        for (int i = 2; i <= 999; i++) {
+            String candidateId = baseId + i;
+            if (!tenantExists(candidateId)) {
+                return candidateId;
+            }
+        }
+        
+        // If all numeric suffixes are taken, fall back to random suffix
         String suffix = UUID.randomUUID().toString().substring(0, 4);
         return baseId + "_" + suffix;
     }
 
     private void createTenantSchema(String tenantId) throws SQLException {
+        String schemaName = tenantId.toLowerCase(Locale.ROOT);
+        
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             
-            String schemaName = tenantId.toLowerCase(Locale.ROOT);
-              // Create schema only - Flyway handles table creation
+            // Create schema first
             statement.execute(String.format("CREATE SCHEMA IF NOT EXISTS \"%s\"", schemaName));
-            log.debug("🏗️ Created schema: {} (tables will be created by Flyway)", schemaName);
+            log.debug("🏗️ Created schema: {}", schemaName);
+        }
+        
+        // Run Flyway migrations for the new schema
+        try {
+            log.info("🚀 Running Flyway migrations for schema: {}", schemaName);
+            
+            Flyway tenantFlyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations(migrationLocations)
+                .schemas(schemaName)
+                .defaultSchema(schemaName)
+                .createSchemas(true)
+                .baselineOnMigrate(true)
+                .cleanOnValidationError(true)
+                .table("flyway_schema_history_" + schemaName.replace("-", "_"))
+                .load();
+            
+            // Migrate the schema
+            tenantFlyway.migrate();
+            
+            log.info("✅ Successfully migrated schema: {}", schemaName);
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to migrate schema {}: {}", schemaName, e.getMessage(), e);
+            throw new SQLException("Failed to migrate schema: " + schemaName, e);
         }
     }
 
