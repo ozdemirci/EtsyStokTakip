@@ -2,6 +2,7 @@ package dev.oasis.stockify.config;
 
 import dev.oasis.stockify.config.tenant.TenantHeaderFilter;
 import dev.oasis.stockify.config.tenant.TenantSecurityFilter;
+import dev.oasis.stockify.config.security.SubscriptionFilter;
 import dev.oasis.stockify.service.AppUserDetailsService;
 import dev.oasis.stockify.config.tenant.TenantAwareAuthenticationSuccessHandler;
 import dev.oasis.stockify.model.Role;
@@ -24,11 +25,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Slf4j
-public class SecurityConfig {
-
-    private final AppUserDetailsService appUserDetailsService;
+public class SecurityConfig {    private final AppUserDetailsService appUserDetailsService;
     private final TenantHeaderFilter tenantHeaderFilter;
-    private final TenantSecurityFilter tenantSecurityFilter;   
+    private final TenantSecurityFilter tenantSecurityFilter;
+    private final SubscriptionFilter subscriptionFilter;   
     private final TenantAwareAuthenticationSuccessHandler successHandler;
 
     @Bean
@@ -47,11 +47,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("🔒 Configuring Security Filter Chain...");
-        
-        http
+          http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)             .csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth                // Public endpoints
-                .requestMatchers("/", "/register", "/login*", "/css/**", "/js/**", "/images/**", "/error","/actuator/**", "/favicon.ico").permitAll()
+            .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
+            .addFilterAfter(subscriptionFilter, TenantSecurityFilter.class).csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth                // Public endpoints
+                .requestMatchers("/", "/register", "/register/**", "/login*", "/css/**", "/js/**", "/images/**", "/error", "/trial-expired", "/actuator/**", "/favicon.ico").permitAll()
                 // SUPER_ADMIN can access everything 
                 .requestMatchers("/superadmin/**").hasRole(Role.SUPER_ADMIN.name())
                 // ADMIN area - accessible by SUPER_ADMIN and ADMIN 
