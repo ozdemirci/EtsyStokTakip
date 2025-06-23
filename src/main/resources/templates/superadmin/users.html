@@ -163,12 +163,11 @@
                                       th:classappend="${user.role == 'SUPER_ADMIN'} ? 'bg-danger' : 
                                                     (${user.role == 'ADMIN'} ? 'bg-warning' : 'bg-info')"
                                       th:text="${user.role}">ROLE</span>
-                            </td>
-                            <td>
-                                <span th:if="${user.isActive}" class="badge bg-success">
+                            </td>                            <td>
+                                <span th:if="${user.active}" class="badge bg-success">
                                     <i class="fas fa-check me-1"></i>Active
                                 </span>
-                                <span th:unless="${user.isActive}" class="badge bg-secondary">
+                                <span th:unless="${user.active}" class="badge bg-secondary">
                                     <i class="fas fa-times me-1"></i>Inactive
                                 </span>
                             </td>
@@ -178,13 +177,12 @@
                                 </small>
                             </td>
                             <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-outline-secondary"
+                                <div class="btn-group" role="group">                                    <button class="btn btn-sm btn-outline-secondary"
                                             th:if="${!user.role.equals('SUPER_ADMIN')}"
-                                            th:attr="data-user-id=${user.id},data-tenant=${tenantEntry.key},data-active=${!user.isActive}"
+                                            th:attr="data-user-id=${user.id},data-tenant=${tenantEntry.key},data-active=${!user.active}"
                                             onclick="toggleStatus(this)"
-                                            th:title="${user.isActive} ? 'Deactivate User' : 'Activate User'">
-                                        <i class="fas" th:classappend="${user.isActive} ? 'fa-user-slash' : 'fa-user-check'"></i>
+                                            th:title="${user.active} ? 'Deactivate User' : 'Activate User'">
+                                        <i class="fas" th:classappend="${user.active} ? 'fa-user-slash' : 'fa-user-check'"></i>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger"
                                             th:if="${!user.role.equals('SUPER_ADMIN')}"

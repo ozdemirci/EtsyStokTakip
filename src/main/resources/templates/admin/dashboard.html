@@ -365,14 +365,13 @@
                                             </div>
                                             <div class="flex-grow-1 ms-3">
                                                 <h6 class="mb-0" th:text="${user.username ?: 'N/A'}">username</h6>
-                                                <small class="text-muted" th:text="${user.email ?: 'No email'}">email</small>
-                                                <div class="mt-1">
+                                                <small class="text-muted" th:text="${user.email ?: 'No email'}">email</small>                                                <div class="mt-1">
                                                     <span class="badge" 
                                                           th:class="'badge ' + (${user.role != null and user.role.toString() == 'ADMIN'} ? 'bg-warning text-dark' : 'bg-info')"
                                                           th:text="${user.role != null ? user.role.toString() : 'USER'}">Role</span>
                                                     <span class="badge ms-1" 
-                                                          th:class="'badge ' + (${user.isActive != null and user.isActive} ? 'bg-success' : 'bg-secondary')"
-                                                          th:text="${user.isActive != null and user.isActive ? 'Active' : 'Inactive'}">Status</span>
+                                                          th:class="'badge ' + (${user.active != null and user.active} ? 'bg-success' : 'bg-secondary')"
+                                                          th:text="${user.active != null and user.active ? 'Active' : 'Inactive'}">Status</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -652,14 +651,13 @@
                                     </div>
                                     <div class="flex-grow-1 ms-3">
                                         <h6 class="mb-0" th:text="${user.username ?: 'N/A'}">username</h6>
-                                        <small class="text-muted" th:text="${user.email ?: 'E-posta yok'}">email</small>                                        <div class="mt-1">
-                                            <span class="badge" 
+                                        <small class="text-muted" th:text="${user.email ?: 'E-posta yok'}">email</small>                                        <div class="mt-1">                                            <span class="badge" 
                                                   th:class="'badge ' + (${user.role != null and user.role.toString() == 'SUPER_ADMIN'} ? 'bg-danger' : 
                                                            (${user.role != null and user.role.toString() == 'ADMIN'} ? 'bg-warning text-dark' : 'bg-info'))"
                                                   th:text="${user.role != null ? user.role.toString() : 'No Role'}">Role</span>
                                             <span class="badge ms-1" 
-                                                  th:class="'badge ' + (${user.isActive != null and user.isActive} ? 'bg-success' : 'bg-secondary')"
-                                                  th:text="${user.isActive != null and user.isActive ? 'Active' : 'Inactive'}">Status</span>
+                                                  th:class="'badge ' + (${user.active != null and user.active} ? 'bg-success' : 'bg-secondary')"
+                                                  th:text="${user.active != null and user.active ? 'Active' : 'Inactive'}">Status</span>
                                         </div>
                                     </div>
                                 </div>
