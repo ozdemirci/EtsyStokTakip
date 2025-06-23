@@ -67,7 +67,7 @@ public class AppUser {
         if (Role.SUPER_ADMIN.equals(role)) {
             canManageAllTenants = true;
             isGlobalUser = true;
-            accessibleTenants = "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions";
+            accessibleTenants = "public,com,rezonans";
             if (primaryTenant == null) {
                 primaryTenant = "stockify";
             }
