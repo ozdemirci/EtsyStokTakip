@@ -1,7 +1,7 @@
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:latest
+    image: postgres:alpine
     container_name: stockify-postgres
     environment:
       POSTGRES_DB: stockify
