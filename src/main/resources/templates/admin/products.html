@@ -230,7 +230,7 @@
                                                     <span th:unless="${product.isActive}" class="badge bg-secondary">
                                                         <i class="bi bi-pause-circle"></i> Inactive
                                                     </span>
-                                                    <div th:if="${product.isFeatured}" class="mt-1">
+                                                    <div th:if="${product.featured}" class="mt-1">
                                                         <span class="badge bg-warning">
                                                             <i class="bi bi-star"></i> Featured
                                                         </span>
@@ -606,10 +606,9 @@
             updateUrl('categories');
         }
 
-        // ================================        // DATA LOADING & API CALLS
         // ================================
-        
-        /**
+        // DATA LOADING & API CALLS
+        // ================================        /**
          * Düşük stoklu ürünleri sunucudan çeker ve tabloyu doldurur.
          */
         function loadLowStockProducts() {
@@ -620,9 +619,7 @@
 
             fetch('/admin/products/low-stock-data')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Server responded with status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
@@ -646,19 +643,16 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error loading low stock products:', error);
-                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu: ${error.message}</div></td></tr>`;                });
-        }
-
-        /**
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu.</div></td></tr>`;
+                });
+        }        /**
          * Kategori düzenleme modalını sunucudan gelen veriyle doldurur.
          */
         function editCategory(categoryId) {
-            if (!categoryId) return;            fetch(`/admin/products/categories/${categoryId}`)
+            if (!categoryId) return;
+            fetch(`/admin/products/categories/${categoryId}`)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Server responded with status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return response.json();
                 })
                 .then(category => {
@@ -673,9 +667,9 @@
                     
                     const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
                     modal.show();
-                })                .catch(error => {
-                    console.error('Error loading category:', error);
-                    alert(`Kategori verileri yüklenirken bir hata oluştu: ${error.message}`);
+                })
+                .catch(error => {
+                    alert('Kategori verileri yüklenirken bir hata oluştu.');
                 });
         }        /**
          * Kullanıcıdan onay alarak kategoriyi siler.
@@ -700,7 +694,9 @@
                 return;
             }
             alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
-        }        // ================================
+        }
+
+        // ================================
         // PAGE INITIALIZATION
         // ================================        // PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
@@ -720,25 +716,6 @@
             } else {
                 tabToActivate = document.getElementById('all-products-tab');
                 if (tabToActivate) new bootstrap.Tab(tabToActivate).show();
-            }            // ================================
-            // AUTO-SUBMIT FORM ON SORT CHANGE
-            // ================================
-            const sortBySelect = document.getElementById('sortBySelect');
-            const sortDirSelect = document.getElementById('sortDirSelect');
-            const searchForm = document.getElementById('productSearchForm'); // Target the specific search form
-
-            if (sortBySelect && searchForm) {
-                sortBySelect.addEventListener('change', function() {
-                    console.log('Sort by changed to:', this.value);
-                    searchForm.submit();
-                });
-            }
-
-            if (sortDirSelect && searchForm) {
-                sortDirSelect.addEventListener('change', function() {
-                    console.log('Sort direction changed to:', this.value);
-                    searchForm.submit();
-                });
             }
         });
     </script>

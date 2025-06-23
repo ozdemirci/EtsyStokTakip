@@ -31,16 +31,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     @Query("SELECT COUNT(p) FROM Product p WHERE LOWER(p.category) = LOWER(:category)")
     long countByCategoryIgnoreCase(@Param("category") String category);
-      // Tenant-aware queries (commented out until database migration adds tenant_id column)
-    // @Query("SELECT p FROM Product p WHERE p.tenantId = :tenantId")
-    // List<Product> findByTenantId(@Param("tenantId") String tenantId);
-    
-    // @Query("SELECT COUNT(p) FROM Product p WHERE p.tenantId = :tenantId")
-    // long countByTenantId(@Param("tenantId") String tenantId);
-    
-    // @Query("SELECT p FROM Product p WHERE p.tenantId = :tenantId AND p.stockLevel <= p.lowStockThreshold")
-    // List<Product> findLowStockProductsByTenant(@Param("tenantId") String tenantId);
-    
-    // @Query("SELECT COUNT(p) FROM Product p WHERE p.tenantId = :tenantId AND p.stockLevel <= p.lowStockThreshold")
-    // long countLowStockProductsByTenant(@Param("tenantId") String tenantId);
+      
 }

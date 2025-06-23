@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 
@@ -34,31 +35,26 @@ import java.util.Random;
 @Order(2) // Run after MultiTenantFlywayConfig (1)
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
-    
+   
     private final AppUserService appUserService;
     private final ProductService productService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final StockNotificationRepository stockNotificationRepository;
-    private final DataSource dataSource;    
+    private final DataSource dataSource;
     
     @Value("${spring.flyway.schemas}")   
-    private List<String> TENANT_IDS;
+    private final String[] TENANT_IDS;
+
     
+
     @Override
     public void run(String... args) {
         log.info("🚀 Starting Multi-Tenant Data Loader...");
         
-        log.info("🏢 Configured tenant IDs: {}", TENANT_IDS);
-        
-        if (TENANT_IDS == null || TENANT_IDS.isEmpty()) {
-            log.error("❌ CRITICAL: No tenant IDs configured! Check spring.flyway.schemas property");
-            return;
-        }
-        
         try {
             // First, fix any existing incorrect accessible_tenants data
-            fixAccessibleTenantsData(TENANT_IDS);
+            fixAccessibleTenantsData();
             
             for (String tenantId : TENANT_IDS) {
                 log.info("🔄 Processing tenant: {}", tenantId);
@@ -67,7 +63,7 @@ public class DataLoader implements CommandLineRunner {
             }
             
             log.info("✅ Multi-Tenant Data Loader completed successfully!");
-            log.info("📊 Initialized {} tenants with sample data", TENANT_IDS.size());
+            log.info("📊 Initialized {} tenants with sample data", TENANT_IDS.length);
             log.warn("⚠️ Remember to change default passwords in production!");
             log.warn("⚠️ Remember to remove /h2-console/** in production where security config!");
            
@@ -78,11 +74,13 @@ public class DataLoader implements CommandLineRunner {
         } finally {
             TenantContext.clear();
         }
-    }      /**
+    }
+    
+    /**
      * Fix incorrect accessible_tenants data from previous configurations
      */
     @Transactional
-    private void fixAccessibleTenantsData(List<String> TENANT_IDS) {
+    private void fixAccessibleTenantsData() {
         log.info("🔧 Fixing accessible_tenants data for tenant isolation...");
         
         try (Connection connection = dataSource.getConnection()) {
@@ -125,10 +123,6 @@ public class DataLoader implements CommandLineRunner {
                 log.info("📋 Data already exists for tenant: {}, skipping", tenantId);
                 return;
             }
-
-            log.info("🔧 Set tenant context to: {} - Current context: {}", 
-                tenantId, TenantContext.getCurrentTenant());
-            verifyTenantSchema(tenantId);
             
             // Initialize users (including super admin for public tenant)
             createUsers(tenantId);
@@ -198,20 +192,19 @@ public class DataLoader implements CommandLineRunner {
         } catch (Exception e) {
             log.error("❌ Failed to create users for tenant {}: {}", tenantId, e.getMessage(), e);
         }
-    }   
-    private void createSuperAdmin() {
+    }
 
+    private void createSuperAdmin() {
         if (appUserRepository.findByUsername("superadmin").isPresent()) {
             log.info("🔑 SuperAdmin already exists, skipping");
             return;
         }
         
-        UserCreateDTO superAdminDto = UserCreateDTO.builder()
-                .username("superadmin")
-                .password("superadmin123")
-                .role(Role.SUPER_ADMIN)
-                .primaryTenant("public")
-                .build();
+        UserCreateDTO superAdminDto = new UserCreateDTO();
+        superAdminDto.setUsername("superadmin");
+        superAdminDto.setPassword("superadmin123");
+        superAdminDto.setRole(Role.SUPER_ADMIN);
+        superAdminDto.setPrimaryTenant("public");
         
         appUserService.saveUser(superAdminDto);
         log.info("✅ Created SuperAdmin user");
@@ -219,7 +212,6 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void createStandardUsers(String tenantId) {
-
         List<UserCreateDTO> users = Arrays.asList(
             createUser("admin", "admin123", Role.ADMIN, tenantId),
             createUser("manager", "manager123", Role.USER, tenantId),
@@ -241,27 +233,38 @@ public class DataLoader implements CommandLineRunner {
         }
         
         log.info("👥 Created {} users for tenant: {}", created, tenantId);
-    }   
-    
-    private void createProducts(String tenantId) {
+    }    private void createProducts(String tenantId) {
         log.info("📦 Creating products for tenant: {}", tenantId);
         
         try {
-            TenantContext.setCurrentTenant(tenantId);                           
-                        
-            List<ProductCreateDTO> products = getSampleProducts();             
+            TenantContext.setCurrentTenant(tenantId);
+            log.info("🔧 Set tenant context to: {} - Current context: {}", 
+                tenantId, TenantContext.getCurrentTenant());
+            
+            // Verify the schema is correct
+            verifyTenantSchema(tenantId);
+            
+            // Check existing products BEFORE creating new ones
+            long existingProductCount = productRepository.count();
+            log.info("📊 Existing product count in tenant {}: {}", tenantId, existingProductCount);
+            
+            List<ProductCreateDTO> products = getSampleProducts();
+            int created = 0;
             
             for (ProductCreateDTO product : products) {
                 try {
                     // Check if product exists in THIS tenant
-                    Boolean existingProduct = productRepository.findBySku(product.getSku()).isEmpty();
-
-                    if (existingProduct) {
+                    Optional<Product> existingProduct = productRepository.findBySku(product.getSku());
+                    if (existingProduct.isEmpty()) {
+                        // Set tenant-specific external ID
+                        product.setEtsyProductId("EXT_" + tenantId.toUpperCase() + "_" + product.getSku());
+                        
+                        log.debug("💾 Saving product {} for tenant {} with context {}", 
+                            product.getSku(), tenantId, TenantContext.getCurrentTenant());
                         
                         productService.saveProduct(product);
-                        
+                        created++;
                         log.info("✅ Created product: {} for tenant: {}", product.getTitle(), tenantId);
-                        
                     } else {
                         log.debug("⏭️ Product {} already exists in tenant {}, skipping", 
                             product.getSku(), tenantId);
@@ -270,7 +273,12 @@ public class DataLoader implements CommandLineRunner {
                     log.error("❌ Failed to create product {} for tenant {}: {}", 
                         product.getSku(), tenantId, e.getMessage());
                 }
-            }                     
+            }
+            
+            // Check product count AFTER creation
+            long finalProductCount = productRepository.count();
+            log.info("📦 Created {} products for tenant: {} - Final count: {}", 
+                created, tenantId, finalProductCount);
             
         } catch (Exception e) {
             log.error("❌ Failed to create products for tenant {}: {}", tenantId, e.getMessage(), e);
@@ -290,58 +298,32 @@ public class DataLoader implements CommandLineRunner {
                 return;
             }
             
+            // Clear existing notifications to avoid duplicates
+            stockNotificationRepository.deleteAll();
             
-            int created = 5;
+            int created = 0;
             Random random = new Random();
             
-            // Create 5 different types of sample notifications
-            for (int i = 0; i < Math.min(5, products.size()); i++) {
+            // Create a few sample notifications
+            for (int i = 0; i < Math.min(3, products.size()); i++) {
                 Product product = products.get(i);
                 
                 StockNotification notification = new StockNotification();
                 notification.setProduct(product);
-                  switch (i) {
-                    case 0:
-                        // Critical out of stock
-                        notification.setNotificationType("OUT_OF_STOCK");
-                        notification.setPriority("HIGH");
-                        notification.setMessage("🚨 Critical: '" + product.getTitle() + "' is completely out of stock!");
-                        notification.setRead(false);
-                        break;
-                        
-                    case 1:
-                        // Low stock warning
-                        notification.setNotificationType("LOW_STOCK");
-                        notification.setPriority("MEDIUM");
-                        notification.setMessage("⚠️ Low stock alert: '" + product.getTitle() + "' has only " + 
-                            product.getStockLevel() + " items remaining");
-                        notification.setRead(false);
-                        break;
-                        
-                    case 2:
-                        // Overstocked notification
-                        notification.setNotificationType("OVERSTOCKED");
-                        notification.setPriority("LOW");
-                        notification.setMessage("� Overstocked: '" + product.getTitle() + "' has excess inventory - Current stock: " + 
-                            product.getStockLevel() + " units");
-                        notification.setRead(true);
-                        break;
-                        
-                    case 3:
-                        // Reorder suggestion
-                        notification.setNotificationType("REORDER");
-                        notification.setPriority("MEDIUM");
-                        notification.setMessage("🔄 Reorder suggested: '" + product.getTitle() + "' stock levels are approaching threshold");
-                        notification.setRead(random.nextBoolean());
-                        break;
-                        
-                    case 4:
-                        // Custom notification
-                        notification.setNotificationType("CUSTOM");
-                        notification.setPriority("LOW");
-                        notification.setMessage("ℹ️ Custom alert: '" + product.getTitle() + "' requires attention from inventory manager");
-                        notification.setRead(random.nextBoolean());
-                        break;
+                
+                if (i == 0) {
+                    // Critical out of stock
+                    notification.setNotificationType("OUT_OF_STOCK");
+                    notification.setPriority("HIGH");
+                    notification.setMessage("🚨 Critical: '" + product.getTitle() + "' is out of stock!");
+                    notification.setRead(false);
+                } else {
+                    // Low stock warning
+                    notification.setNotificationType("LOW_STOCK");
+                    notification.setPriority("MEDIUM");
+                    notification.setMessage("⚠️ Low stock: '" + product.getTitle() + "' has only " + 
+                        product.getStockLevel() + " items remaining");
+                    notification.setRead(random.nextBoolean());
                 }
                 
                 notification.setCategory("STOCK_ALERT");
@@ -353,7 +335,7 @@ public class DataLoader implements CommandLineRunner {
                 }
                 
                 stockNotificationRepository.save(notification);
-               
+                created++;
             }
             
             log.info("🔔 Created {} sample notifications for tenant: {}", created, tenantId);
@@ -361,16 +343,16 @@ public class DataLoader implements CommandLineRunner {
         } catch (Exception e) {
             log.error("❌ Failed to create notifications for tenant {}: {}", tenantId, e.getMessage(), e);
         }
-    }    
-    
+    }
+
     // Helper methods
     private UserCreateDTO createUser(String username, String password, Role role, String tenantId) {
-        return UserCreateDTO.builder()
-                .username(username)
-                .password(password)
-                .role(role)
-                .primaryTenant(tenantId)
-                .build();
+        UserCreateDTO dto = new UserCreateDTO();
+        dto.setUsername(username);
+        dto.setPassword(password);
+        dto.setRole(role);
+        dto.setPrimaryTenant(tenantId);
+        return dto;
     }
 
     private List<ProductCreateDTO> getSampleProducts() {
@@ -403,19 +385,18 @@ public class DataLoader implements CommandLineRunner {
             createProduct("BOOK-002", "Business Strategy", "Business strategy principles", 
                 "Books", "29.99", 60, 8)
         );
-    }    
-    
+    }
+
     private ProductCreateDTO createProduct(String sku, String title, String description, 
                                          String category, String price, int stockLevel, int lowStockThreshold) {
-        return ProductCreateDTO.builder()
-                .sku(sku)
-                .title(title)
-                .description(description)
-                .category(category)
-                .price(new BigDecimal(price))
-                .stockLevel(stockLevel)
-                .lowStockThreshold(lowStockThreshold)
-                .build();
+        ProductCreateDTO dto = new ProductCreateDTO();
+        dto.setSku(sku);
+        dto.setTitle(title);
+        dto.setDescription(description);
+        dto.setCategory(category);        dto.setPrice(new BigDecimal(price));
+        dto.setStockLevel(stockLevel);
+        dto.setLowStockThreshold(lowStockThreshold);
+        return dto;
     }
     
     /**

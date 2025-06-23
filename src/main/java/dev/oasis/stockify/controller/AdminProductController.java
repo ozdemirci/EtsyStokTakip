@@ -48,18 +48,13 @@ import java.util.Optional;
 @RequestMapping("/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @RequiredArgsConstructor
-public class AdminProductController {      private final ProductService productService;
+public class AdminProductController { 
+    
+      private final ProductService productService;
       private final ProductCategoryService categoryService;
       private final AppUserRepository appUserRepository;
 
-    /**
-     * Test endpoint for JavaScript debugging
-     */
-    @GetMapping("/test-js")
-    public String testJavaScript() {
-        log.info("📊 Serving JavaScript test page");
-        return "admin/test-js";
-    }
+    
 
     /**
      * Get current tenant ID from various sources
@@ -90,7 +85,9 @@ public class AdminProductController {      private final ProductService productS
 
         log.info("🎯 Using tenant ID: {}", tenantId);
         return tenantId;
-    }    /**
+    }    
+    
+    /**
      * Display paginated and searchable list of products
      */
     @GetMapping
@@ -181,7 +178,9 @@ public class AdminProductController {      private final ProductService productS
         model.addAttribute("tenantId", tenantId);
         model.addAttribute("categories", categoryService.getAllActiveCategories());
         return "admin/product-form";
-    }    /**
+    }    
+    
+    /**
      * Handle product creation
      */
     @PostMapping
@@ -246,7 +245,9 @@ public class AdminProductController {      private final ProductService productS
             log.error("❌ Product not found with ID: {} for tenant: {}", id, tenantId, e);
             return "redirect:/admin/products";
         }
-    }    /**
+    }    
+    
+    /**
      * Handle product update
      */
     @PostMapping("/{id}")
@@ -388,7 +389,9 @@ public class AdminProductController {      private final ProductService productS
             log.error("❌ Failed to export products for tenant: {}", tenantId, e);
             throw new FileOperationException("Failed to export products: " + e.getMessage());
         }
-    }    /**
+    }    
+    
+    /**
      * Redirect to products page with low-stock tab active
      */
     @GetMapping("/low-stock")
@@ -399,7 +402,9 @@ public class AdminProductController {      private final ProductService productS
         // Add parameter to indicate low-stock tab should be active
         redirectAttributes.addAttribute("tab", "low-stock");
         return "redirect:/admin/products";
-    }    /**
+    }    
+    
+    /**
      * Get low stock products as JSON data for AJAX calls
      */
     @GetMapping("/low-stock-data")
@@ -466,9 +471,12 @@ public class AdminProductController {      private final ProductService productS
         }
 
         return "redirect:/admin/products?tab=categories";
-    }    /**
+    }   
+    
+    /**
      * Get category details for editing
-     */    @GetMapping("/categories/{id}")
+     */    
+    @GetMapping("/categories/{id}")
     @ResponseBody
     public ResponseEntity<ProductCategoryResponseDTO> getCategoryDetails(@PathVariable Long id, HttpServletRequest request) {
         try {
@@ -534,7 +542,9 @@ public class AdminProductController {      private final ProductService productS
         }
 
         return "redirect:/admin/products?tab=categories";
-    }    /**
+    }    
+    
+    /**
      * Get categories list for AJAX requests
      */
     @GetMapping("/categories/list")
