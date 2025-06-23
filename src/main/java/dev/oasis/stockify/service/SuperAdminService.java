@@ -9,6 +9,8 @@ import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +28,17 @@ public class SuperAdminService {
 
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
-    private final AppUserService appUserService;
-
-    private static final Set<String> ALL_TENANTS = Set.of(
-        "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
-    );    /**
+    private final AppUserService appUserService;    
+    
+    @Value("${spring.flyway.schemas}")   
+    private final String[] ALL_TENANTS;
+    
+    /**
      * Get all users across all tenants (SUPER_ADMIN only)
      * Returns both active and inactive users for comprehensive management
      * Note: SUPER_ADMIN users are only shown for the 'public' tenant
      */
+    
     @Transactional(readOnly = true)
     public Map<String, List<AppUser>> getAllUsersAcrossAllTenants() {
         log.info("🔍 Super Admin: Fetching all users (active and inactive) across all tenants");
@@ -144,19 +148,17 @@ public class SuperAdminService {
         } finally {
             TenantContext.clear();
         }
-    }
-
-    /**
+    }    /**
      * Switch to a specific tenant context for operations (SUPER_ADMIN only)
      */
     public void switchToTenant(String targetTenant) {
-        if (!ALL_TENANTS.contains(targetTenant)) {
+        if (!Arrays.asList(ALL_TENANTS).contains(targetTenant)) {
             throw new IllegalArgumentException("Invalid tenant: " + targetTenant);
         }
         
         log.info("🔄 Super Admin: Switching to tenant context '{}'", targetTenant);
         TenantContext.setCurrentTenant(targetTenant);
-    }    /**
+    }/**
      * Get tenant statistics (SUPER_ADMIN only)
      * Note: SUPER_ADMIN users are only counted for the 'public' tenant
      */
@@ -272,13 +274,11 @@ public class SuperAdminService {
         } finally {
             TenantContext.clear();
         }
-    }
-
-    /**
+    }    /**
      * Get available tenants for the super admin
      */
     public Set<String> getAvailableTenants() {
-        return new HashSet<>(ALL_TENANTS);
+        return new HashSet<>(Arrays.asList(ALL_TENANTS));
     }
 
     /**

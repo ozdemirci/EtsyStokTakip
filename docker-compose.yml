@@ -1,7 +1,7 @@
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:16-alpine
+    image: postgres:alpine
     container_name: stockify-postgres
     environment:
       POSTGRES_DB: stockify
@@ -15,10 +15,10 @@ services:
       - ./logs:/var/log
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d stockify"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
     networks:
       - stockify-network
@@ -31,18 +31,21 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - POSTGRES_URL=jdbc:postgresql://postgres:5432/stockify
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/stockify?sslmode=prefer
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8080
+      - SERVER_PORT=10000
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
+      - SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false
     ports:
-      - "8080:8080"
+      - "10000:10000"
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:10000/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
