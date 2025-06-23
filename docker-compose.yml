@@ -1,7 +1,7 @@
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:16-alpine
+    image: postgres:latest
     container_name: stockify-postgres
     environment:
       POSTGRES_DB: stockify
@@ -35,14 +35,14 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8080
+      - SERVER_PORT=10000
     ports:
-      - "8080:8080"
+      - "10000:10000"
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:10000/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
