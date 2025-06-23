@@ -30,7 +30,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - POSTGRES_URL=jdbc:postgresql://postgres:5432/stockify
+      - POSTGRES_URL=jdbc:postgresql://localhost:5432/stockify
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=prod
