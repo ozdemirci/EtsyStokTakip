@@ -46,7 +46,7 @@ public class DataLoader implements CommandLineRunner {
     @Value("${spring.flyway.schemas}")   
     private final String[] TENANT_IDS;
 
-    @Override
+        @Override
     public void run(String... args) {
         log.info("🚀 Starting Multi-Tenant Data Loader...");
         

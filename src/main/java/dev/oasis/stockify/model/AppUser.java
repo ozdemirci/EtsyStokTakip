@@ -62,13 +62,14 @@ public class AppUser {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-          // Set defaults for SUPER_ADMIN
+        
+        // Set defaults for SUPER_ADMIN
         if (Role.SUPER_ADMIN.equals(role)) {
             canManageAllTenants = true;
             isGlobalUser = true;
-            accessibleTenants = "public,mert,rezonans";
+            accessibleTenants = "public,stockify,acme_corp,global_trade,artisan_crafts,tech_solutions";
             if (primaryTenant == null) {
-                primaryTenant = "public";
+                primaryTenant = "stockify";
             }
         }
     }
