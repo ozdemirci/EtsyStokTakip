@@ -1,9 +1,10 @@
 package dev.oasis.stockify.config.tenant;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -13,15 +14,18 @@ import java.sql.SQLException;
  * PostgreSQL-optimized MultiTenantConnectionProvider
  * Uses PostgreSQL's SET search_path for efficient schema switching
  */
-@Component
+@Slf4j
+@Component("multiTenantConnectionProvider")
+@Primary
+@RequiredArgsConstructor
 public class PostgreSQLMultiTenantConnectionProvider implements MultiTenantConnectionProvider<String> {
     
-    private static final Logger log = LoggerFactory.getLogger(PostgreSQLMultiTenantConnectionProvider.class);
-    
     private final DataSource dataSource;
-    
-    public PostgreSQLMultiTenantConnectionProvider(DataSource dataSource) {
-        this.dataSource = dataSource;
+
+    // Constructor-based initialization logging via @PostConstruct
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        log.info("🐘 PostgreSQL MultiTenantConnectionProvider initialized for production");
     }
 
     @Override

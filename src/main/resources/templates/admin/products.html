@@ -155,12 +155,12 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <select class="form-select" name="sortBy" id="sortBySelect">
+                                    <div class="col-md-3">                                        <select class="form-select" name="sortBy" id="sortBySelect">
                                             <option value="title" th:selected="${sortBy == null or sortBy == 'title'}">Sort by Title</option>
                                             <option value="category" th:selected="${sortBy == 'category'}">Sort by Category</option>
                                             <option value="price" th:selected="${sortBy == 'price'}">Sort by Price</option>
-                                            <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock</option>
+                                            <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock Level</option>
+                                            <option value="lowStockThreshold" th:selected="${sortBy == 'lowStockThreshold'}">Sort by Low Threshold</option>
                                             <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by Date</option>
                                         </select>
                                     </div>
@@ -179,30 +179,29 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-hover">
-                                        <thead>
-                                            <tr>
+                                        <thead>                                            <tr>
                                                 <th>Product</th>
                                                 <th>Category</th>
                                                 <th>SKU</th>
                                                 <th>Price</th>
-                                                <th>Stock</th>
+                                                <th>Stock Level</th>
+                                                <th>Low Threshold</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
-                                        </thead>                                        <tbody>
-                                            <tr th:if="${products != null and products.totalElements == 0}">
-                                                <td colspan="7" class="text-center text-muted py-4">
+                                        </thead>                                        <tbody>                                            <tr th:if="${products != null and products.totalElements == 0}">
+                                                <td colspan="8" class="text-center text-muted py-4">
                                                     <i class="bi bi-inbox display-4"></i>
                                                     <div class="mt-2">No products found</div>
                                                 </td>
                                             </tr>
                                             <tr th:if="${products == null or products.empty}">
-                                                <td colspan="7" class="text-center text-muted py-4">
+                                                <td colspan="8" class="text-center text-muted py-4">
                                                     <i class="bi bi-inbox display-4"></i>
                                                     <div class="mt-2">No products available</div>
                                                     <div class="text-muted">Click "Add Product" to get started</div>
                                                 </td>
-                                            </tr>                                            <tr th:each="product : ${products}" 
+                                            </tr><tr th:each="product : ${products}" 
                                                 th:data-product-id="${product.id}"
                                                 th:class="${product.stockLevel == 0 ? 'out-of-stock' : (product.stockLevel <= product.lowStockThreshold ? 'low-stock' : '')}">
                                                 <td>
@@ -214,14 +213,15 @@
                                                 </td>
                                                 <td>
                                                     <code th:text="${product.sku}"></code>
-                                                </td>
-                                                <td>
+                                                </td>                                                <td>
                                                     <span class="fw-bold" th:text="'$' + ${product.price}"></span>
                                                 </td>
-                                                <td class="stock-cell" th:data-low-threshold="${product.lowStockThreshold}">
+                                                <td>
                                                     <span th:class="${product.stockLevel == 0 ? 'badge bg-danger' : (product.stockLevel <= product.lowStockThreshold ? 'badge bg-warning' : 'badge bg-success')}" 
                                                           th:text="${product.stockLevel}"></span>
-                                                    <small class="text-muted" th:text="'/' + ${product.lowStockThreshold}"></small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary" th:text="${product.lowStockThreshold}"></span>
                                                 </td>
                                                 <td>
                                                     <span th:if="${product.isActive}" class="badge bg-success">
@@ -230,7 +230,7 @@
                                                     <span th:unless="${product.isActive}" class="badge bg-secondary">
                                                         <i class="bi bi-pause-circle"></i> Inactive
                                                     </span>
-                                                    <div th:if="${product.featured}" class="mt-1">
+                                                    <div th:if="${product.isFeatured}" class="mt-1">
                                                         <span class="badge bg-warning">
                                                             <i class="bi bi-star"></i> Featured
                                                         </span>
@@ -590,25 +590,32 @@
                 url.searchParams.delete('tab');
             }
             window.history.pushState({}, '', url);
-        }
-
+        }        
+        
         // --- Onclick Functions ---
         function activateAllProductsTab() {
+            const tab = new bootstrap.Tab(document.getElementById('all-products-tab'));
+            tab.show();
             updateUrl(null); // 'All Products' varsayılan olduğu için URL'den tab parametresini kaldır
         }
         
         function activateLowStockTab() {
+            const tab = new bootstrap.Tab(document.getElementById('low-stock-tab'));
+            tab.show();
             loadLowStockProducts();
             updateUrl('low-stock');
         }
         
         function activateCategoriesTab() {
+            const tab = new bootstrap.Tab(document.getElementById('categories-tab'));
+            tab.show();
             updateUrl('categories');
         }
 
         // ================================
         // DATA LOADING & API CALLS
-        // ================================        /**
+        // ================================       
+        /**
          * Düşük stoklu ürünleri sunucudan çeker ve tabloyu doldurur.
          */
         function loadLowStockProducts() {
@@ -645,7 +652,9 @@
                 .catch(error => {
                     tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu.</div></td></tr>`;
                 });
-        }        /**
+        }        
+        
+        /**
          * Kategori düzenleme modalını sunucudan gelen veriyle doldurur.
          */
         function editCategory(categoryId) {
@@ -671,12 +680,13 @@
                 .catch(error => {
                     alert('Kategori verileri yüklenirken bir hata oluştu.');
                 });
-        }        /**
+        }        
+        /**
          * Kullanıcıdan onay alarak kategoriyi siler.
          */
         function deleteCategory(categoryId, categoryName) {
             if (!categoryId) return;
-            const confirmMessage = `"${categoryName}" adlı kategoriyi silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.`;
+            const confirmMessage = `"${categoryName}" adlı kategoriyi silmek istediğinizden emin misiniz?`;
             if (confirm(confirmMessage)) {
                 const form = document.createElement('form');
                 form.method = 'POST';
@@ -684,7 +694,9 @@
                 document.body.appendChild(form);
                 form.submit();
             }
-        }        /**
+        }        
+        
+        /**
          * Hızlı stok ekleme işlemini gerçekleştirir.
          */
         function quickRestock(productId) {
@@ -692,13 +704,9 @@
             if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
                 if (quantity !== null) alert('Lütfen geçerli bir pozitif sayı girin.');
                 return;
-            }
-            alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
-        }
-
-        // ================================
+            }            alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
+        }        // ================================
         // PAGE INITIALIZATION
-        // ================================        // PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const activeTabName = urlParams.get('tab');
@@ -716,6 +724,21 @@
             } else {
                 tabToActivate = document.getElementById('all-products-tab');
                 if (tabToActivate) new bootstrap.Tab(tabToActivate).show();
+            }
+
+            // Sort functionality
+            const sortBySelect = document.getElementById('sortBySelect');
+            const sortDirSelect = document.getElementById('sortDirSelect');
+            const productSearchForm = document.getElementById('productSearchForm');
+
+            if (sortBySelect && sortDirSelect && productSearchForm) {
+                sortBySelect.addEventListener('change', function() {
+                    productSearchForm.submit();
+                });
+
+                sortDirSelect.addEventListener('change', function() {
+                    productSearchForm.submit();
+                });
             }
         });
     </script>
