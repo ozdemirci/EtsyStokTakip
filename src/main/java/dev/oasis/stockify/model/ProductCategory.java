@@ -28,11 +28,10 @@ public class ProductCategory {
     
     @Column(length = 500)
     private String description;
-    
-    @Column(nullable = false)
+      @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
     
-    @Column(nullable = false)
+    @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 0;
     
     @CreationTimestamp
@@ -41,9 +40,7 @@ public class ProductCategory {
     
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-    
-    // Add unique constraint per tenant (will be enforced by tenant schema isolation)
-    @Column(length = 20)
+    private LocalDateTime updatedAt;    // Add unique constraint per tenant (will be enforced by tenant schema isolation)
+    @Column(name = "hex_color", length = 20)
     private String hexColor; // For UI display color coding
 }

@@ -3,8 +3,12 @@ package dev.oasis.stockify.controller;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.Product;
+import dev.oasis.stockify.model.ProductCategory;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
+import dev.oasis.stockify.repository.ProductCategoryRepository;
+import dev.oasis.stockify.service.ProductCategoryService;
+import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +35,8 @@ public class MultiTenantDemoController {
 
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final ProductCategoryService productCategoryService;
     private final DataSource dataSource;
 
     /**
@@ -153,8 +159,44 @@ public class MultiTenantDemoController {
         return ResponseEntity.ok(response);
     }
 
-    
-    
+    /**
+     * Debug endpoint to retrieve categories for the current tenant
+     */
+    @GetMapping("/tenant/categories")
+    public ResponseEntity<Map<String, Object>> getTenantCategories() {
+        String tenantId = TenantContext.getCurrentTenant();
+        log.info("🔍 Debugging categories for tenant: {}", tenantId);
+        
+        try {
+            // Set tenant context
+            TenantContext.setCurrentTenant(tenantId);
+            
+            // Get all categories for the tenant
+            List<ProductCategory> categories = productCategoryRepository.findAll();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("tenantId", tenantId);
+            response.put("categoryCount", categories.size());            response.put("categories", categories.stream()
+                .map(c -> Map.of(
+                    "id", c.getId(),
+                    "name", c.getName(),
+                    "description", c.getDescription(),
+                    "hexColor", c.getHexColor(),
+                    "isActive", c.getIsActive(),
+                    "sortOrder", c.getSortOrder()
+                )).toList());
+            
+            log.info("✅ Retrieved {} categories for tenant: {}", categories.size(), tenantId);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("❌ Error retrieving categories for tenant {}: {}", tenantId, e.getMessage());
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Failed to retrieve categories: " + e.getMessage()));
+        } finally {
+            TenantContext.clear();
+        }
+    }
 
     private boolean isSystemSchema(String schemaName) {
         return schemaName.equalsIgnoreCase("INFORMATION_SCHEMA") ||
