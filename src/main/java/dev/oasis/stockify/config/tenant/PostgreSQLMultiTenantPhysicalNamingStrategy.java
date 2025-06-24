@@ -40,18 +40,22 @@ public class PostgreSQLMultiTenantPhysicalNamingStrategy implements PhysicalNami
         log.debug("🔍 Schema resolution request - Current tenant: '{}', Original identifier: '{}'", 
                  tenantId, identifier != null ? identifier.getText() : "null");
         
-        // Use public schema for null or empty tenant IDs
-        if (tenantId == null || tenantId.isEmpty() || tenantId.equals("public")) {
-            log.debug("🏛️ Using public schema");
-            return Identifier.toIdentifier("public");
+        // CRITICAL ENFORCEMENT: If we have a tenant context, NEVER allow public schema
+        if (tenantId != null && !tenantId.isEmpty()) {
+            String pgSchema = schemaCache.computeIfAbsent(tenantId, this::convertToPostgreSQLSchema);
+            log.warn("🐘 ENFORCED Schema resolution: '{}' -> '{}' (Original ignored: '{}')", 
+                    tenantId, pgSchema, identifier != null ? identifier.getText() : "null");
+            return Identifier.toIdentifier(pgSchema);
         }
         
-        // Convert to PostgreSQL-friendly schema name with caching
-        String pgSchema = schemaCache.computeIfAbsent(tenantId, this::convertToPostgreSQLSchema);
+        // CRITICAL: Log any attempt to use public schema when tenant context might be expected
+        if (identifier != null && "public".equals(identifier.getText())) {
+            log.warn("⚠️ PUBLIC SCHEMA ACCESS: No tenant context, allowing public schema access");
+        }
         
-        log.info("🐘 Schema resolution: '{}' -> '{}' (cached: {})", 
-                tenantId, pgSchema, schemaCache.containsKey(tenantId));
-        return Identifier.toIdentifier(pgSchema);
+        // Fallback to public only if no tenant context and explicitly requested
+        log.debug("🏛️ No tenant context - using public schema");
+        return identifier != null ? identifier : Identifier.toIdentifier("public");
     }
     
     /**

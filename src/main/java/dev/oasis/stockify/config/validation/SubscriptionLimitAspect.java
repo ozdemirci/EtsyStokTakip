@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Aspect for validating subscription limits
+ * Excludes DataLoader from subscription checks to allow initial data seeding
  */
 @Aspect
 @Component
@@ -21,9 +22,19 @@ public class SubscriptionLimitAspect {
     
     /**
      * Check user creation limits
+     * Excludes DataLoader from subscription limits
      */
-    @Around("execution(* dev.oasis.stockify.service.AppUserService.saveUser(..))")
+    @Around("execution(* dev.oasis.stockify.service.AppUserService.saveUser(..)) && !within(dev.oasis.stockify.config.DataLoader)")
     public Object checkUserLimit(ProceedingJoinPoint joinPoint) throws Throwable {
+        // Check if call is coming from DataLoader via stack trace as backup
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTrace) {
+            if (element.getClassName().contains("DataLoader")) {
+                log.debug("🔧 DataLoader detected - bypassing user creation limit");
+                return joinPoint.proceed();
+            }
+        }
+        
         if (!subscriptionService.canCreateUser()) {
             log.warn("❌ User creation blocked - subscription limit reached");
             throw new RuntimeException("Kullanıcı oluşturma limiti aşıldı. Aboneliğinizi yükseltin.");
@@ -35,9 +46,19 @@ public class SubscriptionLimitAspect {
     
     /**
      * Check product creation limits
+     * Excludes DataLoader from subscription limits
      */
-    @Around("execution(* dev.oasis.stockify.service.ProductService.save*(..))")
+    @Around("execution(* dev.oasis.stockify.service.ProductService.save*(..)) && !within(dev.oasis.stockify.config.DataLoader)")
     public Object checkProductLimit(ProceedingJoinPoint joinPoint) throws Throwable {
+        // Check if call is coming from DataLoader via stack trace as backup
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTrace) {
+            if (element.getClassName().contains("DataLoader")) {
+                log.debug("🔧 DataLoader detected - bypassing product creation limit");
+                return joinPoint.proceed();
+            }
+        }
+        
         if (!subscriptionService.canCreateProduct()) {
             log.warn("❌ Product creation blocked - subscription limit reached");
             throw new RuntimeException("Ürün oluşturma limiti aşıldı. Aboneliğinizi yükseltin.");

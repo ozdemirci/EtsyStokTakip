@@ -48,23 +48,64 @@ public class PostgreSQLMultiTenantConnectionProvider implements MultiTenantConne
             // Schema'nın var olduğundan emin ol
             ensureSchemaExists(connection, schema);
             
-            // PostgreSQL search_path ayarla (performanslı!)
-            String searchPath = String.format("\"%s\", \"public\"", schema);
+            // FORCE PostgreSQL search_path - SADECE ilgili schema kullan, public'i TAMAMEN engelle
+            String searchPath = String.format("\"%s\"", schema);
             try (var stmt = connection.createStatement()) {
+                // CRITICAL: Önce search_path'i sadece tenant schema'ya set et
                 stmt.execute("SET search_path TO " + searchPath);
+                
+                // CRITICAL: Local schema'yı da set et (PostgreSQL 9.3+)
+                stmt.execute("SET LOCAL search_path TO " + searchPath);
+                
+                // CRITICAL: Session seviyesinde de schema'yı zorla
+                stmt.execute("SET SESSION schema '" + schema + "'");
+                
+                // CRITICAL: public schema'ya erişimi tamamen engelle
+                if (!"public".equals(schema)) {
+                    // public schema'ya erişimi revoke et (sadece bu session için)
+                    try {
+                        stmt.execute("SET SESSION search_path TO " + searchPath + ", \"$user\"");
+                    } catch (SQLException e) {
+                        log.debug("Could not revoke public access (expected): {}", e.getMessage());
+                    }
+                }
+                
+                // CRITICAL: Connection seviyesinde schema bilgisini set et
+                connection.setSchema(schema);
                 
                 // Verify the search_path was set correctly
                 try (var rs = stmt.executeQuery("SHOW search_path")) {
                     if (rs.next()) {
                         String currentPath = rs.getString(1);
-                        log.debug("🐘 PostgreSQL search_path verified: {} for tenant: {}", 
+                        log.info("🐘 PostgreSQL search_path LOCKED to: {} for tenant: {}", 
                                 currentPath, tenantIdentifier);
+                        
+                        // Eğer hâlâ public varsa, UYAR!
+                        if (currentPath.contains("public") && !"public".equals(schema)) {
+                            log.warn("⚠️ WARNING: search_path still contains 'public' for tenant {}: {}", 
+                                    tenantIdentifier, currentPath);
+                        }
+                    }
+                }
+                
+                // Double check with current_schema()
+                try (var rs = stmt.executeQuery("SELECT current_schema()")) {
+                    if (rs.next()) {
+                        String currentSchema = rs.getString(1);
+                        log.info("🔍 Current schema LOCKED: {} for tenant: {}", 
+                                currentSchema, tenantIdentifier);
+                        
+                        // Eğer schema doğru değilse, UYAR!
+                        if (!schema.equals(currentSchema)) {
+                            log.error("❌ CRITICAL: Current schema mismatch! Expected: {}, Got: {}", 
+                                    schema, currentSchema);
+                        }
                     }
                 }
             }
             
-            log.info("🐘 PostgreSQL connection configured for tenant '{}' with schema '{}'", 
-                    tenantIdentifier, schema);
+            log.info("🐘 PostgreSQL connection FORCED to schema '{}' for tenant '{}'", 
+                    schema, tenantIdentifier);
             
             return connection;
             
