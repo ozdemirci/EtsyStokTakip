@@ -1,6 +1,7 @@
 package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.config.tenant.TenantContext;
+import dev.oasis.stockify.model.PlanType;
 import dev.oasis.stockify.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,7 @@ public class SubscriptionController {
     public String trialExpired(Model model) {
         String tenantId = TenantContext.getCurrentTenant();
         model.addAttribute("tenantId", tenantId);
-        
-        SubscriptionService.PlanType currentPlan = subscriptionService.getTenantPlan();
+          PlanType currentPlan = subscriptionService.getTenantPlan();
         model.addAttribute("currentPlan", currentPlan.getCode());
         
         log.info("Trial expired page accessed for tenant: {}", tenantId);

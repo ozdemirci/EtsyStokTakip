@@ -1,6 +1,7 @@
 package dev.oasis.stockify.service;
 
 import dev.oasis.stockify.config.tenant.TenantContext;
+import dev.oasis.stockify.model.PlanType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,41 +24,6 @@ public class SubscriptionService {
     
     private final DataSource dataSource;
     private final AppUserService appUserService;
-    
-    /**
-     * Plan types
-     */
-    public enum PlanType {
-        STARTER("starter", 1, 100, 30),
-        PROFESSIONAL("professional", 10, 1000, -1),
-        ENTERPRISE("enterprise", -1, -1, -1);
-        
-        private final String code;
-        private final int maxUsers;
-        private final int maxProducts;
-        private final int trialDays;
-        
-        PlanType(String code, int maxUsers, int maxProducts, int trialDays) {
-            this.code = code;
-            this.maxUsers = maxUsers;
-            this.maxProducts = maxProducts;
-            this.trialDays = trialDays;
-        }
-        
-        public String getCode() { return code; }
-        public int getMaxUsers() { return maxUsers; }
-        public int getMaxProducts() { return maxProducts; }
-        public int getTrialDays() { return trialDays; }
-        
-        public static PlanType fromCode(String code) {
-            for (PlanType plan : values()) {
-                if (plan.code.equals(code)) {
-                    return plan;
-                }
-            }
-            return STARTER; // Default fallback
-        }
-    }
     
     /**
      * Set subscription plan for tenant

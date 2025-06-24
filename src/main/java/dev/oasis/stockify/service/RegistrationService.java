@@ -4,6 +4,7 @@ import dev.oasis.stockify.dto.RegisterRequestDTO;
 import dev.oasis.stockify.dto.RegistrationResultDTO;
 import dev.oasis.stockify.dto.TenantCreateDTO;
 import dev.oasis.stockify.dto.TenantDTO;
+import dev.oasis.stockify.model.PlanType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -107,28 +108,19 @@ public class RegistrationService {
         
         return username;
     }
-    
-    /**
+      /**
      * Get plan features for display
      */
     public String getPlanFeatures(String plan) {
-        return switch (plan) {
-            case "starter" -> "1 Lokasyon, 100 Ürün, Temel Raporlar";
-            case "professional" -> "5 Lokasyon, 1.000 Ürün, Gelişmiş Raporlar";
-            case "enterprise" -> "Sınırsız Lokasyon, Sınırsız Ürün, Özel Raporlar";
-            default -> "Bilinmeyen plan";
-        };
+        PlanType planType = PlanType.fromCode(plan);
+        return planType.getFeaturesDescription();
     }
     
     /**
      * Get plan price for display
      */
     public String getPlanPrice(String plan) {
-        return switch (plan) {
-            case "starter" -> "₺0/ay";
-            case "professional" -> "₺299/ay";
-            case "enterprise" -> "₺999/ay";
-            default -> "Fiyat belirtilmemiş";
-        };
+        PlanType planType = PlanType.fromCode(plan);
+        return planType.getPriceDescription();
     }
 }

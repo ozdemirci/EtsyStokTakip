@@ -4,8 +4,10 @@ import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
 import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
+import dev.oasis.stockify.model.PlanType;
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.DashboardService;
+import dev.oasis.stockify.service.SubscriptionService;
 import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.StockNotificationService;
@@ -30,7 +32,8 @@ import java.util.List;
 public class AdminDashboardController {    private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
     private final AppUserService appUserService;
-    private final StockNotificationService stockNotificationService;@GetMapping
+    private final StockNotificationService stockNotificationService;
+    private final SubscriptionService subscriptionService;@GetMapping
 
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
@@ -69,6 +72,27 @@ public class AdminDashboardController {    private final DashboardService dashbo
         model.addAttribute("totalNotifications", totalNotifications);
         model.addAttribute("unreadNotifications", unreadNotifications);
         model.addAttribute("criticalNotifications", criticalNotifications);
+        
+        // Add subscription information
+        PlanType currentPlan = subscriptionService.getTenantPlan();
+        model.addAttribute("subscriptionPlan", currentPlan);
+        model.addAttribute("planDisplayName", currentPlan.getDisplayName());
+        model.addAttribute("planFeatures", currentPlan.getFeaturesDescription());
+        model.addAttribute("planPrice", currentPlan.getPriceDescription());
+        model.addAttribute("isTrialPlan", currentPlan.isTrial());
+        
+        // Add usage limits
+        model.addAttribute("maxUsers", currentPlan.isUnlimitedUsers() ? "Sınırsız" : String.valueOf(currentPlan.getMaxUsers()));
+        model.addAttribute("maxProducts", currentPlan.isUnlimitedProducts() ? "Sınırsız" : String.valueOf(currentPlan.getMaxProducts()));
+        model.addAttribute("currentUsers", tenantUsers.size());
+        model.addAttribute("currentProducts", metrics.getTotalProducts());
+        
+        // Add trial information if applicable
+        if (currentPlan.isTrial()) {
+            long remainingDays = subscriptionService.getRemainingTrialDays();
+            model.addAttribute("remainingTrialDays", remainingDays);
+            model.addAttribute("trialExpired", remainingDays <= 0);
+        }
         
         // Add collections
         model.addAttribute("metrics", metrics);
