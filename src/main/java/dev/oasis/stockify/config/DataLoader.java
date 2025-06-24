@@ -18,11 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
-import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -41,81 +37,41 @@ public class DataLoader implements CommandLineRunner {
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final StockNotificationRepository stockNotificationRepository;
-    private final DataSource dataSource;
     
     @Value("${spring.flyway.schemas}")   
     private final String[] TENANT_IDS;
 
     @Override
     public void run(String... args) {
-        log.info("🚀 Starting Multi-Tenant Data Loader...");
+        log.info("🚀 Starting PostgreSQL Multi-Tenant Data Loader...");
+        log.info("🏗️ Using PostgreSQL schema-based multi-tenancy with PhysicalNamingStrategy");
+        log.info("� Automatic tenant isolation configured for accessible_tenants field");
+        log.info("�📋 Target tenants: {}", Arrays.toString(TENANT_IDS));
         
         try {
-                       
-            // First, fix any existing incorrect accessible_tenants data
-            fixAccessibleTenantsData();
-            
-
-            
             for (String tenantId : TENANT_IDS) {
-                log.info("🔄 Processing tenant: {}", tenantId);
+                log.info("🔄 Processing tenant: '{}' (schema: {})", tenantId, tenantId.toLowerCase());
                 try {
                     initializeTenantData(tenantId);
-                    log.info("✅ Completed processing tenant: {}", tenantId);
+                    log.info("✅ Completed processing tenant: '{}'", tenantId);
                                         
                 } catch (Exception e) {
-                    log.error("❌ Failed to process tenant {}: {}", tenantId, e.getMessage());
+                    log.error("❌ Failed to process tenant '{}': {}", tenantId, e.getMessage());
                     // Continue with other tenants instead of failing completely
                 }
             }
             
-            log.info("✅ Multi-Tenant Data Loader completed successfully!");
-            log.info("📊 Initialized {} tenants with sample data", TENANT_IDS.length);
+            log.info("✅ PostgreSQL Multi-Tenant Data Loader completed successfully!");
+            log.info("📊 Initialized {} tenants with schema-separated data", TENANT_IDS.length);
             log.warn("⚠️ Remember to change default passwords in production!");
             
            
               } 
               catch (Exception e) {
-            log.error("❌ Error during data loading: {}", e.getMessage(), e);
-            throw new RuntimeException("Data loading failed", e);
+            log.error("❌ Error during PostgreSQL multi-tenant data loading: {}", e.getMessage(), e);
+            throw new RuntimeException("Multi-tenant data loading failed", e);
         } finally {
             TenantContext.clear();
-        }
-    }
-    
-    /**
-     * Fix incorrect accessible_tenants data from previous configurations
-     */
-    @Transactional
-    private void fixAccessibleTenantsData() {
-        log.info("🔧 Fixing accessible_tenants data for tenant isolation...");
-        
-        try (Connection connection = dataSource.getConnection()) {
-
-            for (String tenantId : TENANT_IDS) {
-                if ("public".equals(tenantId)){ 
-                continue; // Skip public schema
-                }
-                
-                String updateSql = String.format(
-                    "UPDATE %s.app_user SET accessible_tenants = ? WHERE primary_tenant = ? AND role != 'SUPER_ADMIN' AND accessible_tenants LIKE '%%,%%'",
-                    tenantId
-                );
-                
-                try (PreparedStatement stmt = connection.prepareStatement(updateSql)) {
-                    stmt.setString(1, tenantId); // Set to own tenant only
-                    stmt.setString(2, tenantId); // Where primary_tenant matches
-                    
-                    int updated = stmt.executeUpdate();
-                    if (updated > 0) {
-                        log.info("✅ Fixed accessible_tenants for {} users in tenant: {}", updated, tenantId);
-                    }
-                } catch (SQLException e) {
-                    log.debug("Table might not exist yet for tenant {}: {}", tenantId, e.getMessage());
-                }
-            }
-        } catch (Exception e) {
-            log.warn("⚠️ Could not fix accessible_tenants data: {}", e.getMessage());
         }
     }
     
@@ -123,7 +79,7 @@ public class DataLoader implements CommandLineRunner {
     private void initializeTenantData(String tenantId) {
         try {
             TenantContext.setCurrentTenant(tenantId);
-            log.info("🏢 Initializing data for tenant: {}", tenantId);
+            log.info("🏢 Initializing data for tenant: {} (PostgreSQL schema-based)", tenantId);
             
             // Check if already initialized to avoid duplicates
             if (isAlreadyInitialized(tenantId)) {
@@ -140,7 +96,7 @@ public class DataLoader implements CommandLineRunner {
             // Initialize sample notifications
             createSampleNotifications(tenantId);
             
-            log.info("✨ Successfully initialized tenant: {}", tenantId);
+            log.info("✨ Successfully initialized tenant: {} with PostgreSQL schema separation", tenantId);
             
         } catch (Exception e) {
             log.error("❌ Failed to initialize tenant {}: {}", tenantId, e.getMessage(), e);
@@ -151,17 +107,14 @@ public class DataLoader implements CommandLineRunner {
     }    private boolean isAlreadyInitialized(String tenantId) {
         try {
             TenantContext.setCurrentTenant(tenantId);
-            log.info("🔍 Checking if tenant {} is already initialized - Current context: {}", 
+            log.info("🔍 Checking tenant initialization status for '{}' - Context: {}", 
                 tenantId, TenantContext.getCurrentTenant());
             
-            // Verify schema before checking data
-            verifyTenantSchema(tenantId);
-            
-            // Check if basic data exists
+            // Let Hibernate's PostgreSQLMultiTenantPhysicalNamingStrategy handle schema resolution
             long userCount = appUserRepository.count();
             long productCount = productRepository.count();
             
-            log.info("📊 Tenant {} - Users: {}, Products: {}", tenantId, userCount, productCount);
+            log.info("📊 Tenant '{}' status - Users: {}, Products: {}", tenantId, userCount, productCount);
             
             boolean hasUsers = userCount > 0;
             boolean hasProducts = productCount > 0;
@@ -176,7 +129,7 @@ public class DataLoader implements CommandLineRunner {
             return hasUsers && hasProducts;
             
         } catch (Exception e) {
-            log.debug("Could not check existing data for tenant {}, proceeding with initialization: {}", 
+            log.debug("Could not check existing data for tenant '{}', proceeding with initialization: {}", 
                 tenantId, e.getMessage());
             return false;
         }
@@ -212,10 +165,13 @@ public class DataLoader implements CommandLineRunner {
         superAdminDto.setPassword("superadmin123");
         superAdminDto.setRole(Role.SUPER_ADMIN);
         superAdminDto.setPrimaryTenant("public");
+        // Super admin gets access to all tenants
+        superAdminDto.setAccessibleTenants(String.join(",", TENANT_IDS));
         
         appUserService.saveUser(superAdminDto);
-        log.info("✅ Created SuperAdmin user");
-        log.warn("⚠️ Default SuperAdmin password is 'superaédmin123' - CHANGE THIS IN PRODUCTION!");
+        log.info("✅ Created SuperAdmin user with access to all tenants: {}", 
+                String.join(",", TENANT_IDS));
+        log.warn("⚠️ Default SuperAdmin password is 'superadmin123' - CHANGE THIS IN PRODUCTION!");
     }    private void createStandardUsers(String tenantId) {
         // Create tenant-specific usernames to avoid conflicts across tenants
         String adminUsername = "public".equals(tenantId) ? "admin" : "admin_" + tenantId;
@@ -252,9 +208,6 @@ public class DataLoader implements CommandLineRunner {
             TenantContext.setCurrentTenant(tenantId);
             log.info("🔧 Set tenant context to: {} - Current context: {}", 
                 tenantId, TenantContext.getCurrentTenant());
-            
-            // Verify the schema is correct
-            verifyTenantSchema(tenantId);
             
             // Check existing products BEFORE creating new ones
             long existingProductCount = productRepository.count();
@@ -364,6 +317,19 @@ public class DataLoader implements CommandLineRunner {
         dto.setPassword(password);
         dto.setRole(role);
         dto.setPrimaryTenant(tenantId);
+        
+        // Set accessible_tenants: SUPER_ADMIN can access all, others only their own tenant
+        if (role == Role.SUPER_ADMIN) {
+            // Super admin can access all tenants
+            dto.setAccessibleTenants(String.join(",", TENANT_IDS));
+            log.debug("🔑 SuperAdmin user '{}' created with access to all tenants: {}", 
+                     username, dto.getAccessibleTenants());
+        } else {
+            // Regular users (ADMIN, USER) can only access their own tenant
+            dto.setAccessibleTenants(tenantId);
+            log.debug("👤 User '{}' created with access limited to tenant: {}", username, tenantId);
+        }
+        
         return dto;
     }
 
@@ -409,32 +375,5 @@ public class DataLoader implements CommandLineRunner {
         dto.setStockLevel(stockLevel);
         dto.setLowStockThreshold(lowStockThreshold);
         return dto;
-    }
-      /**
-     * Verify that we're operating in the correct schema
-     */
-    private void verifyTenantSchema(String tenantId) {
-        try (Connection connection = dataSource.getConnection()) {
-            // Add connection timeout to prevent hanging
-            connection.setNetworkTimeout(null, 10000); // 10 seconds timeout
-            
-            String currentSchema = connection.getSchema();
-            log.info("🔍 Schema verification for tenant {}: Database connection schema = '{}'", 
-                tenantId, currentSchema);
-            
-            // Force schema set if not matching
-            String expectedSchema = tenantId.toLowerCase();
-            if (!expectedSchema.equals(currentSchema)) {
-                log.warn("⚠️ Schema mismatch! Expected '{}' but got '{}'. Setting schema...", 
-                    expectedSchema, currentSchema);
-                connection.setSchema(expectedSchema);
-                log.info("✅ Schema corrected to: {}", connection.getSchema());
-            }
-        } catch (SQLException e) {
-            log.error("❌ Failed to verify schema for tenant {}: {}", tenantId, e.getMessage());
-            // Don't throw the exception, just log it and continue
-        } catch (Exception e) {
-            log.error("❌ Unexpected error verifying schema for tenant {}: {}", tenantId, e.getMessage());
-        }
     }
 }

@@ -34,4 +34,6 @@ public class UserCreateDTO {
     private Boolean active = true; // Default to active
     
     private String primaryTenant; // Primary tenant for this user
+    
+    private String accessibleTenants; // Comma-separated list of accessible tenants
 }

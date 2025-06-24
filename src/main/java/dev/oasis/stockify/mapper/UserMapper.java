@@ -33,12 +33,18 @@ public class UserMapper {
             // Super admin can access all tenants
             appUser.setCanManageAllTenants(true);
             appUser.setIsGlobalUser(true);
-            // Note: accessibleTenants should be set separately for super admin
+            // Use accessibleTenants from DTO if provided, otherwise use primaryTenant
+            appUser.setAccessibleTenants(userCreateDTO.getAccessibleTenants() != null ? 
+                                       userCreateDTO.getAccessibleTenants() : 
+                                       userCreateDTO.getPrimaryTenant());
         } else {
             // Regular users only access their own tenant
             appUser.setCanManageAllTenants(false);
             appUser.setIsGlobalUser(false);
-            appUser.setAccessibleTenants(userCreateDTO.getPrimaryTenant()); // Only own tenant
+            // Use accessibleTenants from DTO if provided, otherwise use primaryTenant
+            appUser.setAccessibleTenants(userCreateDTO.getAccessibleTenants() != null ? 
+                                       userCreateDTO.getAccessibleTenants() : 
+                                       userCreateDTO.getPrimaryTenant());
         }
         
         return appUser;
@@ -66,12 +72,18 @@ public class UserMapper {
             // Super admin can access all tenants
             appUser.setCanManageAllTenants(true);
             appUser.setIsGlobalUser(true);
-            // Note: accessibleTenants should be set separately for super admin
+            // Use accessibleTenants from DTO if provided, otherwise use primaryTenant
+            appUser.setAccessibleTenants(userCreateDTO.getAccessibleTenants() != null ? 
+                                       userCreateDTO.getAccessibleTenants() : 
+                                       userCreateDTO.getPrimaryTenant());
         } else {
             // Regular users only access their own tenant
             appUser.setCanManageAllTenants(false);
             appUser.setIsGlobalUser(false);
-            appUser.setAccessibleTenants(userCreateDTO.getPrimaryTenant()); // Only own tenant
+            // Use accessibleTenants from DTO if provided, otherwise use primaryTenant
+            appUser.setAccessibleTenants(userCreateDTO.getAccessibleTenants() != null ? 
+                                       userCreateDTO.getAccessibleTenants() : 
+                                       userCreateDTO.getPrimaryTenant());
         }
         
         return appUser;
