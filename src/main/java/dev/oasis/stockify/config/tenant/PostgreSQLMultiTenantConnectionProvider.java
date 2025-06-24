@@ -46,18 +46,30 @@ public class PostgreSQLMultiTenantConnectionProvider implements MultiTenantConne
             String schema = tenantIdentifier != null ? tenantIdentifier.toLowerCase() : "public";
             
             // Schema'nın var olduğundan emin ol
-            ensureSchemaExists(connection, schema);              // PostgreSQL search_path ayarla (performanslı!)
+            ensureSchemaExists(connection, schema);
+            
+            // PostgreSQL search_path ayarla (performanslı!)
             String searchPath = String.format("\"%s\", \"public\"", schema);
             try (var stmt = connection.createStatement()) {
                 stmt.execute("SET search_path TO " + searchPath);
+                
+                // Verify the search_path was set correctly
+                try (var rs = stmt.executeQuery("SHOW search_path")) {
+                    if (rs.next()) {
+                        String currentPath = rs.getString(1);
+                        log.debug("🐘 PostgreSQL search_path verified: {} for tenant: {}", 
+                                currentPath, tenantIdentifier);
+                    }
+                }
             }
             
-            log.debug("🐘 PostgreSQL search_path set to: {} for tenant: {}", searchPath, tenantIdentifier);
+            log.info("🐘 PostgreSQL connection configured for tenant '{}' with schema '{}'", 
+                    tenantIdentifier, schema);
             
             return connection;
             
         } catch (SQLException e) {
-            log.error("Failed to set search_path for tenant: {}", tenantIdentifier, e);
+            log.error("Failed to configure PostgreSQL connection for tenant: {}", tenantIdentifier, e);
             if (connection != null) {
                 try {
                     connection.close();
@@ -65,7 +77,7 @@ public class PostgreSQLMultiTenantConnectionProvider implements MultiTenantConne
                     log.warn("Failed to close connection after error: {}", closeEx.getMessage());
                 }
             }
-            throw new SQLException("Failed to configure connection for tenant: " + tenantIdentifier, e);
+            throw new SQLException("Failed to configure PostgreSQL connection for tenant: " + tenantIdentifier, e);
         }
     }    @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {

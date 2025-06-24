@@ -1,19 +1,35 @@
 package dev.oasis.stockify.config.tenant;
 
 import org.hibernate.resource.jdbc.spi.StatementInspector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Temporary StatementInspector solution that works
- * Until we can debug why PhysicalNamingStrategy is not being called
+ * @deprecated This class is deprecated and will be removed in future versions.
+ * Use the permanent solution: PostgreSQLMultiTenantPhysicalNamingStrategy + PostgreSQLMultiTenantConnectionProvider
+ * 
+ * Temporary StatementInspector solution that worked as a workaround
+ * until PostgreSQL-native schema-based multi-tenancy was properly configured.
+ * 
+ * This class is now REPLACED by:
+ * - PostgreSQLMultiTenantPhysicalNamingStrategy (for schema naming)
+ * - PostgreSQLMultiTenantConnectionProvider (for search_path management)
  */
+@Slf4j
+@Deprecated(since = "2025-06-24", forRemoval = true)
 public class WorkingTenantStatementInspector implements StatementInspector {
     
-    private static final Logger log = LoggerFactory.getLogger(WorkingTenantStatementInspector.class);
-
+    public WorkingTenantStatementInspector() {
+        log.warn("⚠️ DEPRECATED: WorkingTenantStatementInspector is deprecated. " +
+                "Remove 'hibernate.session_factory.statement_inspector' from application.properties " +
+                "and rely on PostgreSQLMultiTenantPhysicalNamingStrategy instead.");
+    }
+    
     @Override
     public String inspect(String sql) {
+        // Log deprecation warning every time this is called
+        log.warn("⚠️ DEPRECATED: StatementInspector is being used. " +
+                "Migration to PhysicalNamingStrategy + ConnectionProvider is recommended.");
+        
         String currentTenant = TenantContext.getCurrentTenant();
         
         if (currentTenant != null && !currentTenant.isEmpty() && !currentTenant.equals("public")) {
@@ -26,7 +42,8 @@ public class WorkingTenantStatementInspector implements StatementInspector {
             modifiedSql = modifiedSql.replaceAll("\\bpublic\\.", currentTenant.toLowerCase() + ".");
             
             if (!sql.equals(modifiedSql)) {
-                log.info("🔧 SQL FIXED for tenant '{}': Schema changed from public to {}", 
+                log.warn("🔧 DEPRECATED SQL REWRITE for tenant '{}': Schema changed from public to {} " +
+                        "(Consider removing StatementInspector and using PhysicalNamingStrategy)", 
                          currentTenant, currentTenant.toLowerCase());
                 return modifiedSql;
             }
