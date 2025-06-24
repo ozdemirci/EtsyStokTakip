@@ -119,14 +119,9 @@
         <!-- Flyway for database migrations -->
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>11.8.2</version>
+            <artifactId>flyway-core</artifactId>           
         </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.8.2</version>  <!-- PostgreSQL için Flyway eklentisi -->
-        </dependency>
+        
 
         <!-- AspectJ for AOP -->
         <dependency>
