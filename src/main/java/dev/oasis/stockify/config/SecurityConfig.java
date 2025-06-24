@@ -2,7 +2,6 @@ package dev.oasis.stockify.config;
 
 import dev.oasis.stockify.config.tenant.TenantHeaderFilter;
 import dev.oasis.stockify.config.tenant.TenantSecurityFilter;
-import dev.oasis.stockify.config.security.SubscriptionFilter;
 import dev.oasis.stockify.service.AppUserDetailsService;
 import dev.oasis.stockify.config.tenant.TenantAwareAuthenticationSuccessHandler;
 import dev.oasis.stockify.model.Role;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,14 +26,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {    private final AppUserDetailsService appUserDetailsService;
     private final TenantHeaderFilter tenantHeaderFilter;
     private final TenantSecurityFilter tenantSecurityFilter;
-    private final SubscriptionFilter subscriptionFilter;   
     private final TenantAwareAuthenticationSuccessHandler successHandler;
-
-    @Bean
+    private final PasswordEncoder passwordEncoder;    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(appUserDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
@@ -46,11 +42,11 @@ public class SecurityConfig {    private final AppUserDetailsService appUserDeta
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.info("🔒 Configuring Security Filter Chain...");
-          http
+        log.info("🔒 Configuring Security Filter Chain...");        http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
-            .addFilterAfter(subscriptionFilter, TenantSecurityFilter.class).csrf(csrf -> csrf.disable())            .authorizeHttpRequests(auth -> auth                // Public endpoints
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth                // Public endpoints
                 .requestMatchers("/", "/register", "/register/**", "/login*", "/css/**", "/js/**", "/images/**", "/error", "/trial-expired", "/actuator/**", "/favicon.ico").permitAll()
                 // SUPER_ADMIN can access everything 
                 .requestMatchers("/superadmin/**").hasRole(Role.SUPER_ADMIN.name())
@@ -75,14 +71,7 @@ public class SecurityConfig {    private final AppUserDetailsService appUserDeta
             )
             .headers(headers -> headers
                 .frameOptions(frameOptions -> frameOptions.sameOrigin())
-            );
-
-        log.info("✅ Security Filter Chain configured successfully");
+            );        log.info("✅ Security Filter Chain configured successfully");
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
