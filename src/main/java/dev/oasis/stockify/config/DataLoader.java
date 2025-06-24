@@ -46,25 +46,23 @@ public class DataLoader implements CommandLineRunner {
     @Value("${spring.flyway.schemas}")   
     private final String[] TENANT_IDS;
 
-        @Override
+    @Override
     public void run(String... args) {
         log.info("🚀 Starting Multi-Tenant Data Loader...");
         
         try {
-            // Add a small delay to ensure database is fully ready
-            Thread.sleep(2000);
-            
+                       
             // First, fix any existing incorrect accessible_tenants data
             fixAccessibleTenantsData();
+            
+
             
             for (String tenantId : TENANT_IDS) {
                 log.info("🔄 Processing tenant: {}", tenantId);
                 try {
                     initializeTenantData(tenantId);
                     log.info("✅ Completed processing tenant: {}", tenantId);
-                    
-                    // Add a small delay between tenants to avoid overwhelming the connection pool
-                    Thread.sleep(1000);
+                                        
                 } catch (Exception e) {
                     log.error("❌ Failed to process tenant {}: {}", tenantId, e.getMessage());
                     // Continue with other tenants instead of failing completely
@@ -76,11 +74,8 @@ public class DataLoader implements CommandLineRunner {
             log.warn("⚠️ Remember to change default passwords in production!");
             
            
-              } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("❌ Data loading was interrupted: {}", e.getMessage());
-            throw new RuntimeException("Data loading interrupted", e);
-        } catch (Exception e) {
+              } 
+              catch (Exception e) {
             log.error("❌ Error during data loading: {}", e.getMessage(), e);
             throw new RuntimeException("Data loading failed", e);
         } finally {
@@ -220,14 +215,17 @@ public class DataLoader implements CommandLineRunner {
         
         appUserService.saveUser(superAdminDto);
         log.info("✅ Created SuperAdmin user");
-        log.warn("⚠️ Default SuperAdmin password is 'superadmin123' - CHANGE THIS IN PRODUCTION!");
-    }
-
-    private void createStandardUsers(String tenantId) {
+        log.warn("⚠️ Default SuperAdmin password is 'superaédmin123' - CHANGE THIS IN PRODUCTION!");
+    }    private void createStandardUsers(String tenantId) {
+        // Create tenant-specific usernames to avoid conflicts across tenants
+        String adminUsername = "public".equals(tenantId) ? "admin" : "admin_" + tenantId;
+        String managerUsername = "public".equals(tenantId) ? "manager" : "manager_" + tenantId;
+        String operatorUsername = "public".equals(tenantId) ? "operator" : "operator_" + tenantId;
+        
         List<UserCreateDTO> users = Arrays.asList(
-            createUser("admin", "admin123", Role.ADMIN, tenantId),
-            createUser("manager", "manager123", Role.USER, tenantId),
-            createUser("operator", "operator123", Role.USER, tenantId)
+            createUser(adminUsername, "admin123", Role.ADMIN, tenantId),
+            createUser(managerUsername, "manager123", Role.USER, tenantId),
+            createUser(operatorUsername, "operator123", Role.USER, tenantId)
         );
         
         int created = 0;
@@ -237,6 +235,8 @@ public class DataLoader implements CommandLineRunner {
                     appUserService.saveUser(user);
                     created++;
                     log.info("✅ Created user: {} for tenant: {}", user.getUsername(), tenantId);
+                } else {
+                    log.info("⏭️ User {} already exists, skipping", user.getUsername());
                 }
             } catch (Exception e) {
                 log.error("❌ Failed to create user {} for tenant {}: {}", 

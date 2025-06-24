@@ -248,12 +248,4 @@ CREATE INDEX IF NOT EXISTS idx_categories_active_sort ON product_categories (is_
 INSERT INTO product_categories (name, description, is_active, sort_order) VALUES
 ('Electronics', 'Electronic devices and accessories', TRUE, 0),
 ('Clothing', 'Apparel and fashion items', TRUE, 1),
-('Books', 'Books and publications', TRUE, 2),
-('Home & Garden', 'Home improvement and garden supplies', TRUE, 3),
-('Sports', 'Sports equipment and gear', TRUE, 4),
-('Toys', 'Toys and games', TRUE, 5),
-('Food & Beverages', 'Food items and beverages', TRUE, 6),
-('Health & Beauty', 'Health and beauty products', TRUE, 7),
-('Automotive', 'Automotive parts and accessories', TRUE, 8),
-('Office Supplies', 'Office and business supplies', TRUE, 9),
 ('Other', 'Miscellaneous items', TRUE, 10);

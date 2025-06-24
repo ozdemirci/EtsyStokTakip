@@ -1,8 +1,8 @@
 package dev.oasis.stockify.config;
 
-import dev.oasis.stockify.config.tenant.TenantHeaderFilter;
-import dev.oasis.stockify.config.tenant.TenantSecurityFilter;
 import dev.oasis.stockify.service.AppUserDetailsService;
+import dev.oasis.stockify.config.security.TenantHeaderFilter;
+import dev.oasis.stockify.config.security.TenantSecurityFilter;
 import dev.oasis.stockify.config.tenant.TenantAwareAuthenticationSuccessHandler;
 import dev.oasis.stockify.model.Role;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Slf4j
-public class SecurityConfig {    private final AppUserDetailsService appUserDetailsService;
+public class SecurityConfig {    
+    private final AppUserDetailsService appUserDetailsService;
     private final TenantHeaderFilter tenantHeaderFilter;
     private final TenantSecurityFilter tenantSecurityFilter;
     private final TenantAwareAuthenticationSuccessHandler successHandler;

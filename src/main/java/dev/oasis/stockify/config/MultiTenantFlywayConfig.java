@@ -90,10 +90,10 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
                 .defaultSchema(schemaName)
                 .createSchemas(true)
                 .baselineOnMigrate(true)
-                .cleanOnValidationError(true)
                 .table("flyway_schema_history_" + schemaName.toLowerCase().replace("-", "_"))
                 .load();
-            
+
+           
             // Migrate the schema
             tenantFlyway.migrate();
             

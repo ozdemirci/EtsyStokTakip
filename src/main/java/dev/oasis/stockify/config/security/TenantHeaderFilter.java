@@ -1,4 +1,4 @@
-package dev.oasis.stockify.config.tenant;
+package dev.oasis.stockify.config.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,6 +11,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import dev.oasis.stockify.config.tenant.TenantContext;
 
 import java.io.IOException;
 
