@@ -53,3 +53,7 @@ services:
 networks:
   stockify-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+    name: stockify-postgres-data
