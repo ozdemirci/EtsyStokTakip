@@ -44,6 +44,7 @@ public class TenantManagementService {
     /**
      * Create a new tenant with complete setup
      */
+
     @Transactional
     public TenantDTO createTenant(TenantCreateDTO createDTO) {
         String tenantId = generateTenantId(createDTO.getCompanyName());
@@ -216,7 +217,7 @@ public class TenantManagementService {
     }
 
     private void createTenantSchema(String tenantId) throws SQLException {
-        String schemaName = tenantId.toLowerCase(Locale.ROOT);
+        String schemaName = tenantId.toLowerCase();
         
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
