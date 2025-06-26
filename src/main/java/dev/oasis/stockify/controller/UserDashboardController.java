@@ -27,20 +27,23 @@ import java.util.List;
 @PreAuthorize("hasRole('USER')")
 @RequiredArgsConstructor
 @Slf4j
-public class UserDashboardController {    private final DashboardService dashboardService;
+public class UserDashboardController {
+
+    private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
     private final StockNotificationService stockNotificationService;
 
     @GetMapping
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
-        String currentTenantId = getCurrentTenantId(request, authentication);
+        String currentTenantId = getCurrentTenantId(request);
         
         log.debug("User Dashboard - Current tenant ID: {}", currentTenantId);
         
         TenantDTO currentTenant = null;
         try {
             currentTenant = tenantManagementService.getTenant(currentTenantId);
+
         } catch (Exception e) {
             log.warn("Could not get tenant info for: {}, error: {}", currentTenantId, e.getMessage());
         }        // Get dashboard metrics
@@ -92,12 +95,12 @@ public class UserDashboardController {    private final DashboardService dashboa
      */
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {
-        String currentTenantId = getCurrentTenantId(request, null);
+        String currentTenantId = getCurrentTenantId(request);
         TenantContext.setCurrentTenant(currentTenantId);
         log.debug("Set tenant context to: {}", currentTenantId);
     }
 
-    private String getCurrentTenantId(HttpServletRequest request, Authentication authentication) {
+    private String getCurrentTenantId(HttpServletRequest request) {
         // First, try to get from current tenant context
         String currentTenantId = TenantContext.getCurrentTenant();
         log.debug("1. From context: '{}'", currentTenantId);

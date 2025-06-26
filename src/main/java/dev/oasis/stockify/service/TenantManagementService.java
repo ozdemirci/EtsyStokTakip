@@ -6,6 +6,7 @@ import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.exception.TenantAlreadyExistsException;
 import dev.oasis.stockify.exception.TenantNotFoundException;
+import dev.oasis.stockify.model.PlanType;
 import dev.oasis.stockify.model.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -130,7 +131,9 @@ public class TenantManagementService {
         }
         
         return getTenantInfo(tenantId);
-    }    /**
+    }
+
+    /**
      * Deactivate a tenant (soft delete)
      */
     @Transactional
@@ -147,7 +150,9 @@ public class TenantManagementService {
         } finally {
             TenantContext.clear();
         }
-    }    /**
+    }
+
+    /**
      * Activate a tenant
      */
     @Transactional
@@ -182,8 +187,9 @@ public class TenantManagementService {
             log.error("❌ Error checking tenant existence: {}", e.getMessage());
             return false;
         }
-    }    // Private helper methods
+    }
 
+    // Private helper methods
     private String generateTenantId(String companyName) {
         // Generate tenant ID based on company name
         String sanitized = companyName.toLowerCase()
@@ -284,7 +290,9 @@ public class TenantManagementService {
                 stmt.executeUpdate();
             }
         }
-    }    private void createTenantAdmin(TenantCreateDTO createDTO) {
+    }
+
+    private void createTenantAdmin(TenantCreateDTO createDTO) {
         try {
             UserCreateDTO adminUser = new UserCreateDTO();
             adminUser.setUsername(createDTO.getAdminUsername());
@@ -298,7 +306,9 @@ public class TenantManagementService {
             log.error("❌ Failed to create admin user: {}", e.getMessage());
             throw new RuntimeException("Failed to create admin user", e);
         }
-    }    private void setupDefaultConfigurations(String tenantId, TenantCreateDTO createDTO) throws SQLException {
+    }
+
+    private void setupDefaultConfigurations(String tenantId, TenantCreateDTO createDTO) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
@@ -316,7 +326,9 @@ public class TenantManagementService {
                 }
             }
         }
-    }    private TenantDTO getTenantInfo(String tenantId) {
+    }
+
+    private TenantDTO getTenantInfo(String tenantId) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
@@ -338,6 +350,7 @@ public class TenantManagementService {
                         case "company_name" -> builder.companyName(value);
                         case "admin_email" -> builder.adminEmail(value);
                         case "tenant_status" -> builder.status(value);
+
                     }
                 }
                 
