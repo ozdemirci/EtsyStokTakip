@@ -45,9 +45,13 @@ public class RegistrationService {
             if (isEmailAlreadyRegistered(registerRequest.getEmail())) {
                 throw new RuntimeException("Bu e-posta adresi zaten kayıtlı");
             }
-            
-            // Generate unique username from email
-            String username = generateUniqueUsername(registerRequest.getEmail());
+
+            // Check if username already exists
+            if (appUserService.existsByUsername(registerRequest.getUsername())) {
+                throw new RuntimeException("Bu kullanıcı adı zaten kayıtlı");
+            }
+
+            String username = registerRequest.getUsername();
             
             // Create tenant
             TenantCreateDTO tenantCreateDTO = TenantCreateDTO.builder()
@@ -88,26 +92,19 @@ public class RegistrationService {
             return false;
         }
     }
-    
+
     /**
-     * Generate unique username from email
+     * Check if username is already registered across all tenants
      */
-    private String generateUniqueUsername(String email) {
-        String baseUsername = email.substring(0, email.indexOf("@")).toLowerCase();
-        String username = baseUsername;
-        int counter = 1;
-        
-        // Check if username exists and increment if needed
-        while (appUserService.existsByUsername(username)) {
-            username = baseUsername + counter;
-            counter++;
-            if (counter > 100) { // Safety check
-                throw new RuntimeException("Kullanıcı adı oluşturulamadı");
-            }
+    public boolean isUsernameAlreadyRegistered(String username) {
+        try {
+            return appUserService.existsByUsername(username);
+        } catch (Exception e) {
+            log.warn("Could not check username existence: {}", e.getMessage());
+            return false;
         }
-        
-        return username;
     }
+    
       /**
      * Get plan features for display
      */
