@@ -38,9 +38,9 @@ public class AdminDashboardController {
     private final AppUserService appUserService;
     private final StockNotificationService stockNotificationService;
     private final SubscriptionService subscriptionService;
-    private final StockMovementService stockMovementService;
-    @GetMapping
+    
 
+    @GetMapping
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
         String currentTenantId = getCurrentTenantId(request, authentication);
