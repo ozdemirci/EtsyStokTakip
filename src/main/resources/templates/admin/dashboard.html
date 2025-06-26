@@ -179,7 +179,8 @@
 
                 <!-- Notifications Alert Row -->
                 <div class="row mb-4">
-                    <div class="col-md-3">                        <div class="card stats-card border-warning">
+                    <div class="col-md-3">
+                        <div class="card stats-card border-warning">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
@@ -198,31 +199,107 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-9">
-                        <div class="card border-warning">
-                            <div class="card-header bg-warning text-dark">
-                                <h6 class="card-title mb-0">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Recent Critical Alerts
-                                </h6>
+                    
+                    <!-- Stock Movements Card -->
+                    <div class="col-md-3">
+                        <div class="card stats-card border-info">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Stock Movements</h6>
+                                        <h3 class="mb-0 text-info" th:text="${totalStockMovements ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-info">
+                                        <i class="bi bi-arrow-left-right display-6"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-success">
+                                        <i class="bi bi-arrow-up-circle"></i> <span th:text="${stockInMovements ?: 0}">0</span> In
+                                    </small>
+                                    <small class="text-danger ms-2">
+                                        <i class="bi bi-arrow-down-circle"></i> <span th:text="${stockOutMovements ?: 0}">0</span> Out
+                                    </small>
+                                </div>
                             </div>
-                            <div class="card-body p-2">
-                                <div class="row" id="recentAlertsContainer">
-                                    <div class="col-md-4">
-                                        <div class="alert alert-danger alert-sm mb-1 p-2">
-                                            <i class="bi bi-x-circle me-1"></i>
-                                            <small><strong>5 products</strong> out of stock</small>
-                                        </div>
-                                    </div>                                    <div class="col-md-4">
-                                        <div class="alert alert-warning alert-sm mb-1 p-2" style="cursor: pointer;" onclick="window.location.href='/admin/products?tab=low-stock'">
-                                            <i class="bi bi-exclamation-triangle me-1"></i>
-                                            <small><strong>12 products</strong> low stock</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
-                                            <i class="bi bi-bell"></i> View All
-                                        </a>
-                                    </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions Card -->
+                    <div class="col-md-6">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">Quick Stock Actions</h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a th:href="@{/admin/stock-movements}" class="btn btn-outline-info btn-sm">
+                                        <i class="bi bi-list-ul me-1"></i>View All Movements
+                                    </a>
+                                    <button class="btn btn-outline-success btn-sm" onclick="quickStockIn()">
+                                        <i class="bi bi-plus-circle me-1"></i>Quick Stock In
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="quickStockAdjustment()">
+                                        <i class="bi bi-gear me-1"></i>Quick Adjustment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Stock Movements -->
+                <div class="row mb-4" th:if="${recentStockMovements != null and !recentStockMovements.isEmpty()}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-clock-history me-2"></i>Recent Stock Movements
+                                </h5>
+                                <a th:href="@{/admin/stock-movements}" class="btn btn-outline-primary btn-sm">
+                                    View All <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Type</th>
+                                                <th>Quantity</th>
+                                                <th>Previous → New</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="movement : ${recentStockMovements}">
+                                                <td>
+                                                    <div>
+                                                        <strong class="text-truncate" th:text="${movement.productTitle}">Product Name</strong><br>
+                                                        <small class="text-muted" th:text="${movement.productSku}">SKU</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge"
+                                                          th:classappend="${movement.movementType.name() == 'IN'} ? 'bg-success' : (${movement.movementType.name() == 'OUT'} ? 'bg-danger' : 'bg-warning')"
+                                                          th:text="${movement.movementTypeDisplay}">
+                                                        Type
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span th:class="${movement.quantity > 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}"
+                                                          th:text="${movement.quantity > 0 ? '+' + movement.quantity : movement.quantity}">
+                                                        +10
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span th:text="${movement.previousStock} + ' → ' + ${movement.newStock}">50 → 60</span>
+                                                </td>
+                                                <td>
+                                                    <small th:text="${#temporals.format(movement.createdAt, 'dd.MM HH:mm')}">01.01 10:30</small>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

@@ -57,11 +57,11 @@ try {
 
 # Check specific tenant data
 Write-Host ""
-Write-Host "🏢 Checking specific tenant (global_trade)..." -ForegroundColor Yellow
+Write-Host "🏢 Checking specific tenant (com)..." -ForegroundColor Yellow
 try {
-    $headers = @{ "X-TenantId" = "global_trade" }
-    $tenantResponse = Invoke-WebRequest -Uri "http://localhost:8080/api/demo/tenant/global_trade/data" -Headers $headers -UseBasicParsing
-    if ($tenantResponse.Content -like "*global_trade*") {
+    $headers = @{ "X-TenantId" = "com" }
+    $tenantResponse = Invoke-WebRequest -Uri "http://localhost:8080/api/demo/tenant/com/data" -Headers $headers -UseBasicParsing
+    if ($tenantResponse.Content -like "*com*") {
         Write-Host "✅ Tenant isolation: WORKING" -ForegroundColor Green
         $tenantOk = $true
     } else {

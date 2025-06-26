@@ -5,12 +5,16 @@ import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.Role;
+import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.model.StockNotification;
+import dev.oasis.stockify.model.PlanType;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
+import dev.oasis.stockify.repository.StockMovementRepository;
 import dev.oasis.stockify.repository.StockNotificationRepository;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.ProductService;
+import dev.oasis.stockify.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -31,9 +35,11 @@ public class DataLoader implements CommandLineRunner {
    
     private final AppUserService appUserService;
     private final ProductService productService;
+    private final SubscriptionService subscriptionService;
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final StockNotificationRepository stockNotificationRepository;
+    private final StockMovementRepository stockMovementRepository;
     
     @Value("${spring.flyway.schemas}")   
     private final String[] TENANT_IDS;
@@ -65,25 +71,31 @@ public class DataLoader implements CommandLineRunner {
     private void initializeTenantData(String tenantId) {
         try {
             TenantContext.setCurrentTenant(tenantId);
-            
+
             // Check if already initialized
             if (isAlreadyInitialized(tenantId)) {
                 log.info("📋 Tenant '{}' already initialized, skipping", tenantId);
                 return;
             }
+
+            
+            
+            
             
             // Create users (SuperAdmin only for public tenant)
             if ("public".equals(tenantId)) {
                 createSuperAdmin();
             }
-            createSampleUsers(tenantId);
-            
-            // Create products and notifications
+
+            //sample datas
+            setTenantPlan(tenantId);
+            createSampleUsers(tenantId);           
             createSampleProducts(tenantId);
+            createSampleStockMovements(tenantId);
             createSampleNotifications(tenantId);
-            
+
             log.info("✨ Successfully initialized tenant: '{}'", tenantId);
-            
+
         } catch (Exception e) {
             log.error("❌ Failed to initialize tenant '{}': {}", tenantId, e.getMessage(), e);
             throw new RuntimeException("Failed to initialize tenant: " + tenantId, e);
@@ -91,6 +103,27 @@ public class DataLoader implements CommandLineRunner {
             TenantContext.clear();
         }
     }
+
+
+    private void setTenantPlan(String tenantId) {
+        // Set default plan type to ENTERPRISE
+            PlanType defaultPlan = PlanType.ENTERPRISE;
+            log.info("🔄 Setting default plan type '{}' for tenant: '{}'", defaultPlan.getDisplayName(), tenantId);
+
+
+// Save the plan using SubscriptionService
+            try {
+                subscriptionService.setTenantPlan(tenantId, defaultPlan.getCode());
+                log.info("✅ Successfully set plan '{}' for tenant: '{}'", defaultPlan.getDisplayName(), tenantId);
+            } catch (Exception e) {
+                log.warn("⚠️ Could not set plan for tenant '{}': {}", tenantId, e.getMessage());
+            }
+
+
+
+
+    }
+
 
     private boolean isAlreadyInitialized(String tenantId) {
         try {
@@ -176,6 +209,42 @@ public class DataLoader implements CommandLineRunner {
                 log.info("✅ Created product: {} for tenant: {}", product[1], tenantId);
             }
         }
+    }
+
+    private void createSampleStockMovements(String tenantId) {
+        List<Product> products = productRepository.findAll();
+        if (products.isEmpty()) {
+            return;
+        }
+        
+        // Create 5 sample stock movements
+        StockMovement.MovementType[] types = {
+            StockMovement.MovementType.IN, 
+            StockMovement.MovementType.OUT, 
+            StockMovement.MovementType.ADJUSTMENT,
+            StockMovement.MovementType.IN,
+            StockMovement.MovementType.RETURN
+        };
+        
+        Random random = new Random();
+        
+        for (int i = 0; i < Math.min(5, products.size()); i++) {
+            Product product = products.get(i);
+            
+            StockMovement movement = new StockMovement();
+            movement.setProduct(product);
+            movement.setMovementType(types[i]);
+            movement.setQuantity(types[i] == StockMovement.MovementType.OUT ? -random.nextInt(10) - 1 : random.nextInt(20) + 1);
+            movement.setPreviousStock(product.getStockLevel());
+            movement.setNewStock(product.getStockLevel() + movement.getQuantity());
+            movement.setReferenceId("SAMPLE_" + tenantId.toUpperCase() + "_" + (i + 1));
+            movement.setNotes("Sample stock " + (types[i] == StockMovement.MovementType.IN ? "addition" : "movement") + " for product: " + product.getTitle());
+            movement.setCreatedBy(1L); // Assuming first user
+            
+            stockMovementRepository.save(movement);
+        }
+        
+        log.info("✅ Created {} sample stock movements for tenant: {}", Math.min(5, products.size()), tenantId);
     }
 
     private void createSampleNotifications(String tenantId) {

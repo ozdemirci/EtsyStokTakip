@@ -4,8 +4,10 @@ import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.dto.QuickRestockResponseDTO;
+import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.mapper.ProductMapper;
 import dev.oasis.stockify.model.Product;
+import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,13 +28,16 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final StockNotificationService stockNotificationService;
+    private final StockMovementService stockMovementService;
 
     public ProductService(ProductRepository productRepository,
-                        ProductMapper productMapper,
-                        StockNotificationService stockNotificationService) {
+                         ProductMapper productMapper,
+                         StockNotificationService stockNotificationService,
+                         StockMovementService stockMovementService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.stockNotificationService = stockNotificationService;
+        this.stockMovementService = stockMovementService;
     }    /**
      * Retrieves all products from the database
      * @return a list of all products
@@ -235,22 +240,34 @@ public class ProductService {
                         throw new IllegalArgumentException("Stock level cannot be negative");
                     }
                     
-                    // Update stock level
-                    product.setStockLevel(newStockLevel);
-                    Product savedProduct = productRepository.save(product);
+                    // Create stock movement record before updating product
+                    StockMovementCreateDTO stockMovementCreateDTO = new StockMovementCreateDTO();
+                    stockMovementCreateDTO.setProductId(productId);
+                    stockMovementCreateDTO.setMovementType(
+                        operation.equals("ADD") ? StockMovement.MovementType.IN : StockMovement.MovementType.ADJUSTMENT
+                    );
+                    stockMovementCreateDTO.setQuantity(operation.equals("ADD") ? quantity : newStockLevel - oldStockLevel);
+                    stockMovementCreateDTO.setReferenceId("QUICK_RESTOCK_" + System.currentTimeMillis());
+                    stockMovementCreateDTO.setNotes("Quick restock operation: " + operation + " - " + quantity);
+                    // Note: StockMovementService will handle updating the product stock level
+                    stockMovementService.createStockMovement(stockMovementCreateDTO);
+                    
+                    // Refresh product after stock movement
+                    Product savedProduct = productRepository.findById(productId)
+                        .orElseThrow(() -> new RuntimeException("Product not found after stock movement"));
                     
                     // Check for low stock notifications
                     stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
                     
                     log.info("✅ Quick restock completed - Product: {} Old Stock: {} New Stock: {} for tenant: {}", 
-                            product.getTitle(), oldStockLevel, newStockLevel, currentTenant);
+                            savedProduct.getTitle(), oldStockLevel, savedProduct.getStockLevel(), currentTenant);
                     
                     return QuickRestockResponseDTO.success(
                         productId,
-                        product.getTitle(),
+                        savedProduct.getTitle(),
                         oldStockLevel,
-                        newStockLevel,
-                        operation.equals("ADD") ? quantity : newStockLevel - oldStockLevel,
+                        savedProduct.getStockLevel(),
+                        operation.equals("ADD") ? quantity : savedProduct.getStockLevel() - oldStockLevel,
                         operation
                     );
                 })

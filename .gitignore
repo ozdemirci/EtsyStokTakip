@@ -1,6 +1,5 @@
 /.idea
 /.vscode
-/copy-logs.sh
 /target
 /logs
 /.mvn

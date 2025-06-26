@@ -2,9 +2,11 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
+import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.DashboardService;
+import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.StockNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,23 @@ public class UserDashboardController {    private final DashboardService dashboa
         // Get notification data
         List<StockNotification> notifications = stockNotificationService.getAllNotifications();
         long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
+        
+        // Get stock movement data for user dashboard
+        try {
+            List<StockMovementResponseDTO> recentStockMovements = dashboardService.getRecentStockMovements();
+            StockMovementService.StockMovementStats stockStats = dashboardService.getStockMovementStats();
+            
+            model.addAttribute("recentStockMovements", recentStockMovements);
+            model.addAttribute("totalStockMovements", stockStats.getTotalMovements());
+            model.addAttribute("stockInMovements", stockStats.getInMovements());
+            model.addAttribute("stockOutMovements", stockStats.getOutMovements());
+        } catch (Exception e) {
+            log.warn("Could not get stock movement data for user dashboard: {}", e.getMessage());
+            model.addAttribute("recentStockMovements", List.of());
+            model.addAttribute("totalStockMovements", 0);
+            model.addAttribute("stockInMovements", 0);
+            model.addAttribute("stockOutMovements", 0);
+        }
         
         log.debug("Found metrics for tenant: {} - Products: {}, Stock Value: {}", 
                 currentTenantId, metrics.getTotalProducts(), metrics.getTotalInventoryValue());

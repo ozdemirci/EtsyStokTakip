@@ -72,6 +72,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="/user/stock-movements">
+                                <i class="bi bi-arrow-left-right"></i> Stock Movements
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/user/notifications">
                                 <i class="bi bi-bell"></i> Notifications
                                 <span class="badge bg-danger ms-2" 
@@ -159,6 +164,55 @@
                     </div>
                 </div>
 
+                <!-- Stock Movement Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card stats-card" style="border-left-color: #28a745;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Total Stock Movements</h6>
+                                        <h3 class="mb-0" th:text="${totalStockMovements ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-success">
+                                        <i class="bi bi-arrow-left-right" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stats-card" style="border-left-color: #28a745;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Stock In</h6>
+                                        <h3 class="mb-0 text-success" th:text="${stockInMovements ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-success">
+                                        <i class="bi bi-arrow-down-circle" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stats-card" style="border-left-color: #dc3545;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-muted">Stock Out</h6>
+                                        <h3 class="mb-0 text-danger" th:text="${stockOutMovements ?: 0}">0</h3>
+                                    </div>
+                                    <div class="text-danger">
+                                        <i class="bi bi-arrow-up-circle" style="font-size: 2rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quick Actions -->
                 <div class="row mb-4">
                     <div class="col-12">
@@ -174,9 +228,15 @@
                                         <a href="/user/products" class="btn btn-outline-primary w-100 quick-action-btn">
                                             <i class="bi bi-box-seam"></i> View Products
                                         </a>
-                                    </div>                                    <div class="col-md-3">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="/user/stock-movements" class="btn btn-outline-success w-100 quick-action-btn">
+                                            <i class="bi bi-arrow-left-right"></i> Stock Movements
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
                                         <a href="/user/products?tab=low-stock" class="btn btn-outline-warning w-100 quick-action-btn">
-                                            <i class="bi bi-exclamation-triangle"></i> Check Low Stock
+                                            <i class="bi bi-exclamation-triangle me-2"></i>Check Low Stock
                                         </a>
                                     </div>
                                     <div class="col-md-3">
@@ -184,11 +244,90 @@
                                             <i class="bi bi-bell"></i> View Notifications
                                         </a>
                                     </div>
-                                    <div class="col-md-3">
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
                                         <button class="btn btn-outline-secondary w-100 quick-action-btn" onclick="refreshData()">
                                             <i class="bi bi-arrow-clockwise"></i> Refresh Data
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Stock Movements -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-arrow-left-right"></i> Recent Stock Movements
+                                </h5>
+                                <a href="/user/stock-movements" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View All
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${recentStockMovements != null and !recentStockMovements.empty}">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Product</th>
+                                                    <th>Type</th>
+                                                    <th>Quantity</th>
+                                                    <th>Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="movement : ${recentStockMovements}">
+                                                    <td>
+                                                        <small th:text="${#temporals.format(movement.timestamp, 'MM-dd HH:mm')}">
+                                                            01-01 12:00
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <span th:text="${movement.productName}">Product Name</span>
+                                                        <br>
+                                                        <small class="text-muted" th:text="${movement.productSku}">SKU-001</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge"
+                                                              th:class="${'badge ' + 
+                                                                       (movement.type == 'IN' ? 'bg-success' : 
+                                                                        movement.type == 'OUT' ? 'bg-danger' : 
+                                                                        movement.type == 'ADJUSTMENT' ? 'bg-warning' : 'bg-info')}"
+                                                              th:text="${movement.type}">
+                                                            IN
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span th:class="${movement.type == 'IN' ? 'text-success' : 
+                                                                       (movement.type == 'OUT' ? 'text-danger' : 'text-primary')}"
+                                                              th:text="${(movement.type == 'IN' ? '+' : 
+                                                                       (movement.type == 'OUT' ? '-' : '')) + movement.quantity}">
+                                                            +10
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small th:text="${movement.reason ?: 'No reason'}" 
+                                                               th:title="${movement.reason}">
+                                                            Stock replenishment
+                                                        </small>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div th:if="${recentStockMovements == null or recentStockMovements.empty}" 
+                                     class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox display-6"></i>
+                                    <div class="mt-2">No recent stock movements</div>
+                                    <small>Stock movements will appear here when products are updated</small>
                                 </div>
                             </div>
                         </div>

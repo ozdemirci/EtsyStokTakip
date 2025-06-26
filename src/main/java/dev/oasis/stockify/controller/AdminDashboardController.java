@@ -2,11 +2,13 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
+import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.PlanType;
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.DashboardService;
+import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.service.SubscriptionService;
 import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.AppUserService;
@@ -33,7 +35,8 @@ public class AdminDashboardController {    private final DashboardService dashbo
     private final TenantManagementService tenantManagementService;
     private final AppUserService appUserService;
     private final StockNotificationService stockNotificationService;
-    private final SubscriptionService subscriptionService;@GetMapping
+    private final SubscriptionService subscriptionService;
+    private final StockMovementService stockMovementService;@GetMapping
 
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
@@ -58,7 +61,26 @@ public class AdminDashboardController {    private final DashboardService dashbo
         long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
         long criticalNotifications = notifications.stream()
             .filter(n -> "HIGH".equals(n.getPriority()) || "OUT_OF_STOCK".equals(n.getNotificationType()))
-            .count();// Add individual metrics for template
+            .count();
+
+        // Get stock movement data
+        try {
+            List<StockMovementResponseDTO> recentStockMovements = dashboardService.getRecentStockMovements();
+            StockMovementService.StockMovementStats stockStats = dashboardService.getStockMovementStats();
+            
+            model.addAttribute("recentStockMovements", recentStockMovements);
+            model.addAttribute("totalStockMovements", stockStats.getTotalMovements());
+            model.addAttribute("stockInMovements", stockStats.getInMovements());
+            model.addAttribute("stockOutMovements", stockStats.getOutMovements());
+        } catch (Exception e) {
+            log.warn("Could not get stock movement data: {}", e.getMessage());
+            model.addAttribute("recentStockMovements", List.of());
+            model.addAttribute("totalStockMovements", 0);
+            model.addAttribute("stockInMovements", 0);
+            model.addAttribute("stockOutMovements", 0);
+        }
+        
+        // Add individual metrics for template
         model.addAttribute("totalProducts", metrics.getTotalProducts());
         model.addAttribute("activeProducts", Math.max(0, metrics.getTotalProducts() - metrics.getLowStockProducts()));
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
@@ -80,19 +102,6 @@ public class AdminDashboardController {    private final DashboardService dashbo
         model.addAttribute("planFeatures", currentPlan.getFeaturesDescription());
         model.addAttribute("planPrice", currentPlan.getPriceDescription());
         model.addAttribute("isTrialPlan", currentPlan.isTrial());
-        
-        // Add usage limits
-        model.addAttribute("maxUsers", currentPlan.isUnlimitedUsers() ? "Sınırsız" : String.valueOf(currentPlan.getMaxUsers()));
-        model.addAttribute("maxProducts", currentPlan.isUnlimitedProducts() ? "Sınırsız" : String.valueOf(currentPlan.getMaxProducts()));
-        model.addAttribute("currentUsers", tenantUsers.size());
-        model.addAttribute("currentProducts", metrics.getTotalProducts());
-        
-        // Add trial information if applicable
-        if (currentPlan.isTrial()) {
-            long remainingDays = subscriptionService.getRemainingTrialDays();
-            model.addAttribute("remainingTrialDays", remainingDays);
-            model.addAttribute("trialExpired", remainingDays <= 0);
-        }
         
         // Add collections
         model.addAttribute("metrics", metrics);

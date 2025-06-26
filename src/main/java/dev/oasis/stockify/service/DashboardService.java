@@ -3,6 +3,7 @@ package dev.oasis.stockify.service;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
 import dev.oasis.stockify.dto.DashboardStats;
+import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
@@ -22,6 +23,7 @@ public class DashboardService {
     private final ProductRepository productRepository;
     private final AppUserRepository userRepository;
     private final StockNotificationRepository notificationRepository;
+    private final StockMovementService stockMovementService;
     private final MeterRegistry meterRegistry;
 
     @PostConstruct
@@ -49,6 +51,26 @@ public class DashboardService {
                 .monthlyRevenue(getMonthlyRevenue())
                 .dailyRevenue(getDailyRevenue())
                 .build();
+    }
+
+    /**
+     * Get recent stock movements for dashboard
+     */
+    public List<StockMovementResponseDTO> getRecentStockMovements() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("📋 Fetching recent stock movements for tenant: {}", currentTenant);
+        
+        return stockMovementService.getRecentMovements(10); // Last 10 movements
+    }
+
+    /**
+     * Get stock movement statistics for dashboard
+     */
+    public StockMovementService.StockMovementStats getStockMovementStats() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("📊 Fetching stock movement statistics for tenant: {}", currentTenant);
+        
+        return stockMovementService.getStockMovementStats();
     }
       private long getTenantProductCount() {
         String currentTenant = TenantContext.getCurrentTenant();
