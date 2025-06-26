@@ -33,7 +33,7 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stockify:aG3Ku2dwshL1USurnRk1uQJqJElyUYio@dpg-d1edg6re5dus73b9reh0-a/stockify_9qn8
       - SPRING_DATASOURCE_USERNAME=stockify
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=aG3Ku2dwshL1USurnRk1uQJqJElyUYio
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_PROFILES_ACTIVE=prod
