@@ -2,423 +2,435 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kayıt Ol - Stockify</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #059669;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --bg-light: #f8fafc;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kayıt Ol - Stockify</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #1e40af;
+      --accent-color: #059669;
+      --text-dark: #1f2937;
+      --text-light: #6b7280;
+      --bg-light: #f8fafc;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
+    body {
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+    }
 
-        .register-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            max-width: 900px;
-            margin: 2rem auto;
-        }
+    .register-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      max-width: 900px;
+      margin: 2rem auto;
+    }
 
-        .register-left {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 3rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+    .register-left {
+      background: linear-gradient(135deg,
+          var(--primary-color),
+          var(--secondary-color));
+      color: white;
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-        .register-right {
-            padding: 3rem;
-        }
+    .register-right {
+      padding: 3rem;
+    }
 
-        .form-control {
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
+    .form-control {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
 
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
-        }
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+    }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+    .btn-primary {
+      background: linear-gradient(135deg,
+          var(--primary-color),
+          var(--secondary-color));
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
-        }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+    }
 
-        .plan-selector {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .plan-selector {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-        .plan-selector:hover {
-            border-color: var(--primary-color);
-        }
+    .plan-selector:hover {
+      border-color: var(--primary-color);
+    }
 
-        .plan-selector.selected {
-            border-color: var(--primary-color);
-            background: rgba(37, 99, 235, 0.1);
-        }
+    .plan-selector.selected {
+      border-color: var(--primary-color);
+      background: rgba(37, 99, 235, 0.1);
+    }
 
-        .plan-selector input[type="radio"] {
-            display: none;
-        }
+    .plan-selector input[type="radio"] {
+      display: none;
+    }
 
-        .feature-list {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 1rem;
-        }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
 
-        .feature-list li {
-            padding: 0.25rem 0;
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-        }
+    .feature-list li {
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+    }
 
-        .feature-list li i {
-            color: var(--accent-color);
-            margin-right: 0.5rem;
-            width: 16px;
-        }
-    </style>
+    .feature-list li i {
+      color: var(--accent-color);
+      margin-right: 0.5rem;
+      width: 16px;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="register-container">
-            <div class="row g-0">
-                <!-- Left Side -->
-                <div class="col-lg-5">
-                    <div class="register-left">
-                        <div class="text-center mb-4">
-                            <h2 class="fw-bold">
-                                <i class="fas fa-boxes me-2"></i>Stockify
-                            </h2>
-                            <p class="lead">Modern Stok Yönetim Sistemi</p>
-                        </div>
-
-                        <div class="mb-4">
-                            <h4>Neden Stockify?</h4>
-                            <ul class="list-unstyled mt-3">
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    30 gün ücretsiz deneme
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    Kurulum ücreti yok
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    İstediğiniz zaman iptal
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    7/24 destek
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    Güvenli ve hızlı
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="text-center">
-                            <p class="small opacity-75">
-                                Zaten hesabınız var mı?
-                                <br>
-                                <a href="/login" class="text-white fw-bold">Giriş Yapın</a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Side -->
-                <div class="col-lg-7">
-                    <div class="register-right">
-                        <div class="text-center mb-4">
-                            <h3 class="fw-bold text-dark">Hesap Oluşturun</h3>
-                            <p class="text-muted">Birkaç dakikada hesabınızı oluşturun ve hemen başlayın</p>
-                        </div>
-
-                        <!-- Plan Selection -->
-                        <div class="mb-4">
-                            <h5 class="mb-3">Plan Seçin</h5>
-
-                            <div class="plan-selector" onclick="selectPlan('starter')"
-                                th:class="${selectedPlan == 'starter'} ? 'plan-selector selected' : 'plan-selector'">
-                                <input type="radio" name="plan" value="starter"
-                                    th:checked="${selectedPlan == 'starter'}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">Başlangıç</h6>
-                                        <p class="mb-0 text-muted">₺0/ay - İlk 30 gün ücretsiz</p>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="text-success fw-bold">ÜCRETSIZ</small>
-                                    </div>
-                                </div>
-                                <ul class="feature-list mt-2">
-                                    <li><i class="fas fa-check"></i>1 Lokasyon</li>
-                                    <li><i class="fas fa-check"></i>100 Ürün</li>
-                                    <li><i class="fas fa-check"></i>Temel Raporlar</li>
-                                </ul>
-                            </div>
-
-                            <div class="plan-selector" onclick="selectPlan('professional')"
-                                th:class="${selectedPlan == 'professional'} ? 'plan-selector selected' : 'plan-selector'">
-                                <input type="radio" name="plan" value="professional"
-                                    th:checked="${selectedPlan == 'professional'}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">Profesyonel</h6>
-                                        <p class="mb-0 text-muted">₺299/ay</p>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="text-primary fw-bold">POPÜLER</small>
-                                    </div>
-                                </div>
-                                <ul class="feature-list mt-2">
-                                    <li><i class="fas fa-check"></i>5 Lokasyon</li>
-                                    <li><i class="fas fa-check"></i>1.000 Ürün</li>
-                                    <li><i class="fas fa-check"></i>Gelişmiş Raporlar</li>
-                                </ul>
-                            </div>
-
-                            <div class="plan-selector" onclick="selectPlan('enterprise')"
-                                th:class="${selectedPlan == 'enterprise'} ? 'plan-selector selected' : 'plan-selector'">
-                                <input type="radio" name="plan" value="enterprise"
-                                    th:checked="${selectedPlan == 'enterprise'}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">Kurumsal</h6>
-                                        <p class="mb-0 text-muted">₺999/ay</p>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="text-warning fw-bold">PREMIUM</small>
-                                    </div>
-                                </div>
-                                <ul class="feature-list mt-2">
-                                    <li><i class="fas fa-check"></i>Sınırsız Lokasyon</li>
-                                    <li><i class="fas fa-check"></i>Sınırsız Ürün</li>
-                                    <li><i class="fas fa-check"></i>Özel Raporlar</li>
-                                </ul>
-                            </div>
-                        </div> <!-- Registration Form -->
-                        <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post">
-                            <input type="hidden" name="selectedPlan" id="selectedPlanInput" th:field="*{selectedPlan}">
-
-                            <!-- Error Messages -->
-                            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show"
-                                role="alert">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <span th:text="${errorMessage}"></span>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="firstName" class="form-label">Ad</label>
-                                    <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
-                                        th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'" required>
-                                    <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
-                                        <span th:errors="*{firstName}"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="lastName" class="form-label">Soyad</label>
-                                    <input type="text" class="form-control" id="lastName" th:field="*{lastName}"
-                                        th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'" required>
-                                    <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
-                                        <span th:errors="*{lastName}"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="companyName" class="form-label">Şirket Adı</label>
-                                <input type="text" class="form-control" id="companyName" th:field="*{companyName}"
-                                    th:classappend="${#fields.hasErrors('companyName')} ? 'is-invalid'" required>
-                                <div th:if="${#fields.hasErrors('companyName')}" class="invalid-feedback">
-                                    <span th:errors="*{companyName}"></span>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label">E-posta Adresi</label>
-                                <input type="email" class="form-control" id="email" th:field="*{email}"
-                                    th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required>
-                                <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
-                                    <span th:errors="*{email}"></span>
-                                </div>
-                                <div class="form-text" id="emailHelp">Bu e-posta adresi ile giriş yapacaksınız</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Şifre</label>
-                                <input type="password" class="form-control" id="password" th:field="*{password}"
-                                    th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" required>
-                                <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
-                                    <span th:errors="*{password}"></span>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
-                                <input type="password" class="form-control" id="confirmPassword"
-                                    th:field="*{confirmPassword}"
-                                    th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'" required>
-                                <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback">
-                                    <span th:errors="*{confirmPassword}"></span>
-                                </div>
-                            </div>
-
-                            <div class="form-check mb-4">
-                                <input class="form-check-input" type="checkbox" id="acceptTerms"
-                                    th:field="*{acceptTerms}"
-                                    th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid'" required>
-                                <label class="form-check-label" for="acceptTerms">
-                                    <a href="#" class="text-primary">Kullanım Şartları</a> ve <a href="#"
-                                        class="text-primary">Gizlilik Politikası</a>'nı kabul ediyorum.
-                                </label>
-                                <div th:if="${#fields.hasErrors('acceptTerms')}" class="invalid-feedback">
-                                    <span th:errors="*{acceptTerms}"></span>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100 py-3" id="submitBtn">
-                                <i class="fas fa-rocket me-2"></i>
-                                Hesap Oluştur ve Başla
-                            </button>
-                        </form>
-
-                        <div class="text-center mt-4">
-                            <a href="/" class="text-decoration-none">
-                                <i class="fas fa-arrow-left me-2"></i>Ana Sayfaya Dön
-                            </a>
-                        </div>
-                    </div>
-                </div>
+  <div class="container">
+    <div class="register-container">
+      <div class="row g-0">
+        <!-- Left Side -->
+        <div class="col-lg-5">
+          <div class="register-left">
+            <div class="text-center mb-4">
+              <h2 class="fw-bold">
+                <i class="fas fa-boxes me-2"></i>Stockify
+              </h2>
+              <p class="lead">Modern Stok Yönetim Sistemi</p>
             </div>
+
+            <div class="mb-4">
+              <h4>Neden Stockify?</h4>
+              <ul class="list-unstyled mt-3">
+                <li class="mb-2">
+                  <i class="fas fa-check-circle me-2"></i>
+                  30 gün ücretsiz deneme
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check-circle me-2"></i>
+                  Kurulum ücreti yok
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check-circle me-2"></i>
+                  İstediğiniz zaman iptal
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check-circle me-2"></i>
+                  7/24 destek
+                </li>
+                <li class="mb-2">
+                  <i class="fas fa-check-circle me-2"></i>
+                  Güvenli ve hızlı
+                </li>
+              </ul>
+            </div>
+
+            <div class="text-center">
+              <p class="small opacity-75">
+                Zaten hesabınız var mı?
+                <br />
+                <a href="/login" class="text-white fw-bold">Giriş Yapın</a>
+              </p>
+            </div>
+          </div>
         </div>
+
+        <!-- Right Side -->
+        <div class="col-lg-7">
+          <div class="register-right">
+            <div class="text-center mb-4">
+              <h3 class="fw-bold text-dark">Hesap Oluşturun</h3>
+              <p class="text-muted">
+                Birkaç dakikada hesabınızı oluşturun ve hemen başlayın
+              </p>
+            </div>
+
+            <!-- Plan Selection -->
+            <div class="mb-4">
+              <h5 class="mb-3">Plan Seçin</h5>
+
+              <div class="plan-selector" onclick="selectPlan('starter')"
+                th:class="${selectedPlan == 'starter'} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="starter" th:checked="${selectedPlan == 'starter'}" />
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 fw-bold">Başlangıç</h6>
+                    <p class="mb-0 text-muted">₺0/ay - İlk 30 gün ücretsiz</p>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-success fw-bold">ÜCRETSIZ</small>
+                  </div>
+                </div>
+                <ul class="feature-list mt-2">
+                  <li><i class="fas fa-check"></i>1 Lokasyon</li>
+                  <li><i class="fas fa-check"></i>100 Ürün</li>
+                  <li><i class="fas fa-check"></i>Temel Raporlar</li>
+                </ul>
+              </div>
+
+              <div class="plan-selector" onclick="selectPlan('professional')"
+                th:class="${selectedPlan == 'professional'} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="professional" th:checked="${selectedPlan == 'professional'}" />
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 fw-bold">Profesyonel</h6>
+                    <p class="mb-0 text-muted">₺299/ay</p>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-primary fw-bold">POPÜLER</small>
+                  </div>
+                </div>
+                <ul class="feature-list mt-2">
+                  <li><i class="fas fa-check"></i>5 Lokasyon</li>
+                  <li><i class="fas fa-check"></i>1.000 Ürün</li>
+                  <li><i class="fas fa-check"></i>Gelişmiş Raporlar</li>
+                </ul>
+              </div>
+
+              <div class="plan-selector" onclick="selectPlan('enterprise')"
+                th:class="${selectedPlan == 'enterprise'} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="enterprise" th:checked="${selectedPlan == 'enterprise'}" />
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 fw-bold">Kurumsal</h6>
+                    <p class="mb-0 text-muted">₺999/ay</p>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-warning fw-bold">PREMIUM</small>
+                  </div>
+                </div>
+                <ul class="feature-list mt-2">
+                  <li><i class="fas fa-check"></i>Sınırsız Lokasyon</li>
+                  <li><i class="fas fa-check"></i>Sınırsız Ürün</li>
+                  <li><i class="fas fa-check"></i>Özel Raporlar</li>
+                </ul>
+              </div>
+            </div>
+            <!-- Registration Form -->
+            <form id="registerForm" th:action="@{/register}" th:object="${registerRequest}" method="post">
+              <input type="hidden" name="selectedPlan" id="selectedPlanInput" th:field="*{selectedPlan}" />
+
+              <!-- Error Messages -->
+              <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="firstName" class="form-label">Ad</label>
+                  <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
+                    th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'" required />
+                  <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
+                    <span th:errors="*{firstName}"></span>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="lastName" class="form-label">Soyad</label>
+                  <input type="text" class="form-control" id="lastName" th:field="*{lastName}"
+                    th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'" required />
+                  <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
+                    <span th:errors="*{lastName}"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="companyName" class="form-label">Şirket Adı</label>
+                <input type="text" class="form-control" id="companyName" th:field="*{companyName}"
+                  th:classappend="${#fields.hasErrors('companyName')} ? 'is-invalid'" required />
+                <div th:if="${#fields.hasErrors('companyName')}" class="invalid-feedback">
+                  <span th:errors="*{companyName}"></span>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">E-posta Adresi</label>
+                <input type="email" class="form-control" id="email" th:field="*{email}"
+                  th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required />
+                <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                  <span th:errors="*{email}"></span>
+                </div>
+                <div class="form-text" id="emailHelp">
+                  Bu e-posta adresi ile giriş yapacaksınız
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Şifre</label>
+                <input type="password" class="form-control" id="password" th:field="*{password}"
+                  th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" required />
+                <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
+                  <span th:errors="*{password}"></span>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
+                <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}"
+                  th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'" required />
+                <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback">
+                  <span th:errors="*{confirmPassword}"></span>
+                </div>
+              </div>
+
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="acceptTerms" th:field="*{acceptTerms}"
+                  th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid'" required />
+                <label class="form-check-label" for="acceptTerms">
+                  <a href="#" class="text-primary">Kullanım Şartları</a> ve
+                  <a href="#" class="text-primary">Gizlilik Politikası</a>'nı
+                  kabul ediyorum.
+                </label>
+                <div th:if="${#fields.hasErrors('acceptTerms')}" class="invalid-feedback">
+                  <span th:errors="*{acceptTerms}"></span>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 py-3" id="submitBtn">
+                <i class="fas fa-rocket me-2"></i>
+                Hesap Oluştur ve Başla
+              </button>
+            </form>
+
+            <div class="text-center mt-4">
+              <a href="/" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Ana Sayfaya Dön
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function selectPlan(planType) {
-            // Remove selected class from all plans
-            document.querySelectorAll('.plan-selector').forEach(selector => {
-                selector.classList.remove('selected');
-            });
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function selectPlan(planType) {
+      // Remove selected class from all plans
+      document.querySelectorAll(".plan-selector").forEach((selector) => {
+        selector.classList.remove("selected");
+      });
 
-            // Add selected class to clicked plan
-            event.currentTarget.classList.add('selected');
+      // Add selected class to clicked plan
+      event.currentTarget.classList.add("selected");
 
-            // Update radio button
-            document.querySelector(`input[value="${planType}"]`).checked = true;
+      // Update radio button
+      document.querySelector(`input[value="${planType}"]`).checked = true;
 
-            // Update hidden input
-            document.getElementById('selectedPlanInput').value = planType;
+      // Update hidden input
+      document.getElementById("selectedPlanInput").value = planType;
+    }
+
+    // Form validation and submission
+    document
+      .getElementById("registerForm")
+      .addEventListener("submit", function (e) {
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+        const acceptTerms = document.getElementById("acceptTerms").checked;
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Client-side validation
+        if (password !== confirmPassword) {
+          e.preventDefault();
+          alert("Şifreler eşleşmiyor!");
+          return false;
         }
 
-        // Form validation and submission
-        document.getElementById('registerForm').addEventListener('submit', function (e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const acceptTerms = document.getElementById('acceptTerms').checked;
-            const submitBtn = document.getElementById('submitBtn');
+        if (password.length < 6) {
+          e.preventDefault();
+          alert("Şifre en az 6 karakter olmalıdır!");
+          return false;
+        }
 
-            // Client-side validation
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Şifreler eşleşmiyor!');
-                return false;
-            }
+        if (!acceptTerms) {
+          e.preventDefault();
+          alert("Kullanım şartlarını kabul etmelisiniz!");
+          return false;
+        }
 
-            if (password.length < 6) {
-                e.preventDefault();
-                alert('Şifre en az 6 karakter olmalıdır!');
-                return false;
-            }
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>Hesap Oluşturuluyor...';
+      });
 
-            if (!acceptTerms) {
-                e.preventDefault();
-                alert('Kullanım şartlarını kabul etmelisiniz!');
-                return false;
-            }
-
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Hesap Oluşturuluyor...';
-        });
-
-        // Email validation
-        document.getElementById('email').addEventListener('blur', function () {
-            const email = this.value;
-            if (email && email.includes('@')) {
-                fetch(`/register/check-email?email=${encodeURIComponent(email)}`)
-                    .then(response => response.json())
-                    .then(available => {
-                        const emailHelp = document.getElementById('emailHelp');
-                        if (!available) {
-                            emailHelp.innerHTML = '<span class="text-danger">Bu e-posta adresi zaten kayıtlı</span>';
-                            this.classList.add('is-invalid');
-                        } else {
-                            emailHelp.innerHTML = 'Bu e-posta adresi ile giriş yapacaksınız';
-                            this.classList.remove('is-invalid');
-                        }
-                    })
-                    .catch(() => {
-                        // Ignore errors in email check
-                    });
-            }
-        });
-
-        // Password confirmation validation
-        document.getElementById('confirmPassword').addEventListener('input', function () {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-
-            if (password && confirmPassword && password !== confirmPassword) {
-                this.classList.add('is-invalid');
+    // Email validation
+    document.getElementById("email").addEventListener("blur", function () {
+      const email = this.value;
+      if (email && email.includes("@")) {
+        fetch(`/register/check-email?email=${encodeURIComponent(email)}`)
+          .then((response) => response.json())
+          .then((available) => {
+            const emailHelp = document.getElementById("emailHelp");
+            if (!available) {
+              emailHelp.innerHTML =
+                '<span class="text-danger">Bu e-posta adresi zaten kayıtlı</span>';
+              this.classList.add("is-invalid");
             } else {
-                this.classList.remove('is-invalid');
+              emailHelp.innerHTML =
+                "Bu e-posta adresi ile giriş yapacaksınız";
+              this.classList.remove("is-invalid");
             }
-        });
-    </script>
+          })
+          .catch(() => {
+            // Ignore errors in email check
+          });
+      }
+    });
+
+    // Password confirmation validation
+    document
+      .getElementById("confirmPassword")
+      .addEventListener("input", function () {
+        const password = document.getElementById("password").value;
+        const confirmPassword = this.value;
+
+        if (password && confirmPassword && password !== confirmPassword) {
+          this.classList.add("is-invalid");
+        } else {
+          this.classList.remove("is-invalid");
+        }
+      });
+  </script>
 </body>
 
 </html>
