@@ -1,7 +1,6 @@
 package dev.oasis.stockify.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import dev.oasis.stockify.model.PlanType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

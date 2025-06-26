@@ -6,7 +6,6 @@ import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.exception.TenantAlreadyExistsException;
 import dev.oasis.stockify.exception.TenantNotFoundException;
-import dev.oasis.stockify.model.PlanType;
 import dev.oasis.stockify.model.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
