@@ -219,6 +219,145 @@
         </div>
     </div>
 
+      <!-- Notification Coordination Script -->
+    <script th:inline="javascript">
+        // Notification System Integration - Get initial data from server
+        let notificationData = {
+            total: /*[[${totalNotifications}]]*/ 12,
+            unread: /*[[${@stockNotificationService.getUnreadNotifications().size()}]]*/ 3,
+            critical: /*[[${criticalNotifications}]]*/ 2,
+            alerts: [
+                {
+                    type: /*[[${outOfStockProducts > 0 ? 'danger' : 'warning'}]]*/ 'danger',
+                    message: /*[[${outOfStockProducts ?: 0}]]*/ '5' + ' products out of stock',
+                    icon: 'x-circle'
+                },
+                {
+                    type: 'warning',
+                    message: /*[[${lowStockProducts ?: 0}]]*/ '12' + ' products low stock',
+                    icon: 'exclamation-triangle'
+                }
+            ]
+        };
+        function updateNotificationCounters() {
+            const navBadge = document.getElementById('navNotificationBadge');
+            if (navBadge) {
+                if (notificationData.unread > 0) {
+                    navBadge.textContent = notificationData.unread;
+                    navBadge.style.display = 'inline';
+                } else {
+                    navBadge.style.display = 'none';
+                }
+            }
+
+            const sidebarBadge = document.getElementById('notificationBadge');
+            if (sidebarBadge) {
+                if (notificationData.unread > 0) {
+                    sidebarBadge.textContent = notificationData.unread;
+                    sidebarBadge.style.display = 'inline';
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
+            }
+
+            const quickActionBadge = document.getElementById('quickActionNotificationBadge');
+            if (quickActionBadge) {
+                if (notificationData.critical > 0) {
+                    quickActionBadge.textContent = notificationData.critical;
+                    quickActionBadge.style.display = 'inline';
+                } else {
+                    quickActionBadge.style.display = 'none';
+                }
+            }
+
+            const activeCountElem = document.getElementById('activeNotificationsCount');
+            if (activeCountElem) activeCountElem.textContent = notificationData.total;
+            const criticalCountElem = document.getElementById('criticalNotificationsCount');
+            if (criticalCountElem) criticalCountElem.textContent = notificationData.critical;
+        }
+
+        function updateRecentAlerts() {
+            const container = document.getElementById('recentAlertsContainer');
+            if (container) {
+                const alertsHtml = notificationData.alerts.map(alert => `
+                    <div class="col-md-4">
+                        <div class="alert alert-${alert.type} alert-sm mb-1 p-2">
+                            <i class="bi bi-${alert.icon} me-1"></i>
+                            <small>${alert.message}</small>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = alertsHtml + `
+                    <div class="col-md-4 text-end">
+                        <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-bell"></i> View All
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        function checkForNewNotifications() {
+            const shouldUpdate = Math.random() < 0.1;
+            if (shouldUpdate) {
+                const wasUnread = notificationData.unread;
+                notificationData.unread = Math.max(0, notificationData.unread + (Math.random() > 0.5 ? 1 : -1));
+                notificationData.total = Math.max(notificationData.unread, notificationData.total);
+
+                if (notificationData.unread > wasUnread) {
+                    showNotificationToast('New notification received!');
+                }
+
+                updateNotificationCounters();
+            }
+        }
+
+        function showNotificationToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="bi bi-bell-fill text-primary me-2"></i>
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bootstrapToast = new bootstrap.Toast(toast);
+            bootstrapToast.show();
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationCounters();
+            updateRecentAlerts();
+            setInterval(checkForNewNotifications, 30000);
+            document.querySelectorAll('a[href="/admin/notifications"]').forEach(link => {
+                link.addEventListener('click', function() {
+                    notificationData.unread = 0;
+                    updateNotificationCounters();
+                });
+            });
+        });
+
+        window.triggerNotificationUpdate = function(type = 'info', message = 'Test notification') {
+            notificationData.unread++;
+            notificationData.total++;
+            if (type === 'critical') {
+                notificationData.critical++;
+            }
+            updateNotificationCounters();
+            updateRecentAlerts();
+            showNotificationToast(message);
+        };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
