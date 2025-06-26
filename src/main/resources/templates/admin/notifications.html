@@ -102,7 +102,8 @@
                 <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
                     <i class="bi bi-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        id="navNotificationBadge" th:if="${@stockNotificationService.getUnreadNotifications().size() > 0}"
+                        id="navNotificationBadge"
+                        th:if="${@stockNotificationService.getUnreadNotifications().size() > 0}"
                         th:text="${@stockNotificationService.getUnreadNotifications().size()}">0</span>
                 </a>
                 <span class="navbar-text me-3">
@@ -146,7 +147,8 @@
                             <a class="nav-link active" href="/admin/notifications">
                                 <i class="bi bi-bell"></i> Notifications
                                 <span class="badge bg-danger ms-2" id="notificationBadge"
-                                    th:if="${@stockNotificationService.getUnreadNotifications().size() > 0}" th:text="${@stockNotificationService.getUnreadNotifications().size()}"
+                                    th:if="${unreadNotifications > 0}"
+                                    th:text="${unreadNotifications}"
                                     style="display: inline;">1</span>
                             </a>
                         </li>
@@ -194,7 +196,8 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Unread</h6>
-                                        <h3 class="mb-0" id="unreadNotifications" th:text="${@stockNotificationService.getUnreadNotifications().size()}">
+                                        <h3 class="mb-0" id="unreadNotifications"
+                                            th:text="${unreadNotifications}">
                                             0</h3>
                                     </div>
                                     <div class="text-warning">
