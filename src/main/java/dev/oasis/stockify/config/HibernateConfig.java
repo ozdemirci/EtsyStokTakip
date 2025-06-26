@@ -3,7 +3,6 @@ package dev.oasis.stockify.config;
 import dev.oasis.stockify.config.tenant.CurrentTenantIdentifierResolverImpl;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
-import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
