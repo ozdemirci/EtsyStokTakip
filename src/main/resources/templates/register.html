@@ -282,6 +282,18 @@
               </div>
 
               <div class="mb-3">
+                <label for="username" class="form-label">Kullanıcı Adı</label>
+                <input type="text" class="form-control" id="username" th:field="*{username}"
+                  th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" required />
+                <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
+                  <span th:errors="*{username}"></span>
+                </div>
+                <div class="form-text" id="usernameHelp">
+                  Girişte kullanacağınız benzersiz kullanıcı adı
+                </div>
+              </div>
+
+              <div class="mb-3">
                 <label for="email" class="form-label">E-posta Adresi</label>
                 <input type="email" class="form-control" id="email" th:field="*{email}"
                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required />
@@ -289,7 +301,7 @@
                   <span th:errors="*{email}"></span>
                 </div>
                 <div class="form-text" id="emailHelp">
-                  Bu e-posta adresi ile giriş yapacaksınız
+                  Bildirimler için e-posta adresiniz
                 </div>
               </div>
 
@@ -393,6 +405,28 @@
           '<i class="fas fa-spinner fa-spin me-2"></i>Hesap Oluşturuluyor...';
       });
 
+    // Username validation
+    document.getElementById("username").addEventListener("blur", function () {
+      const username = this.value;
+      if (username && username.length >= 3) {
+        fetch(`/register/check-username?username=${encodeURIComponent(username)}`)
+          .then((response) => response.json())
+          .then((available) => {
+            const usernameHelp = document.getElementById("usernameHelp");
+            if (!available) {
+              usernameHelp.innerHTML = '<span class="text-danger">Bu kullanıcı adı zaten kullanılıyor</span>';
+              this.classList.add("is-invalid");
+            } else {
+              usernameHelp.innerHTML = "Girişte kullanacağınız benzersiz kullanıcı adı";
+              this.classList.remove("is-invalid");
+            }
+          })
+          .catch(() => {
+            // Ignore errors in username check
+          });
+      }
+    });
+
     // Email validation
     document.getElementById("email").addEventListener("blur", function () {
       const email = this.value;
@@ -407,7 +441,7 @@
               this.classList.add("is-invalid");
             } else {
               emailHelp.innerHTML =
-                "Bu e-posta adresi ile giriş yapacaksınız";
+                "Bildirimler için e-posta adresiniz";
               this.classList.remove("is-invalid");
             }
           })

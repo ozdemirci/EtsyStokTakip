@@ -28,6 +28,10 @@ public class RegisterRequestDTO {
     @NotBlank(message = "Şirket adı boş olamaz")
     @Size(min = 2, max = 100, message = "Şirket adı 2 ile 100 karakter arasında olmalıdır")
     private String companyName;
+
+    @NotBlank(message = "Kullanıcı adı boş olamaz")
+    @Size(min = 3, max = 20, message = "Kullanıcı adı 3 ile 20 karakter arasında olmalıdır")
+    private String username;
     
     @NotBlank(message = "E-posta adresi boş olamaz")
     @Email(message = "Geçerli bir e-posta adresi giriniz")
@@ -45,12 +49,4 @@ public class RegisterRequestDTO {
     
     @Builder.Default
     private Boolean acceptTerms = false;
-    
-    // Helper method to generate username from email
-    public String generateUsername() {
-        if (email != null && email.contains("@")) {
-            return email.substring(0, email.indexOf("@")).toLowerCase();
-        }
-        return null;
-    }
 }

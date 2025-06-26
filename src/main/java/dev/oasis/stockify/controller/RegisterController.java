@@ -48,7 +48,7 @@ public class RegisterController {
                                     RedirectAttributes redirectAttributes,
                                     Model model) {
         
-        log.info("🎯 Processing registration for email: {}", registerRequest.getEmail());
+        log.info("🎯 Processing registration for username: {}", registerRequest.getUsername());
         
         // Check for validation errors
         if (bindingResult.hasErrors()) {
@@ -86,11 +86,13 @@ public class RegisterController {
             return "redirect:/login?registered=true&tenantId=" + registrationResult.getTenantId();
             
         } catch (Exception e) {
-            log.error("❌ Registration failed for {}: {}", registerRequest.getEmail(), e.getMessage());
-            
+            log.error("❌ Registration failed for {}: {}", registerRequest.getUsername(), e.getMessage());
+
             String errorMessage = e.getMessage();
             if (errorMessage.contains("email") && errorMessage.contains("kayıtlı")) {
                 bindingResult.rejectValue("email", "email.exists", errorMessage);
+            } else if (errorMessage.contains("kullanıcı") && errorMessage.contains("kayıtlı")) {
+                bindingResult.rejectValue("username", "username.exists", errorMessage);
             } else {
                 model.addAttribute("errorMessage", "Kayıt işlemi başarısız: " + errorMessage);
             }
@@ -112,6 +114,20 @@ public class RegisterController {
             return !registrationService.isEmailAlreadyRegistered(email);
         } catch (Exception e) {
             log.warn("Could not check email availability: {}", e.getMessage());
+            return true; // Assume available if check fails
+        }
+    }
+
+    /**
+     * AJAX endpoint to check if username is already registered
+     */
+    @GetMapping("/register/check-username")
+    @ResponseBody
+    public boolean checkUsernameAvailability(@RequestParam String username) {
+        try {
+            return !registrationService.isUsernameAlreadyRegistered(username);
+        } catch (Exception e) {
+            log.warn("Could not check username availability: {}", e.getMessage());
             return true; // Assume available if check fails
         }
     }
