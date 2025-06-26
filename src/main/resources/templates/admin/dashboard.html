@@ -906,46 +906,54 @@
 
             // Update sidebar badge
             const sidebarBadge = document.getElementById('notificationBadge');
-            if (notificationData.unread > 0) {
-                sidebarBadge.textContent = notificationData.unread;
-                sidebarBadge.style.display = 'inline';
-            } else {
-                sidebarBadge.style.display = 'none';
+            if (sidebarBadge) {
+                if (notificationData.unread > 0) {
+                    sidebarBadge.textContent = notificationData.unread;
+                    sidebarBadge.style.display = 'inline';
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
             }
 
             // Update quick action badge
             const quickActionBadge = document.getElementById('quickActionNotificationBadge');
-            if (notificationData.critical > 0) {
-                quickActionBadge.textContent = notificationData.critical;
-                quickActionBadge.style.display = 'inline';
-            } else {
-                quickActionBadge.style.display = 'none';
+            if (quickActionBadge) {
+                if (notificationData.critical > 0) {
+                    quickActionBadge.textContent = notificationData.critical;
+                    quickActionBadge.style.display = 'inline';
+                } else {
+                    quickActionBadge.style.display = 'none';
+                }
             }
 
             // Update stats cards
-            document.getElementById('activeNotificationsCount').textContent = notificationData.total;
-            document.getElementById('criticalNotificationsCount').textContent = notificationData.critical;
+            const activeCountElem = document.getElementById('activeNotificationsCount');
+            if (activeCountElem) activeCountElem.textContent = notificationData.total;
+            const criticalCountElem = document.getElementById('criticalNotificationsCount');
+            if (criticalCountElem) criticalCountElem.textContent = notificationData.critical;
         }
 
         // Update recent alerts display
         function updateRecentAlerts() {
             const container = document.getElementById('recentAlertsContainer');
-            const alertsHtml = notificationData.alerts.map(alert => `
-                <div class="col-md-4">
-                    <div class="alert alert-${alert.type} alert-sm mb-1 p-2">
-                        <i class="bi bi-${alert.icon} me-1"></i>
-                        <small>${alert.message}</small>
+            if (container) {
+                const alertsHtml = notificationData.alerts.map(alert => `
+                    <div class="col-md-4">
+                        <div class="alert alert-${alert.type} alert-sm mb-1 p-2">
+                            <i class="bi bi-${alert.icon} me-1"></i>
+                            <small>${alert.message}</small>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-            
-            container.innerHTML = alertsHtml + `
-                <div class="col-md-4 text-end">
-                    <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
-                        <i class="bi bi-bell"></i> View All
-                    </a>
-                </div>
-            `;
+                `).join('');
+
+                container.innerHTML = alertsHtml + `
+                    <div class="col-md-4 text-end">
+                        <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-bell"></i> View All
+                        </a>
+                    </div>
+                `;
+            }
         }
 
         // Simulate notification updates (in real app, this would be WebSocket or polling)
