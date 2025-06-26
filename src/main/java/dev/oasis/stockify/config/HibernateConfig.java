@@ -49,8 +49,7 @@ public class HibernateConfig implements HibernatePropertiesCustomizer {
     }
 
     @Bean
-    @SuppressWarnings("rawtypes")
-    public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
+    public CurrentTenantIdentifierResolverImpl currentTenantIdentifierResolver() {
         return currentTenantIdentifierResolver;
     }
 }
