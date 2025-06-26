@@ -1,52 +1,112 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-sca                                        <a href="/user/products?tab=low-stock" class="btn btn-outline-warning w-100 quick-action-btn">
-                                            <i class="bi bi-exclamation-triangle me-2"></i>Check Low Stock
-                                        </a>1.0">
+    <meta name="viewport" content="width=device-width, initial-sca                                        <a href="
+        /user/products?tab=low-stock" class="btn btn-outline-warning w-100 quick-action-btn">
+    <i class="bi bi-exclamation-triangle me-2"></i>Check Low Stock
+    </a>1.0">
     <title>User Dashboard - Stockify</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .navbar-brand { font-weight: bold; }
-        .sidebar { height: 100vh; background-color: #f8f9fa; }
-        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
-        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
-        .sidebar .nav-link.active { background-color: #007bff; color: white; }
-        .main-content { padding: 20px; }
-        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
-        .stats-card { border-left: 4px solid #007bff; }
-        .chart-card { min-height: 300px; }
-        .quick-action-btn { margin: 5px 0; }
-        .recent-activity { max-height: 300px; overflow-y: auto; }
-        .activity-item { border-left: 3px solid transparent; padding-left: 15px; }
-        .activity-item.new { border-left-color: #28a745; }
-        .activity-item.warning { border-left-color: #ffc107; }
-        .activity-item.danger { border-left-color: #dc3545; }
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .sidebar {
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar .nav-link {
+            padding: 12px 20px;
+            color: #495057;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .tenant-badge {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .stats-card {
+            border-left: 4px solid #007bff;
+        }
+
+        .chart-card {
+            min-height: 300px;
+        }
+
+        .quick-action-btn {
+            margin: 5px 0;
+        }
+
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            border-left: 3px solid transparent;
+            padding-left: 15px;
+        }
+
+        .activity-item.new {
+            border-left-color: #28a745;
+        }
+
+        .activity-item.warning {
+            border-left-color: #ffc107;
+        }
+
+        .activity-item.danger {
+            border-left-color: #dc3545;
+        }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container-fluid">
             <a class="navbar-brand" href="/user/dashboard">
                 <i class="bi bi-boxes"></i> Stockify User
-            </a>            <div class="navbar-nav ms-auto">
+            </a>
+            <div class="navbar-nav ms-auto">
                 <a class="nav-link position-relative me-3" href="/user/notifications" title="Notifications">
                     <i class="bi bi-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                          th:if="${unreadNotifications > 0}"
-                          th:text="${unreadNotifications}">0</span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}">0</span>
                 </a>
                 <span class="navbar-text me-3">
-                    <i class="bi bi-building"></i> 
+                    <i class="bi bi-building"></i>
                     <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
                 </span>
                 <span class="navbar-text me-3">
-                    <i class="bi bi-person-circle"></i> 
+                    <i class="bi bi-person-circle"></i>
                     Welcome, <span th:text="${currentUser}">User</span>
                 </span>
                 <a class="nav-link" href="/logout">
@@ -66,7 +126,8 @@
                             <a class="nav-link active" href="/user/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
-                        </li>                        <li class="nav-item">
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/user/products">
                                 <i class="bi bi-box-seam"></i> Products
                             </a>
@@ -79,9 +140,8 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/user/notifications">
                                 <i class="bi bi-bell"></i> Notifications
-                                <span class="badge bg-danger ms-2" 
-                                      th:if="${unreadNotifications > 0}"
-                                      th:text="${unreadNotifications}">0</span>
+                                <span class="badge bg-danger ms-2" th:if="${unreadNotifications > 0}"
+                                    th:text="${unreadNotifications}">0</span>
                             </a>
                         </li>
                     </ul>
@@ -91,12 +151,15 @@
             <!-- Main Content -->
             <main class="col-md-10 ms-sm-auto main-content">
                 <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
                         <i class="bi bi-speedometer2"></i> User Dashboard
                     </h1>
                     <div class="text-muted">
-                        <small>Last updated: <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}">16 Jun 2025 20:30</span></small>
+                        <small>Last updated: <span
+                                th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}">16 Jun 2025
+                                20:30</span></small>
                     </div>
                 </div>
 
@@ -153,7 +216,8 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Total Value</h6>
-                                        <h3 class="mb-0">₺<span th:text="${totalInventoryValue ?: '0.00'}">0.00</span></h3>
+                                        <h3 class="mb-0">₺<span th:text="${totalInventoryValue ?: '0.00'}">0.00</span>
+                                        </h3>
                                     </div>
                                     <div class="text-info">
                                         <i class="bi bi-currency-dollar" style="font-size: 2rem;"></i>
@@ -230,24 +294,28 @@
                                         </a>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="/user/stock-movements" class="btn btn-outline-success w-100 quick-action-btn">
+                                        <a href="/user/stock-movements"
+                                            class="btn btn-outline-success w-100 quick-action-btn">
                                             <i class="bi bi-arrow-left-right"></i> Stock Movements
                                         </a>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="/user/products?tab=low-stock" class="btn btn-outline-warning w-100 quick-action-btn">
+                                        <a href="/user/products?tab=low-stock"
+                                            class="btn btn-outline-warning w-100 quick-action-btn">
                                             <i class="bi bi-exclamation-triangle me-2"></i>Check Low Stock
                                         </a>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="/user/notifications" class="btn btn-outline-info w-100 quick-action-btn">
+                                        <a href="/user/notifications"
+                                            class="btn btn-outline-info w-100 quick-action-btn">
                                             <i class="bi bi-bell"></i> View Notifications
                                         </a>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-12">
-                                        <button class="btn btn-outline-secondary w-100 quick-action-btn" onclick="refreshData()">
+                                        <button class="btn btn-outline-secondary w-100 quick-action-btn"
+                                            onclick="refreshData()">
                                             <i class="bi bi-arrow-clockwise"></i> Refresh Data
                                         </button>
                                     </div>
@@ -285,36 +353,39 @@
                                             <tbody>
                                                 <tr th:each="movement : ${recentStockMovements}">
                                                     <td>
-                                                        <small th:text="${#temporals.format(movement.timestamp, 'MM-dd HH:mm')}">
+                                                        <small
+                                                            th:text="${#temporals.format(movement.timestamp, 'MM-dd HH:mm')}">
                                                             01-01 12:00
                                                         </small>
                                                     </td>
                                                     <td>
                                                         <span th:text="${movement.productName}">Product Name</span>
                                                         <br>
-                                                        <small class="text-muted" th:text="${movement.productSku}">SKU-001</small>
+                                                        <small class="text-muted"
+                                                            th:text="${movement.productSku}">SKU-001</small>
                                                     </td>
                                                     <td>
                                                         <span class="badge"
-                                                              th:class="${'badge ' + 
+                                                            th:class="${'badge ' + 
                                                                        (movement.type == 'IN' ? 'bg-success' : 
                                                                         movement.type == 'OUT' ? 'bg-danger' : 
                                                                         movement.type == 'ADJUSTMENT' ? 'bg-warning' : 'bg-info')}"
-                                                              th:text="${movement.type}">
+                                                            th:text="${movement.type}">
                                                             IN
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <span th:class="${movement.type == 'IN' ? 'text-success' : 
+                                                        <span
+                                                            th:class="${movement.type == 'IN' ? 'text-success' : 
                                                                        (movement.type == 'OUT' ? 'text-danger' : 'text-primary')}"
-                                                              th:text="${(movement.type == 'IN' ? '+' : 
+                                                            th:text="${(movement.type == 'IN' ? '+' : 
                                                                        (movement.type == 'OUT' ? '-' : '')) + movement.quantity}">
                                                             +10
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small th:text="${movement.reason ?: 'No reason'}" 
-                                                               th:title="${movement.reason}">
+                                                        <small th:text="${movement.reason ?: 'No reason'}"
+                                                            th:title="${movement.reason}">
                                                             Stock replenishment
                                                         </small>
                                                     </td>
@@ -323,8 +394,8 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div th:if="${recentStockMovements == null or recentStockMovements.empty}" 
-                                     class="text-center text-muted py-4">
+                                <div th:if="${recentStockMovements == null or recentStockMovements.empty}"
+                                    class="text-center text-muted py-4">
                                     <i class="bi bi-inbox display-6"></i>
                                     <div class="mt-2">No recent stock movements</div>
                                     <small>Stock movements will appear here when products are updated</small>
@@ -382,24 +453,27 @@
                                                 <strong>System Update</strong>
                                                 <p class="mb-1 text-muted">Dashboard data refreshed successfully</p>
                                                 <small class="text-muted">
-                                                    <i class="bi bi-clock"></i> 
-                                                    <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">20:30</span>
+                                                    <i class="bi bi-clock"></i>
+                                                    <span
+                                                        th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">20:30</span>
                                                 </small>
                                             </div>
                                             <span class="badge bg-success">System</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="activity-item warning mb-3" th:if="${lowStockProducts > 0}">
                                         <div class="d-flex justify-content-between">
                                             <div>
                                                 <strong>Low Stock Alert</strong>
                                                 <p class="mb-1 text-muted">
-                                                    <span th:text="${lowStockProducts}">0</span> products are running low on stock
+                                                    <span th:text="${lowStockProducts}">0</span> products are running
+                                                    low on stock
                                                 </p>
                                                 <small class="text-muted">
-                                                    <i class="bi bi-clock"></i> 
-                                                    <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">20:25</span>
+                                                    <i class="bi bi-clock"></i>
+                                                    <span
+                                                        th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}">20:25</span>
                                                 </small>
                                             </div>
                                             <span class="badge bg-warning">Alert</span>
@@ -436,15 +510,19 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Tenant ID:</strong> <span th:text="${currentTenant.name}">N/A</span></p>
-                                        <p><strong>Status:</strong> 
-                                            <span class="badge bg-success" th:text="${currentTenant.status}">Active</span>
+                                        <p><strong>Tenant ID:</strong> <span th:text="${currentTenant.name}">N/A</span>
+                                        </p>
+                                        <p><strong>Status:</strong>
+                                            <span class="badge bg-success"
+                                                th:text="${currentTenant.status}">Active</span>
                                         </p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Database:</strong> <span th:text="${currentTenant.databaseName}">N/A</span></p>
-                                        <p><strong>Created:</strong> 
-                                            <span th:text="${currentTenant.createdAt != null ? #temporals.format(currentTenant.createdAt, 'dd MMM yyyy') : 'N/A'}">N/A</span>
+                                        <p><strong>Database:</strong> <span
+                                                th:text="${currentTenant.databaseName}">N/A</span></p>
+                                        <p><strong>Created:</strong>
+                                            <span
+                                                th:text="${currentTenant.createdAt != null ? #temporals.format(currentTenant.createdAt, 'dd MMM yyyy') : 'N/A'}">N/A</span>
                                         </p>
                                     </div>
                                 </div>
@@ -548,9 +626,10 @@
         }
 
         // Auto-refresh every 5 minutes
-        setInterval(function() {
+        setInterval(function () {
             refreshData();
         }, 300000);
     </script>
 </body>
+
 </html>
