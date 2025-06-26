@@ -31,14 +31,20 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
-public class AdminDashboardController {    private final DashboardService dashboardService;
+public class AdminDashboardController {    
+    
+    private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
     private final AppUserService appUserService;
     private final StockNotificationService stockNotificationService;
     private final SubscriptionService subscriptionService;
-    private final StockMovementService stockMovementService;@GetMapping
+    private final StockMovementService stockMovementService;
+    
+    @GetMapping
+    public String showDashboard(Model model,
+    HttpServletRequest request, 
+    Authentication authentication) {
 
-    public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
         String currentTenantId = getCurrentTenantId(request, authentication);
         
