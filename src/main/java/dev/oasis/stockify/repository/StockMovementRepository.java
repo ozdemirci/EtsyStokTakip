@@ -20,13 +20,13 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     /**
      * Find stock movements by product ID
      */
-    @Query("SELECT sm FROM StockMovement sm WHERE sm.product.id = :productId ORDER BY sm.createdAt DESC")
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product WHERE sm.product.id = :productId ORDER BY sm.createdAt DESC")
     List<StockMovement> findByProductId(@Param("productId") Long productId);
 
     /**
      * Find stock movements by product ID with pagination
      */
-    @Query("SELECT sm FROM StockMovement sm WHERE sm.product.id = :productId ORDER BY sm.createdAt DESC")
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product WHERE sm.product.id = :productId ORDER BY sm.createdAt DESC")
     Page<StockMovement> findByProductId(@Param("productId") Long productId, Pageable pageable);
 
     /**
@@ -44,7 +44,7 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     /**
      * Find recent stock movements
      */
-    @Query("SELECT sm FROM StockMovement sm ORDER BY sm.createdAt DESC")
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product ORDER BY sm.createdAt DESC")
     Page<StockMovement> findRecent(Pageable pageable);
 
     /**

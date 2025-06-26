@@ -12,6 +12,7 @@ Start-Sleep 5
 # Write-Host "📦 Checking Docker containers..." -ForegroundColor Yellow
 # docker compose ps
 
+
 Write-Host ""
 Write-Host "🏥 Checking application health..." -ForegroundColor Yellow
 
