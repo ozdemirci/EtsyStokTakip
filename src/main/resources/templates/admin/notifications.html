@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,42 +8,105 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .navbar-brand { font-weight: bold; }
-        .sidebar { height: 100vh; background-color: #f8f9fa; }
-        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
-        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
-        .sidebar .nav-link.active { background-color: #007bff; color: white; }
-        .main-content { padding: 20px; }
-        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
-        .notification-item { border-left: 4px solid transparent; transition: all 0.3s ease; }
-        .notification-item:hover { background-color: #f8f9fa; }
-        .notification-item.warning { border-left-color: #ffc107; }
-        .notification-item.success { border-left-color: #28a745; }
-        .notification-item.info { border-left-color: #17a2b8; }
-        .notification-item.danger { border-left-color: #dc3545; }
-        .notification-item.primary { border-left-color: #007bff; }
-        .stats-card { border-left: 4px solid #007bff; }
-        .quick-action-btn { margin: 5px 0; }
-        .recent-activity { max-height: 300px; overflow-y: auto; }
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .sidebar {
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar .nav-link {
+            padding: 12px 20px;
+            color: #495057;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .tenant-badge {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .notification-item {
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item.warning {
+            border-left-color: #ffc107;
+        }
+
+        .notification-item.success {
+            border-left-color: #28a745;
+        }
+
+        .notification-item.info {
+            border-left-color: #17a2b8;
+        }
+
+        .notification-item.danger {
+            border-left-color: #dc3545;
+        }
+
+        .notification-item.primary {
+            border-left-color: #007bff;
+        }
+
+        .stats-card {
+            border-left: 4px solid #007bff;
+        }
+
+        .quick-action-btn {
+            margin: 5px 0;
+        }
+
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+        }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">            <a class="navbar-brand" href="/admin/dashboard">
+        <div class="container-fluid"> <a class="navbar-brand" href="/admin/dashboard">
                 <i class="bi bi-boxes"></i> Stockify Admin
             </a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
                     <i class="bi bi-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                          id="navNotificationBadge" 
-                          th:if="${unreadNotifications > 0}"
-                          th:text="${unreadNotifications}">0</span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        id="navNotificationBadge" th:if="${unreadNotifications > 0}"
+                        th:text="${unreadNotifications}">0</span>
                 </a>
                 <span class="navbar-text me-3">
-                    <i class="bi bi-building"></i> 
+                    <i class="bi bi-building"></i>
                     <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
                 </span>
                 <a class="nav-link" href="/logout">
@@ -56,7 +120,8 @@
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-2 sidebar">
-                <div class="position-sticky pt-3">                    <ul class="nav flex-column">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
@@ -66,7 +131,7 @@
                             <a class="nav-link" href="/admin/products">
                                 <i class="bi bi-box-seam"></i> Products
                             </a>
-                        </li>                        
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/users">
                                 <i class="bi bi-people"></i> Users
@@ -80,9 +145,9 @@
                         <li class="nav-item">
                             <a class="nav-link active" href="/admin/notifications">
                                 <i class="bi bi-bell"></i> Notifications
-                                <span class="badge bg-danger ms-2" id="notificationBadge" 
-                                      th:if="${unreadNotifications > 0}"
-                                      th:text="${unreadNotifications}" style="display: none;">0</span>
+                                <span class="badge bg-danger ms-2" id="notificationBadge"
+                                    th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}"
+                                    style="display: none;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -90,16 +155,16 @@
             </nav>
 
             <!-- Main Content -->
-            <main class="col-md-10 ms-sm-auto main-content">                <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <main class="col-md-10 ms-sm-auto main-content"> <!-- Header -->
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
                         <i class="bi bi-bell"></i> Notifications & Alerts
-                    </h1>                    <div class="btn-toolbar mb-2 mb-md-0">                        <div class="btn-group me-2">
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
                             <button class="btn btn-outline-secondary btn-sm" onclick="markAllAsRead(this)">
                                 <i class="bi bi-check-all"></i> Mark All as Read
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAllRead(this)">
-                                <i class="bi bi-trash"></i> Delete All as Read
                             </button>
                         </div>
                     </div>
@@ -108,11 +173,13 @@
                 <!-- Notification Statistics -->
                 <div class="row mb-4">
                     <div class="col-md-3">
-                        <div class="card stats-card">                            <div class="card-body">
+                        <div class="card stats-card">
+                            <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Total Notifications</h6>
-                                        <h3 class="mb-0" id="totalNotifications" th:text="${totalNotifications ?: 0}">0</h3>
+                                        <h3 class="mb-0" id="totalNotifications" th:text="${totalNotifications ?: 0}">0
+                                        </h3>
                                     </div>
                                     <div class="text-primary">
                                         <i class="bi bi-bell" style="font-size: 2rem;"></i>
@@ -122,11 +189,13 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card stats-card">                            <div class="card-body">
+                        <div class="card stats-card">
+                            <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Unread</h6>
-                                        <h3 class="mb-0" id="unreadNotifications" th:text="${unreadNotifications ?: 0}">0</h3>
+                                        <h3 class="mb-0" id="unreadNotifications" th:text="${unreadNotifications ?: 0}">
+                                            0</h3>
                                     </div>
                                     <div class="text-warning">
                                         <i class="bi bi-bell-fill" style="font-size: 2rem;"></i>
@@ -136,7 +205,8 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card stats-card">                            <div class="card-body">
+                        <div class="card stats-card">
+                            <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">Critical Alerts</h6>
@@ -150,7 +220,8 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card stats-card">                            <div class="card-body">
+                        <div class="card stats-card">
+                            <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="card-title text-muted">System Status</h6>
@@ -163,11 +234,12 @@
                             </div>
                         </div>
                     </div>
-                </div>                <!-- Notification Filters -->
+                </div> <!-- Notification Filters -->
                 <div class="row mb-3">
                     <div class="col-md-8">
                         <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="notificationFilter" id="allNotifications" checked>
+                            <input type="radio" class="btn-check" name="notificationFilter" id="allNotifications"
+                                checked>
                             <label class="btn btn-outline-primary" for="allNotifications">All Notifications</label>
 
                             <input type="radio" class="btn-check" name="notificationFilter" id="unreadOnly">
@@ -181,7 +253,8 @@
                         </div>
                     </div>
                     <div class="col-md-4 text-end">
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createNotificationModal">
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#createNotificationModal">
                             <i class="bi bi-plus-circle"></i> Create Notification
                         </button>
                     </div>
@@ -189,7 +262,8 @@
 
                 <!-- Notifications List -->
                 <div class="row">
-                    <div class="col-12">                        <div class="card">
+                    <div class="col-12">
+                        <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bi bi-inbox"></i> Notification Center
@@ -199,18 +273,21 @@
                                 <!-- Dynamic notifications will be loaded here -->
                                 <div th:if="${notifications != null and !notifications.empty}">
                                     <th:block th:each="notification : ${notifications}">
-                                        <div class="notification-item p-3 mb-3 rounded border" 
-                                             th:classappend="${notification.read ? 'border-secondary' : 'border-warning'}"
-                                             th:style="${notification.read ? 'opacity: 0.8;' : ''}"
-                                             th:data-id="${notification.id}">
+                                        <div class="notification-item p-3 mb-3 rounded border"
+                                            th:classappend="${notification.read ? 'border-secondary' : 'border-warning'}"
+                                            th:style="${notification.read ? 'opacity: 0.8;' : ''}"
+                                            th:data-id="${notification.id}">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div class="flex-grow-1">
                                                     <h6 class="mb-1">
                                                         <!-- Icon based on notification type -->
                                                         <th:block th:switch="${notification.notificationType}">
-                                                            <i th:case="'OUT_OF_STOCK'" class="bi bi-x-circle-fill text-danger me-2"></i>
-                                                            <i th:case="'LOW_STOCK'" class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                                                            <i th:case="*" class="bi bi-info-circle-fill text-info me-2"></i>
+                                                            <i th:case="'OUT_OF_STOCK'"
+                                                                class="bi bi-x-circle-fill text-danger me-2"></i>
+                                                            <i th:case="'LOW_STOCK'"
+                                                                class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                                            <i th:case="*"
+                                                                class="bi bi-info-circle-fill text-info me-2"></i>
                                                         </th:block>
                                                         <!-- Title based on notification type -->
                                                         <th:block th:switch="${notification.notificationType}">
@@ -219,13 +296,16 @@
                                                             <span th:case="*">Notification</span>
                                                         </th:block>
                                                     </h6>
-                                                    <p class="mb-2" th:text="${notification.message}">Notification message</p>
+                                                    <p class="mb-2" th:text="${notification.message}">Notification
+                                                        message</p>
                                                     <div class="d-flex align-items-center">
                                                         <small class="text-muted me-3">
-                                                            <i class="bi bi-clock"></i> 
-                                                            <span th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
+                                                            <i class="bi bi-clock"></i>
+                                                            <span
+                                                                th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
                                                         </small>
-                                                        <small class="text-muted me-3" th:if="${notification.product != null}">
+                                                        <small class="text-muted me-3"
+                                                            th:if="${notification.product != null}">
                                                             <i class="bi bi-box"></i>
                                                             <span th:text="${notification.product.title}">Product</span>
                                                         </small>
@@ -242,26 +322,31 @@
                                                 <div class="flex-shrink-0">
                                                     <!-- Badge based on notification type -->
                                                     <th:block th:switch="${notification.notificationType}">
-                                                        <span th:case="'OUT_OF_STOCK'" class="badge bg-danger text-white mb-2" th:text="${notification.notificationType}">OUT_OF_STOCK</span>
-                                                        <span th:case="'LOW_STOCK'" class="badge bg-warning text-dark mb-2" th:text="${notification.notificationType}">LOW_STOCK</span>
-                                                        <span th:case="*" class="badge bg-info text-white mb-2" th:text="${notification.notificationType}">INFO</span>
+                                                        <span th:case="'OUT_OF_STOCK'"
+                                                            class="badge bg-danger text-white mb-2"
+                                                            th:text="${notification.notificationType}">OUT_OF_STOCK</span>
+                                                        <span th:case="'LOW_STOCK'"
+                                                            class="badge bg-warning text-dark mb-2"
+                                                            th:text="${notification.notificationType}">LOW_STOCK</span>
+                                                        <span th:case="*" class="badge bg-info text-white mb-2"
+                                                            th:text="${notification.notificationType}">INFO</span>
                                                     </th:block>
                                                     <div class="btn-group d-block" role="group">
-                                                        <button class="btn btn-sm btn-outline-success me-1" title="Mark as read" 
-                                                                th:if="${!notification.read}"
-                                                                th:data-notification-id="${notification.id}"
-                                                                onclick="markSingleAsRead(this.dataset.notificationId, this)">
+                                                        <button class="btn btn-sm btn-outline-success me-1"
+                                                            title="Mark as read" th:if="${!notification.read}"
+                                                            th:data-notification-id="${notification.id}"
+                                                            onclick="markSingleAsRead(this.dataset.notificationId, this)">
                                                             <i class="bi bi-check"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-outline-primary me-1" title="View Product" 
-                                                                th:if="${notification.product != null}"
-                                                                th:data-product-title="${notification.product.title}"
-                                                                onclick="viewProduct(this.dataset.productTitle)">
+                                                        <button class="btn btn-sm btn-outline-primary me-1"
+                                                            title="View Product" th:if="${notification.product != null}"
+                                                            th:data-product-title="${notification.product.title}"
+                                                            onclick="viewProduct(this.dataset.productTitle)">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-outline-danger" title="Delete" 
-                                                                th:data-notification-id="${notification.id}"
-                                                                onclick="deleteSingleNotification(this.dataset.notificationId, this)">
+                                                        <button class="btn btn-sm btn-outline-danger" title="Delete"
+                                                            th:data-notification-id="${notification.id}"
+                                                            onclick="deleteSingleNotification(this.dataset.notificationId, this)">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
@@ -270,7 +355,7 @@
                                         </div>
                                     </th:block>
                                 </div>
-                                  <!-- Empty state when no notifications -->
+                                <!-- Empty state when no notifications -->
                                 <div th:if="${notifications == null or notifications.empty}" class="text-center py-5">
                                     <i class="bi bi-bell-slash text-muted" style="font-size: 4rem;"></i>
                                     <h5 class="text-muted mt-3">No Notifications</h5>
@@ -284,12 +369,14 @@
                 <!-- Notification Settings -->
                 <div class="row mt-4">
                     <div class="col-12">
-                        <div class="card">                            <div class="card-header">
+                        <div class="card">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bi bi-gear"></i> Notification Settings
                                 </h5>
                             </div>
-                            <div class="card-body">                                <div class="row">
+                            <div class="card-body">
+                                <div class="row">
                                     <div class="col-md-4">
                                         <h6>Stock Alerts</h6>
                                         <div class="form-check">
@@ -300,14 +387,16 @@
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="outOfStockAlerts" checked>
+                                            <input class="form-check-input" type="checkbox" id="outOfStockAlerts"
+                                                checked>
                                             <label class="form-check-label" for="outOfStockAlerts">
                                                 <i class="bi bi-x-circle text-danger me-1"></i>
                                                 Out of Stock Alerts
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="stockThresholdAlerts" checked>
+                                            <input class="form-check-input" type="checkbox" id="stockThresholdAlerts"
+                                                checked>
                                             <label class="form-check-label" for="stockThresholdAlerts">
                                                 <i class="bi bi-graph-down text-info me-1"></i>
                                                 Stock Threshold Alerts
@@ -317,7 +406,8 @@
                                     <div class="col-md-4">
                                         <h6>User Activities</h6>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="userRegistrations" checked>
+                                            <input class="form-check-input" type="checkbox" id="userRegistrations"
+                                                checked>
                                             <label class="form-check-label" for="userRegistrations">
                                                 <i class="bi bi-person-plus text-primary me-1"></i>
                                                 New User Registrations
@@ -348,7 +438,8 @@
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="maintenanceAlerts" checked>
+                                            <input class="form-check-input" type="checkbox" id="maintenanceAlerts"
+                                                checked>
                                             <label class="form-check-label" for="maintenanceAlerts">
                                                 <i class="bi bi-tools text-warning me-1"></i>
                                                 Maintenance Alerts
@@ -362,19 +453,22 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>                                <hr>
+                                </div>
+                                <hr>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h6>Delivery Methods</h6>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="browserNotifications" checked>
+                                            <input class="form-check-input" type="checkbox" id="browserNotifications"
+                                                checked>
                                             <label class="form-check-label" for="browserNotifications">
                                                 <i class="bi bi-browser-chrome text-success me-1"></i>
                                                 Browser Notifications
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications"
+                                                checked>
                                             <label class="form-check-label" for="emailNotifications">
                                                 <i class="bi bi-envelope text-secondary me-1"></i>
                                                 Email Notifications
@@ -384,12 +478,16 @@
                                     <div class="col-md-6">
                                         <h6>Priority Settings</h6>
                                         <div class="mb-2">
-                                            <label for="lowStockThreshold" class="form-label">Low Stock Threshold</label>
-                                            <input type="number" class="form-control" id="lowStockThreshold" value="10" min="1">
+                                            <label for="lowStockThreshold" class="form-label">Low Stock
+                                                Threshold</label>
+                                            <input type="number" class="form-control" id="lowStockThreshold" value="10"
+                                                min="1">
                                         </div>
                                         <div class="mb-2">
-                                            <label for="criticalStockThreshold" class="form-label">Critical Stock Threshold</label>
-                                            <input type="number" class="form-control" id="criticalStockThreshold" value="5" min="0">
+                                            <label for="criticalStockThreshold" class="form-label">Critical Stock
+                                                Threshold</label>
+                                            <input type="number" class="form-control" id="criticalStockThreshold"
+                                                value="5" min="0">
                                         </div>
                                     </div>
                                 </div>
@@ -407,7 +505,7 @@
                 </div>
             </main>
         </div>
-    </div>    <!-- Create Notification Modal -->
+    </div> <!-- Create Notification Modal -->
     <div class="modal fade" id="createNotificationModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -459,19 +557,19 @@
     <script>
         // Filter notifications
         document.querySelectorAll('input[name="notificationFilter"]').forEach(radio => {
-            radio.addEventListener('change', function() {
+            radio.addEventListener('change', function () {
                 filterNotifications(this.id);
             });
         });
 
         function filterNotifications(filterType) {
             const notifications = document.querySelectorAll('.notification-item');
-            
+
             notifications.forEach(notification => {
                 const type = notification.getAttribute('data-type');
                 const isUnread = notification.style.opacity !== '0.8';
-                
-                switch(filterType) {
+
+                switch (filterType) {
                     case 'allNotifications':
                         notification.style.display = 'block';
                         break;
@@ -486,16 +584,16 @@
                         break;
                 }
             });
-        }        function markAllAsRead(button) {
+        } function markAllAsRead(button) {
             console.log('🔴 markAllAsRead function called with button:', button);
-            
+
             // Show loading state
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="spinner-border spinner-border-sm"></i> Processing...';
             button.disabled = true;
-            
+
             console.log('🔴 Calling markAllAsRead endpoint...');
-            
+
             // Call backend endpoint
             fetch('/admin/notifications/mark-all-read', {
                 method: 'POST',
@@ -503,60 +601,60 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                console.log('🔴 Response status:', response.status);
-                console.log('🔴 Response ok:', response.ok);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    throw new Error('Response is not JSON');
-                }
-            })
-            .then(data => {
-                console.log('🔴 Response data:', data);
-                if (data.success) {
-                    showToast(data.message || 'All notifications marked as read!', 'success');
-                    // Reload the page to refresh the notification list
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showToast(data.message || 'Failed to mark notifications as read', 'danger');
+                .then(response => {
+                    console.log('🔴 Response status:', response.status);
+                    console.log('🔴 Response ok:', response.ok);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        throw new Error('Response is not JSON');
+                    }
+                })
+                .then(data => {
+                    console.log('🔴 Response data:', data);
+                    if (data.success) {
+                        showToast(data.message || 'All notifications marked as read!', 'success');
+                        // Reload the page to refresh the notification list
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Failed to mark notifications as read', 'danger');
+                        // Restore button state
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('🔴 Error details:', error);
+                    showToast('Error marking notifications as read: ' + error.message, 'danger');
                     // Restore button state
                     button.innerHTML = originalText;
                     button.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('🔴 Error details:', error);
-                showToast('Error marking notifications as read: ' + error.message, 'danger');
-                // Restore button state
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
-        }        function deleteAllRead(button) {
+                });
+        } function deleteAllRead(button) {
             console.log('🟡 deleteAllRead function called with button:', button);
-            
+
             // Show confirmation dialog
             if (!confirm('Are you sure you want to permanently delete all read notifications? This action cannot be undone.')) {
                 console.log('🟡 User cancelled delete operation');
                 return;
             }
-            
+
             // Show loading state
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="spinner-border spinner-border-sm"></i> Deleting...';
             button.disabled = true;
-            
+
             console.log('🟡 Calling deleteAllRead endpoint...');
-            
+
             // Call backend endpoint
             fetch('/admin/notifications/delete-all-read', {
                 method: 'POST',
@@ -564,60 +662,60 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                console.log('🟡 Response status:', response.status);
-                console.log('🟡 Response ok:', response.ok);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    throw new Error('Response is not JSON');
-                }
-            })
-            .then(data => {
-                console.log('🟡 Response data:', data);
-                if (data.success) {
-                    showToast(data.message || 'Read notifications deleted successfully!', 'success');
-                    // Reload the page to refresh the notification list
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showToast(data.message || 'Failed to delete read notifications', 'danger');
+                .then(response => {
+                    console.log('🟡 Response status:', response.status);
+                    console.log('🟡 Response ok:', response.ok);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        throw new Error('Response is not JSON');
+                    }
+                })
+                .then(data => {
+                    console.log('🟡 Response data:', data);
+                    if (data.success) {
+                        showToast(data.message || 'Read notifications deleted successfully!', 'success');
+                        // Reload the page to refresh the notification list
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message || 'Failed to delete read notifications', 'danger');
+                        // Restore button state
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('🟡 Error details:', error);
+                    showToast('Error deleting read notifications: ' + error.message, 'danger');
                     // Restore button state
                     button.innerHTML = originalText;
                     button.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('🟡 Error details:', error);
-                showToast('Error deleting read notifications: ' + error.message, 'danger');
-                // Restore button state
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
+                });
         }
 
         function markAsRead(button) {
             const notificationItem = button.closest('.notification-item');
             notificationItem.style.opacity = '0.8';
-            
+
             const unreadSpan = notificationItem.querySelector('small span:last-child');
             if (unreadSpan && unreadSpan.innerHTML.includes('Unread')) {
                 unreadSpan.innerHTML = '<i class="bi bi-eye"></i> Read';
             }
-            
+
             // Update counter
             const currentUnread = parseInt(document.getElementById('unreadNotifications').textContent);
             const newUnreadCount = Math.max(0, currentUnread - 1);
             document.getElementById('unreadNotifications').textContent = newUnreadCount;
-            
+
             // Update sidebar badge
             const sidebarBadge = document.getElementById('sidebarNotificationBadge');
             if (sidebarBadge) {
@@ -628,7 +726,7 @@
                     sidebarBadge.style.display = 'none';
                 }
             }
-            
+
             // Update navbar badge
             const navBadge = document.getElementById('navNotificationBadge');
             if (navBadge) {
@@ -639,24 +737,24 @@
                     navBadge.style.display = 'none';
                 }
             }
-            
+
             showToast('Notification marked as read', 'success');
-        }        function deleteNotification(button) {
+        } function deleteNotification(button) {
             if (confirm('Are you sure you want to delete this notification?')) {
                 const notificationItem = button.closest('.notification-item');
                 const isUnread = !notificationItem.style.opacity || notificationItem.style.opacity !== '0.8';
-                
+
                 notificationItem.remove();
-                
+
                 // Update counters
                 const currentTotal = parseInt(document.getElementById('totalNotifications').textContent);
                 document.getElementById('totalNotifications').textContent = Math.max(0, currentTotal - 1);
-                
+
                 if (isUnread) {
                     const currentUnread = parseInt(document.getElementById('unreadNotifications').textContent);
                     const newUnreadCount = Math.max(0, currentUnread - 1);
                     document.getElementById('unreadNotifications').textContent = newUnreadCount;
-                    
+
                     // Update sidebar badge
                     const sidebarBadge = document.getElementById('sidebarNotificationBadge');
                     if (sidebarBadge) {
@@ -667,7 +765,7 @@
                             sidebarBadge.style.display = 'none';
                         }
                     }
-                    
+
                     // Update navbar badge
                     const navBadge = document.getElementById('navNotificationBadge');
                     if (navBadge) {
@@ -677,22 +775,23 @@
                         } else {
                             navBadge.style.display = 'none';
                         }
-                    }                }
-                
+                    }
+                }
+
                 showToast('Notification deleted', 'info');
             }
         }
-        
+
         function viewNotificationDetails(id) {
             // This would typically open a detailed view or navigate to relevant page
             showToast('Opening notification details...', 'info');
-            
+
             // Example: Navigate to related page based on notification type
             if (id === 1 || id === 2) {
                 // Navigate to products page for stock-related notifications
                 window.open('/admin/products/low-stock', '_blank');
             }
-        }        function sendTestNotification() {
+        } function sendTestNotification() {
             const testNotification = `
                 <div class="notification-item info p-3 mb-3 rounded" data-type="test">
                     <div class="d-flex justify-content-between align-items-start">
@@ -722,47 +821,48 @@
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('notificationsList').insertAdjacentHTML('afterbegin', testNotification);
-            
+
             // Update counters
             const currentTotal = parseInt(document.getElementById('totalNotifications').textContent);
             const currentUnread = parseInt(document.getElementById('unreadNotifications').textContent);
             document.getElementById('totalNotifications').textContent = currentTotal + 1;
             document.getElementById('unreadNotifications').textContent = currentUnread + 1;
-            
+
             // Update sidebar badge
             const sidebarBadge = document.getElementById('sidebarNotificationBadge');
             if (sidebarBadge) {
                 sidebarBadge.textContent = currentUnread + 1;
                 sidebarBadge.style.display = 'inline';
             }
-            
+
             // Update navbar badge
             const navBadge = document.getElementById('navNotificationBadge');
             if (navBadge) {
                 navBadge.textContent = currentUnread + 1;
                 navBadge.style.display = 'inline';
             }
-              showToast('Test notification sent!', 'success');
+            showToast('Test notification sent!', 'success');
         }
-        
+
         function createNotification() {
             const form = document.getElementById('createNotificationForm');
             const formData = new FormData(form);
-            
+
             if (form.checkValidity()) {
                 // This would typically send data to server
                 showToast('Notification created successfully!', 'success');
-                
+
                 // Close modal and reset form
                 const modal = bootstrap.Modal.getInstance(document.getElementById('createNotificationModal'));
                 modal.hide();
-                form.reset();            } else {
+                form.reset();
+            } else {
                 form.reportValidity();
             }
         }
-        
+
         function saveNotificationSettings() {
             showToast('Notification settings saved successfully!', 'success');
         }
@@ -779,7 +879,7 @@
                 // Reset all checkboxes and inputs to default values
                 document.getElementById('lowStockThreshold').value = '10';
                 document.getElementById('criticalStockThreshold').value = '5';
-                
+
                 showToast('Notification settings reset to default', 'info');
             }
         }
@@ -793,7 +893,7 @@
                 <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 if (toast.parentElement) {
                     toast.remove();
@@ -805,27 +905,27 @@
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }        // Auto-refresh notifications every 30 seconds
-        setInterval(function() {
+        setInterval(function () {
             // This would typically fetch new notifications from server
             console.log('Checking for new notifications...');
         }, 30000);
 
         // Initialize notification counts on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateNotificationCounts();
         });
 
         function updateNotificationCounts() {
             const allNotifications = document.querySelectorAll('.notification-item').length;
             const unreadNotifications = document.querySelectorAll('.notification-item:not([style*="opacity: 0.8"])').length;
-            
+
             document.getElementById('totalNotifications').textContent = allNotifications;
             document.getElementById('unreadNotifications').textContent = unreadNotifications;
-            
+
             // Update badges
             const sidebarBadge = document.getElementById('sidebarNotificationBadge');
             const navBadge = document.getElementById('navNotificationBadge');
-            
+
             if (unreadNotifications > 0) {
                 if (sidebarBadge) {
                     sidebarBadge.textContent = unreadNotifications;
@@ -846,7 +946,7 @@
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="bi bi-spinner-border"></i>';
             button.disabled = true;
-            
+
             // Call the existing single notification endpoint
             fetch(`/notifications/${notificationId}/read`, {
                 method: 'POST',
@@ -855,48 +955,48 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => {
-                if (response.ok) {
-                    // Update the notification item visually
-                    const notificationItem = button.closest('.notification-item');
-                    notificationItem.style.opacity = '0.8';
-                    notificationItem.classList.remove('border-warning');
-                    notificationItem.classList.add('border-secondary');
-                    
-                    // Update the read status text
-                    const unreadSpan = notificationItem.querySelector('small span:last-child');
-                    if (unreadSpan && unreadSpan.innerHTML.includes('Unread')) {
-                        unreadSpan.innerHTML = '<i class="bi bi-eye"></i> Read';
+                .then(response => {
+                    if (response.ok) {
+                        // Update the notification item visually
+                        const notificationItem = button.closest('.notification-item');
+                        notificationItem.style.opacity = '0.8';
+                        notificationItem.classList.remove('border-warning');
+                        notificationItem.classList.add('border-secondary');
+
+                        // Update the read status text
+                        const unreadSpan = notificationItem.querySelector('small span:last-child');
+                        if (unreadSpan && unreadSpan.innerHTML.includes('Unread')) {
+                            unreadSpan.innerHTML = '<i class="bi bi-eye"></i> Read';
+                        }
+
+                        // Remove the button since it's now read
+                        button.remove();
+
+                        // Update counters
+                        updateNotificationCounts();
+
+                        showToast('Notification marked as read!', 'success');
+                    } else {
+                        throw new Error('Failed to mark notification as read');
                     }
-                    
-                    // Remove the button since it's now read
-                    button.remove();
-                    
-                    // Update counters
-                    updateNotificationCounts();
-                    
-                    showToast('Notification marked as read!', 'success');
-                } else {
-                    throw new Error('Failed to mark notification as read');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error marking notification as read', 'danger');
-                // Restore button state
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
-        }        function deleteSingleNotification(notificationId, button) {
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error marking notification as read', 'danger');
+                    // Restore button state
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+        } function deleteSingleNotification(notificationId, button) {
             if (!confirm('Are you sure you want to delete this notification?')) {
                 return;
             }
-            
+
             // Show loading state
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="bi bi-spinner-border"></i>';
             button.disabled = true;
-            
+
             // Call backend endpoint
             fetch(`/admin/notifications/${notificationId}/delete`, {
                 method: 'POST',
@@ -905,32 +1005,33 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove the notification item from DOM
-                    const notificationItem = button.closest('.notification-item');
-                    notificationItem.remove();
-                    
-                    // Update counters
-                    updateNotificationCounts();
-                    
-                    showToast(data.message || 'Notification deleted successfully!', 'success');
-                } else {
-                    showToast(data.message || 'Failed to delete notification', 'danger');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the notification item from DOM
+                        const notificationItem = button.closest('.notification-item');
+                        notificationItem.remove();
+
+                        // Update counters
+                        updateNotificationCounts();
+
+                        showToast(data.message || 'Notification deleted successfully!', 'success');
+                    } else {
+                        showToast(data.message || 'Failed to delete notification', 'danger');
+                        // Restore button state
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error deleting notification', 'danger');
                     // Restore button state
                     button.innerHTML = originalText;
                     button.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error deleting notification', 'danger');
-                // Restore button state
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
+                });
         }
     </script>
 </body>
+
 </html>
