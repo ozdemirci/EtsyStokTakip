@@ -83,16 +83,16 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link active" href="/admin/stock-movements">
+                                <i class="bi bi-arrow-left-right"></i> Stock Movements
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/admin/notifications">
                                 <i class="bi bi-bell"></i> Notifications
                                 <span class="badge bg-danger ms-2" id="notificationBadge" 
                                       th:if="${unreadNotifications > 0}"
                                       th:text="${unreadNotifications}" style="display: none;">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/admin/stock-movements">
-                                <i class="bi bi-arrow-left-right"></i> Stock Movements
                             </a>
                         </li>
                     </ul>

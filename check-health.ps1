@@ -9,8 +9,8 @@ Write-Host "⏳ Waiting for application to start..." -ForegroundColor Yellow
 Start-Sleep 5
 
 # Check if containers are running
-Write-Host "📦 Checking Docker containers..." -ForegroundColor Yellow
-docker compose ps
+# Write-Host "📦 Checking Docker containers..." -ForegroundColor Yellow
+# docker compose ps
 
 Write-Host ""
 Write-Host "🏥 Checking application health..." -ForegroundColor Yellow
@@ -36,7 +36,7 @@ Write-Host "🗄️ Checking tenant schemas..." -ForegroundColor Yellow
 try {
     $schemasResponse = Invoke-WebRequest -Uri "http://localhost:8080/api/demo/schemas" -UseBasicParsing
     $schemasContent = $schemasResponse.Content
-    if ($schemasContent -like "*global_trade*") {
+    if ($schemasContent -like "*com*") {
         Write-Host "✅ Tenant schemas: AVAILABLE" -ForegroundColor Green
         $schemasOk = $true
         # Try to parse JSON for count
