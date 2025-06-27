@@ -16,6 +16,7 @@
         .sidebar {
             height: 100vh;
             background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
         }
 
         .sidebar .nav-link {
@@ -41,6 +42,7 @@
 
         .card {
             border: none;
+            border-radius: .75rem;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
 
@@ -85,9 +87,7 @@
     </style>
 </head>
 
-<body>
-
-
+<body class="bg-light">
 
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -113,7 +113,9 @@
         </div>
     </nav>
 
-    <div class="card-body">
+    <div class="container-fluid py-4">
+        <div class="card mb-4">
+            <div class="card-body">
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h4 class="card-title mb-3">
@@ -166,12 +168,13 @@
             </div>
         </div>
     </div>
+        </div>
 
 <!-- ----------- -->
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-2 sidebar">
+            <nav class="col-md-2 sidebar border-end">
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -663,481 +666,6 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
-
-
-<!-- Quick Stats Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0">
-                        <div class="bg-primary text-white rounded-circle p-3">
-                            <i class="bi bi-box-seam fs-4"></i>
-                        </div>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h6 class="text-muted mb-0">Toplam Ürün</h6>
-                        <h3 class="mb-0" th:text="${metrics.totalProducts}">0</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0">
-                        <div class="bg-success text-white rounded-circle p-3">
-                            <i class="bi bi-people fs-4"></i>
-                        </div>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h6 class="text-muted mb-0">Toplam Kullanıcı</h6>
-                        <h3 class="mb-0" th:text="${metrics.totalUsers}">0</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0">
-                        <div class="bg-warning text-white rounded-circle p-3">
-                            <i class="bi bi-exclamation-triangle fs-4"></i>
-                        </div>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h6 class="text-muted mb-0">Düşük Stok</h6>
-                        <h3 class="mb-0" th:text="${metrics.lowStockProducts}">0</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0">
-                        <div class="bg-info text-white rounded-circle p-3">
-                            <i class="bi bi-currency-dollar fs-4"></i>
-                        </div>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h6 class="text-muted mb-0">Envanter Değeri</h6>
-                        <h3 class="mb-0" th:text="${#numbers.formatCurrency(metrics.totalInventoryValue)}">₺0</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-lightning me-2"></i>Hızlı İşlemler
-                </h5>
-            </div>
-            <div class="card-body quick-actions">
-                <div class="row g-3">
-                    <div class="col-md-2 col-sm-4 col-6">
-                        <a href="/users/add" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-plus-lg d-block mb-1"></i>
-                            <small>Ürün Ekle</small>
-                        </a>
-                    </div>
-                    <div class="col-md-2 col-sm-4 col-6">
-                        <a href="/products" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-list-ul d-block mb-1"></i>
-                            <small>Ürün Listesi</small>
-                        </a>
-                    </div>
-                    <div class="col-md-2 col-sm-4 col-6">
-                        <a href="/admin/users/add" class="btn btn-outline-success w-100">
-                            <i class="bi bi-person-plus d-block mb-1"></i>
-                            <small>Kullanıcı Ekle</small>
-                        </a>
-                    </div>
-                    <div class="col-md-2 col-sm-4 col-6">
-                        <a href="/admin/users" class="btn btn-outline-info w-100">
-                            <i class="bi bi-people d-block mb-1"></i>
-                            <small>Kullanıcılar</small>
-                        </a>
-                    </div>
-                    <div class="col-md-2 col-sm-4 col-6">
-                        <a href="/admin/notifications" class="btn btn-outline-warning w-100">
-                            <i class="bi bi-bell d-block mb-1"></i>
-                            <small>Bildirimler</small>
-                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle"
-                                id="quickActionNotificationBadge" style="display: inline;">1</span>
-                        </a>
-                    </div>
-                    <div class="col-md-2 col-sm-4 col-6">
-                        <a href="/products/import" class="btn btn-outline-dark w-100">
-                            <i class="bi bi-upload d-block mb-1"></i>
-                            <small>Toplu İçe Aktar</small>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Main Content Row -->
-<div class="row g-4">
-    <!-- Revenue Chart -->
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-graph-up me-2"></i>Gelir Analizi
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="revenueChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tenant Users -->
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-people me-2"></i>Tenant Kullanıcıları
-                </h5>
-                <span class="badge bg-primary" th:text="${tenantUsers.size()}">0</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
-                    <div class="list-group-item" th:each="user : ${tenantUsers}" th:if="${user != null}">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                    style="width: 40px; height: 40px;">
-                                    <i class="bi bi-person"></i>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0" th:text="${user.username ?: 'N/A'}">username</h6>
-                                <small class="text-muted" th:text="${user.email ?: 'E-posta yok'}">email</small>
-                                <div class="mt-1"> <span class="badge"
-                                        th:class="'badge ' + (${user.role != null and user.role.toString() == 'SUPER_ADMIN'} ? 'bg-danger' : 
-                                                           (${user.role != null and user.role.toString() == 'ADMIN'} ? 'bg-warning text-dark' : 'bg-info'))"
-                                        th:text="${user.role != null ? user.role.toString() : 'No Role'}">Role</span>
-                                    <span class="badge ms-1"
-                                        th:class="'badge ' + (${user.active != null and user.active} ? 'bg-success' : 'bg-secondary')"
-                                        th:text="${user.active != null and user.active ? 'Active' : 'Inactive'}">Status</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-group-item text-center" th:if="${tenantUsers == null or tenantUsers.isEmpty()}">
-                        <i class="bi bi-people text-muted fs-1"></i>
-                        <p class="text-muted mb-0">Henüz kullanıcı yok</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <a href="/admin/users" class="btn btn-sm btn-outline-primary w-100">
-                    <i class="bi bi-arrow-right me-1"></i>Tüm Kullanıcıları Görüntüle
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Additional Info Row -->
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-info-circle me-2"></i>Sistem Bilgileri
-                </h5>
-            </div>
-            <div class="card-body info-section">
-                <div class="row">
-                    <div class="col-6">
-                        <strong>Aktif Bildirimler:</strong>
-                        <p class="mb-2" th:text="${metrics.activeNotifications}">0</p>
-                        <strong>Günlük Gelir:</strong>
-                        <p class="mb-2" th:text="${#numbers.formatCurrency(metrics.dailyRevenue)}">₺0</p>
-                    </div>
-                    <div class="col-6">
-                        <strong>Aylık Gelir:</strong>
-                        <p class="mb-2" th:text="${#numbers.formatCurrency(metrics.monthlyRevenue)}">₺0</p>
-                        <strong>Tenant ID:</strong>
-                        <p class="mb-2" th:text="${currentTenantId}">demo</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-activity me-2"></i>Son Aktiviteler
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="bg-success text-white rounded-circle p-2 me-3">
-                        <i class="bi bi-plus"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Yeni ürün eklendi</h6>
-                        <small class="text-muted">2 saat önce</small>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="bg-primary text-white rounded-circle p-2 me-3">
-                        <i class="bi bi-person"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Kullanıcı giriş yaptı</h6>
-                        <small class="text-muted">5 saat önce</small>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center">
-                    <div class="bg-warning text-white rounded-circle p-2 me-3">
-                        <i class="bi bi-exclamation"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Düşük stok uyarısı</h6>
-                        <small class="text-muted">1 gün önce</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</div>
-<script th:inline="javascript">
-    // Revenue Chart
-    const dailyRevenue = /*[[${metrics.dailyRevenue}]]*/ 0;
-    const monthlyRevenue = /*[[${metrics.monthlyRevenue}]]*/ 0;
-
-    new Chart(document.getElementById('revenueChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Günlük Gelir', 'Aylık Gelir'],
-            datasets: [{
-                label: 'Gelir (₺)',
-                data: [dailyRevenue, monthlyRevenue],
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(75, 192, 192, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)'
-                ],
-                borderWidth: 2,
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            }
-        }
-    });
-</script>
-<!-- Notification Coordination Script -->
-<script th:inline="javascript">
-    // Notification System Integration - Get initial data from server
-    let notificationData = {
-        total: /*[[${totalNotifications}]]*/ 12,
-        unread: /*[[${unreadNotifications}]]*/ 3,
-        critical: /*[[${criticalNotifications}]]*/ 2,
-        alerts: [
-            {
-                type: /*[[${outOfStockProducts > 0 ? 'danger' : 'warning'}]]*/ 'danger',
-                message: /*[[${outOfStockProducts ?: 0}]]*/ '5' + ' products out of stock',
-                icon: 'x-circle'
-            },
-            {
-                type: 'warning',
-                message: /*[[${lowStockProducts ?: 0}]]*/ '12' + ' products low stock',
-                icon: 'exclamation-triangle'
-            }
-        ]
-    };        // Update notification counters
-    function updateNotificationCounters() {
-        // Update navigation badge
-        const navBadge = document.getElementById('navNotificationBadge');
-        if (navBadge) {
-            if (notificationData.unread > 0) {
-                navBadge.textContent = notificationData.unread;
-                navBadge.style.display = 'inline';
-            } else {
-                navBadge.style.display = 'none';
-            }
-        }
-
-        // Update sidebar badge
-        const sidebarBadge = document.getElementById('notificationBadge');
-        if (sidebarBadge) {
-            if (notificationData.unread > 0) {
-                sidebarBadge.textContent = notificationData.unread;
-                sidebarBadge.style.display = 'inline';
-            } else {
-                sidebarBadge.style.display = 'none';
-            }
-        }
-
-        // Update quick action badge
-        const quickActionBadge = document.getElementById('quickActionNotificationBadge');
-        if (quickActionBadge) {
-            if (notificationData.critical > 0) {
-                quickActionBadge.textContent = notificationData.critical;
-                quickActionBadge.style.display = 'inline';
-            } else {
-                quickActionBadge.style.display = 'none';
-            }
-        }
-
-        // Update stats cards
-        const activeCountElem = document.getElementById('activeNotificationsCount');
-        if (activeCountElem) activeCountElem.textContent = notificationData.total;
-        const criticalCountElem = document.getElementById('criticalNotificationsCount');
-        if (criticalCountElem) criticalCountElem.textContent = notificationData.critical;
-    }
-
-    // Update recent alerts display
-    function updateRecentAlerts() {
-        const container = document.getElementById('recentAlertsContainer');
-        if (container) {
-            const alertsHtml = notificationData.alerts.map(alert => `
-                    <div class="col-md-4">
-                        <div class="alert alert-${alert.type} alert-sm mb-1 p-2">
-                            <i class="bi bi-${alert.icon} me-1"></i>
-                            <small>${alert.message}</small>
-                        </div>
-                    </div>
-                `).join('');
-
-            container.innerHTML = alertsHtml + `
-                    <div class="col-md-4 text-end">
-                        <a href="/admin/notifications" class="btn btn-outline-warning btn-sm">
-                            <i class="bi bi-bell"></i> View All
-                        </a>
-                    </div>
-                `;
-        }
-    }
-
-    // Simulate notification updates (in real app, this would be WebSocket or polling)
-    function checkForNewNotifications() {
-        // This would typically fetch from server
-        // For demo, we'll occasionally update the counts
-        const shouldUpdate = Math.random() < 0.1; // 10% chance of update
-
-        if (shouldUpdate) {
-            // Simulate new notification
-            const wasUnread = notificationData.unread;
-            notificationData.unread = Math.max(0, notificationData.unread + (Math.random() > 0.5 ? 1 : -1));
-            notificationData.total = Math.max(notificationData.unread, notificationData.total);
-
-            if (notificationData.unread > wasUnread) {
-                // Show toast for new notification
-                showNotificationToast('New notification received!');
-            }
-
-            updateNotificationCounters();
-        }
-    }
-
-    // Show notification toast
-    function showNotificationToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast position-fixed top-0 end-0 m-3';
-        toast.style.zIndex = '9999';
-        toast.innerHTML = `
-                <div class="toast-header">
-                    <i class="bi bi-bell-fill text-primary me-2"></i>
-                    <strong class="me-auto">Notification</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
-            `;
-
-        document.body.appendChild(toast);
-        const bootstrapToast = new bootstrap.Toast(toast);
-        bootstrapToast.show();
-
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
-    }
-
-    // Add click handlers for notification links
-    document.addEventListener('DOMContentLoaded', function () {
-        // Update initial state
-        updateNotificationCounters();
-        updateRecentAlerts();
-
-        // Check for notifications every 30 seconds
-        setInterval(checkForNewNotifications, 30000);
-
-        // Add click tracking for notification links
-        document.querySelectorAll('a[href="/admin/notifications"]').forEach(link => {
-            link.addEventListener('click', function () {
-                // Mark notifications as being viewed
-                notificationData.unread = 0;
-                updateNotificationCounters();
-            });
-        });
-    });
-
-    // Expose function to manually trigger notification update (for testing)
-    window.triggerNotificationUpdate = function (type = 'info', message = 'Test notification') {
-        notificationData.unread++;
-        notificationData.total++;
-        if (type === 'critical') {
-            notificationData.critical++;
-        }
-        updateNotificationCounters();
-        updateRecentAlerts();
-        showNotificationToast(message);
-    };
-</script>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
