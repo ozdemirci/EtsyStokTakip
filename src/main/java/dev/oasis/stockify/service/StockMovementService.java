@@ -10,6 +10,7 @@ import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.repository.StockMovementRepository;
+import dev.oasis.stockify.service.StockNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ public class StockMovementService {
     private final StockMovementRepository stockMovementRepository;
     private final ProductRepository productRepository;
     private final AppUserRepository appUserRepository;
+    private final StockNotificationService stockNotificationService;
 
     /**
      * Create a new stock movement
@@ -94,6 +96,7 @@ public class StockMovementService {
         // Update product stock level
         product.setStockLevel(newStock);
         productRepository.save(product);
+        stockNotificationService.checkAndCreateLowStockNotification(product);
 
         log.info(
                 "✅ Stock movement created - Product: {}, Type: {}, Quantity: {}, Previous: {} -> New: {} for tenant: {}",

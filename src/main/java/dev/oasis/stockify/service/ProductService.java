@@ -257,9 +257,6 @@ public class ProductService {
                     Product savedProduct = productRepository.findById(productId)
                         .orElseThrow(() -> new RuntimeException("Product not found after stock movement"));
                     
-                    // Check for low stock notifications
-                    stockNotificationService.checkAndCreateLowStockNotification(savedProduct);
-                    
                     log.info("✅ Quick restock completed - Product: {} Old Stock: {} New Stock: {} for tenant: {}", 
                             savedProduct.getTitle(), oldStockLevel, savedProduct.getStockLevel(), currentTenant);
                     
