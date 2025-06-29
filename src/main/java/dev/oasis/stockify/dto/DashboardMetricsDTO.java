@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DashboardMetricsDTO {
     private long totalProducts;
+    private long activeProducts;
     private long totalUsers;
     private double totalInventoryValue;
     private long lowStockProducts;

@@ -630,7 +630,7 @@
                     labels: ['Active Products', 'Inactive Products', 'Low Stock', 'Out of Stock'],
                     datasets: [{
                         data: [
-                            Math.max(0, totalProducts - lowStockProducts - outOfStockProducts),
+                            activeProducts,
                             Math.max(0, totalProducts - activeProducts),
                             lowStockProducts,
                             outOfStockProducts
@@ -669,7 +669,7 @@
                     const data = await response.json();
 
                     totalProducts = data.totalProducts;
-                    activeProducts = Math.max(0, data.totalProducts - data.lowStockProducts);
+                    activeProducts = data.activeProducts;
                     lowStockProducts = data.lowStockProducts;
 
                     document.getElementById('totalProductsCount').innerText = totalProducts;
