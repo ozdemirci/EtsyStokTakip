@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @Slf4j
-public class LoginController {    @GetMapping("/login")
+public class LoginController {    
+    
+    @GetMapping("/login")
     public String login(@RequestParam(required = false) String tenantId, 
                        @RequestParam(required = false) String registered,
                        Model model) {

@@ -38,7 +38,9 @@ public class ProductService {
         this.productMapper = productMapper;
         this.stockNotificationService = stockNotificationService;
         this.stockMovementService = stockMovementService;
-    }    /**
+    }    
+    
+    /**
      * Retrieves all products from the database
      * @return a list of all products
      */

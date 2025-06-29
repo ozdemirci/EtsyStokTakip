@@ -1,5 +1,6 @@
 package dev.oasis.stockify.controller;
 
+import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.model.StockMovement;
@@ -7,12 +8,14 @@ import dev.oasis.stockify.service.StockMovementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -111,4 +114,46 @@ public class StockMovementController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    /**-------------------------------------------------------------------------------------
+     * Toplu stok hareketi
+     */
+
+    @GetMapping("/bulk")
+    public String bulk(Model model) {
+        return "admin/bulk-stock-movements";
+    }
+
+    /**
+     * Toplu stok hareketi girişi
+     */
+    @PostMapping("/bulk")
+    public List<StockMovementResponseDTO> createBulkMovements(@RequestBody BulkStockMovementCreateDTO bulkDto) {
+        return stockMovementService.createBulkStockMovements(bulkDto);
+    }
+
+ /**
+     * Bugünün hareketlerini getirir
+     */
+    @GetMapping("/bulk/today")
+    public List<StockMovementResponseDTO> getTodaysMovements() {
+        return stockMovementService.getTodaysStockMovements();
+    }
+
+    /**
+     * Tarih aralığına göre hareket getirir
+     */
+    @GetMapping("/bulk/by-date")
+    public List<StockMovementResponseDTO> getMovementsByDateRange(
+            @RequestParam("start")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        return stockMovementService.getStockMovementsByDateRange(start, end);
+    }
+
+    
+    
+
+
 }

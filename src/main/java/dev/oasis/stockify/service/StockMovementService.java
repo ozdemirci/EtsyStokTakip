@@ -1,8 +1,10 @@
 package dev.oasis.stockify.service;
 
 import dev.oasis.stockify.config.tenant.TenantContext;
+import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
+import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.AppUserRepository;
@@ -14,10 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +55,8 @@ public class StockMovementService {
 
         // Validate new stock level
         if (newStock < 0) {
-            throw new IllegalArgumentException("Stock level cannot be negative. Current: " + previousStock + ", Change: " + dto.getQuantity());
+            throw new IllegalArgumentException(
+                    "Stock level cannot be negative. Current: " + previousStock + ", Change: " + dto.getQuantity());
         }
 
         // Create stock movement record
@@ -61,16 +68,30 @@ public class StockMovementService {
         movement.setNewStock(newStock);
         movement.setReferenceId(dto.getReferenceId());
         movement.setNotes(dto.getNotes());
-        movement.setCreatedBy(dto.getCreatedBy());
+
+        //  setCreatedBy
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            // Kullanıcı adını veya ID'sini al
+            String username = authentication.getName();
+            // Kullanıcıyı veritabanından bul ve ID'sini ata
+            AppUser user = appUserRepository.findByUsername(username).orElse(null);
+            if (user != null) {
+                movement.setCreatedBy(user.getId());
+            }
+        }        
 
         // Save movement record
         StockMovement savedMovement = stockMovementRepository.save(movement);
+        Long createdBy = savedMovement.getCreatedBy();
+        log.warn("=========createdBy: {}", createdBy);
 
         // Update product stock level
         product.setStockLevel(newStock);
         productRepository.save(product);
 
-        log.info("✅ Stock movement created - Product: {}, Type: {}, Quantity: {}, Previous: {} -> New: {} for tenant: {}",
+        log.info(
+                "✅ Stock movement created - Product: {}, Type: {}, Quantity: {}, Previous: {} -> New: {} for tenant: {}",
                 product.getTitle(), dto.getMovementType(), dto.getQuantity(), previousStock, newStock, currentTenant);
 
         return convertToResponseDTO(savedMovement);
@@ -188,9 +209,61 @@ public class StockMovementService {
             this.adjustments = adjustments;
         }
 
-        public long getTotalMovements() { return totalMovements; }
-        public long getInMovements() { return inMovements; }
-        public long getOutMovements() { return outMovements; }
-        public long getAdjustments() { return adjustments; }
+        public long getTotalMovements() {
+            return totalMovements;
+        }
+
+        public long getInMovements() {
+            return inMovements;
+        }
+
+        public long getOutMovements() {
+            return outMovements;
+        }
+
+        public long getAdjustments() {
+            return adjustments;
+        }
+    }
+
+    /**
+     * Get today's stock movements
+     */
+    public List<StockMovementResponseDTO> getTodaysStockMovements() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        List<StockMovement> movements = stockMovementRepository
+                .findByCreatedAtBetweenOrderByCreatedAtDesc(startOfDay, endOfDay);
+
+        return movements.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get stock movements by date range (inclusive)
+     */
+    public List<StockMovementResponseDTO> getStockMovementsByDateRange(LocalDate start, LocalDate end) {
+        LocalDateTime startDateTime = start.atStartOfDay();
+        LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
+
+        List<StockMovement> movements = stockMovementRepository
+                .findByCreatedAtBetweenOrderByCreatedAtDesc(startDateTime, endDateTime);
+
+        return movements.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Toplu hareket oluşturur
+     */
+    @Transactional
+    public List<StockMovementResponseDTO> createBulkStockMovements(BulkStockMovementCreateDTO bulkDto) {
+        return bulkDto.getMovements().stream()
+                .map(this::createStockMovement)
+                .collect(Collectors.toList());
     }
 }

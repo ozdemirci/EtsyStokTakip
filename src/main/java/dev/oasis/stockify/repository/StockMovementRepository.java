@@ -64,4 +64,7 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
      */
     @Query("SELECT sm FROM StockMovement sm WHERE sm.referenceId = :referenceId")
     List<StockMovement> findByReferenceId(@Param("referenceId") String referenceId);
+
+    List<StockMovement> findByCreatedAtBetweenOrderByCreatedAtDesc(LocalDateTime start, LocalDateTime end);
+
 }

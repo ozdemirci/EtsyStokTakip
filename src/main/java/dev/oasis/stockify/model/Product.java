@@ -34,7 +34,9 @@ public class Product {
     private Integer stockLevel;
 
     @Column(name = "low_stock_threshold")
-    private Integer lowStockThreshold;    @Column(name = "etsy_product_id")
+    private Integer lowStockThreshold;    
+    
+    @Column(name = "etsy_product_id")
     private String etsyProductId;    // Tenant information will be added after database migration
 
     // Audit fields

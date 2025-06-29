@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Toplu Stok Hareketi Girişi</title>
+    <script>
+        function addRow() {
+            const table = document.getElementById("movementsTable");
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td><input name="productId" type="number" required /></td>
+                <td>
+                    <select name="movementType" required>
+                        <option value="IN">IN</option>
+                        <option value="OUT">OUT</option>
+                        <option value="ADJUSTMENT">ADJUSTMENT</option>
+                        <option value="RETURN">RETURN</option>
+                        <option value="TRANSFER">TRANSFER</option>
+                        <option value="DAMAGED">DAMAGED</option>
+                        <option value="EXPIRED">EXPIRED</option>
+                    </select>
+                </td>
+                <td><input name="quantity" type="number" required /></td>
+                <td><input name="notes" type="text" /></td>
+            `;
+        }
+
+        function submitBulkMovements() {
+            const table = document.getElementById("movementsTable");
+            const rows = Array.from(table.rows).slice(1);
+            const movements = rows.map(row => {
+                const cells = row.querySelectorAll("input, select");
+                return {
+                    productId: cells[0].value,
+                    movementType: cells[1].value,
+                    quantity: cells[2].value,
+                    notes: cells[3].value,
+                    // Diğer alanlar gerekirse eklenebilir
+                };
+            });
+
+            fetch('/admin/bulk-stock-movements', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({movements})
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert("Toplu giriş başarılı!");
+                window.location.reload();
+            })
+            .catch(() => alert("Bir hata oluştu."));
+        }
+    </script>
+</head>
+<body>
+    <h1>Günlük Toplu Stok Hareketi Girişi</h1>
+    <table border="1" id="movementsTable">
+        <tr>
+            <th>Ürün ID</th>
+            <th>Hareket Tipi</th>
+            <th>Miktar</th>
+            <th>Not</th>
+        </tr>
+    </table>
+    <button onclick="addRow()">Satır Ekle</button>
+    <button onclick="submitBulkMovements()">Toplu Kaydet</button>
+</body>
+</html>
