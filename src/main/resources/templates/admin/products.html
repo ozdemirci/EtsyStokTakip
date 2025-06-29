@@ -230,6 +230,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3"> <select class="form-select" name="sortBy" id="sortBySelect">
+                                            <option value="id" th:selected="${sortBy == 'id'}">Sort by ID</option>
                                             <option value="title" th:selected="${sortBy == null or sortBy == 'title'}">
                                                 Sort by Title</option>
                                             <option value="category" th:selected="${sortBy == 'category'}">Sort by
