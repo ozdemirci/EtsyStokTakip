@@ -137,11 +137,7 @@ public class StockMovementController {
         } catch (Exception e) {
             log.error("❌ Error bulk creating stock movement: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        }
-
-
-
-        
+        }        
     }
 
  /**
