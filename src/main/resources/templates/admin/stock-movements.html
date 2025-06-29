@@ -173,9 +173,13 @@
                                 data-bs-target="#createMovementModal">
                                 <i class="bi bi-plus-circle me-2"></i>New Movement
                             </button>
-                            <button class="btn btn-outline-primary" data-bs-toggle="modal"
+                            <button class="btn btn-outline-primary me-2" data-bs-toggle="modal"
                                 data-bs-target="#createBulkMovementModal">
                                 <i class="bi bi-plus-square me-2"></i>Bulk Movement
+                            </button>
+                            <button class="btn btn-outline-secondary" data-bs-toggle="modal"
+                                data-bs-target="#uploadCsvModal">
+                                <i class="bi bi-upload me-2"></i>Upload CSV
                             </button>
                         </div>
                     </div>
@@ -467,6 +471,32 @@
         </div>
     </div>
 
+    <!-- CSV Upload Modal -->
+    <div class="modal fade" id="uploadCsvModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="csvUploadForm" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload Stock Movements CSV</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="csvFile" name="file" accept=".csv" required>
+                            <div class="form-text">CSV columns: productId, movementType, quantity, referenceId, notes
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Create stock movement
         function createStockMovement() {
@@ -559,6 +589,30 @@
                     alert('Error creating bulk stock movements: ' + error.message);
                 });
         }
+
+        // CSV upload işlemi
+        document.getElementById('csvUploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            fetch('/admin/stock-movements/upload-csv', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('Network response was not ok');
+                })
+                .then(data => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('uploadCsvModal'));
+                    modal.hide();
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Error uploading CSV: ' + error.message);
+                });
+        });
 
         // Ürünleri AJAX ile yükle ve tüm product select'lere ekle
         function loadProductsToSelects() {

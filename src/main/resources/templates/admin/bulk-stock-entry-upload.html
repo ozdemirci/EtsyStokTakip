@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV ile Stok Hareketi Aktarımı</title>
+</head>
+<body>
+    <h1>CSV ile Toplu Stok Hareketi Aktarımı</h1>
+    <form id="csvUploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required />
+        <button type="submit">Yükle</button>
+    </form>
+    <div id="result"></div>
+    <script>
+        document.getElementById("csvUploadForm").onsubmit = function(e){
+            e.preventDefault();
+            var formData = new FormData(this);
+            fetch('/admin/stock-movements/upload-csv', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.text())
+            .then(msg => document.getElementById("result").innerText = msg)
+            .catch(() => alert("Bir hata oluştu."));
+        };
+    </script>
+    <p>Örnek CSV başlıkları: <b>productId,movementType,quantity,notes</b></p>
+</body>
+</html>

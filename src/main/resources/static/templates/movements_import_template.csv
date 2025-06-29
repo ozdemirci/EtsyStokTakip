@@ -1,0 +1,4 @@
+productId,movementType,quantity,notes
+1,IN,111111111,İlk giriş
+2,OUT,11,Sipariş çıkışı
+3,ADJUSTMENT,1,Envanter düzeltme

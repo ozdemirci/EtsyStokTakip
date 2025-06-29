@@ -20,7 +20,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import com.opencsv.CSVReader;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.opencsv.CSVReader;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -83,8 +89,7 @@ public class StockMovementService {
 
         // Save movement record
         StockMovement savedMovement = stockMovementRepository.save(movement);
-        Long createdBy = savedMovement.getCreatedBy();
-        log.warn("=========createdBy: {}", createdBy);
+        
 
         // Update product stock level
         product.setStockLevel(newStock);
@@ -266,4 +271,26 @@ public class StockMovementService {
                 .map(this::createStockMovement)
                 .collect(Collectors.toList());
     }
+
+    public int importFromCsv(MultipartFile file) throws IOException, com.opencsv.exceptions.CsvValidationException {
+        int count = 0;
+        try (CSVReader reader = new CSVReader(new java.io.InputStreamReader(file.getInputStream()))) {
+            String[] nextLine;
+            // Başlık satırını atla
+            reader.readNext();
+            while ((nextLine = reader.readNext()) != null) {
+                // Örnek: [productId, movementType, quantity, notes]
+                StockMovementCreateDTO dto = new StockMovementCreateDTO();
+                dto.setProductId(Long.parseLong(nextLine[0]));
+                dto.setMovementType(StockMovement.MovementType.valueOf(nextLine[1]));
+                dto.setQuantity(Integer.parseInt(nextLine[2]));
+                dto.setNotes(nextLine.length > 3 ? nextLine[3] : null);
+                // Gerekirse diğer alanlar
+                createStockMovement(dto);
+                count++;
+            }
+        }
+        return count;
+    }
+
 }

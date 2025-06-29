@@ -14,9 +14,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for stock movement operations
@@ -38,22 +40,22 @@ public class StockMovementController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Model model) {
-        
+
         log.info("📋 Displaying stock movements page - Page: {}, Size: {}", page, size);
-        
+
         try {
             Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
             StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
-            
+
             model.addAttribute("movements", movements);
             model.addAttribute("stats", stats);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", movements.getTotalPages());
             model.addAttribute("totalElements", movements.getTotalElements());
             model.addAttribute("movementTypes", StockMovement.MovementType.values());
-            
+
             return "admin/stock-movements";
-            
+
         } catch (Exception e) {
             log.error("❌ Error loading stock movements page: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to load stock movements: " + e.getMessage());
@@ -68,11 +70,11 @@ public class StockMovementController {
     @ResponseBody
     public ResponseEntity<?> createStockMovement(@RequestBody StockMovementCreateDTO dto) {
         log.info("🔄 Creating stock movement for product ID: {}", dto.getProductId());
-        
+
         try {
             StockMovementResponseDTO response = stockMovementService.createStockMovement(dto);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             log.error("❌ Error creating stock movement: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
@@ -86,11 +88,11 @@ public class StockMovementController {
     @ResponseBody
     public ResponseEntity<List<StockMovementResponseDTO>> getStockMovementsByProduct(@PathVariable Long productId) {
         log.info("📋 Fetching stock movements for product ID: {}", productId);
-        
+
         try {
             List<StockMovementResponseDTO> movements = stockMovementService.getStockMovementsByProduct(productId);
             return ResponseEntity.ok(movements);
-            
+
         } catch (Exception e) {
             log.error("❌ Error fetching stock movements for product {}: {}", productId, e.getMessage(), e);
             return ResponseEntity.badRequest().build();
@@ -104,19 +106,19 @@ public class StockMovementController {
     @ResponseBody
     public ResponseEntity<StockMovementService.StockMovementStats> getStockMovementStats() {
         log.info("📊 Fetching stock movement statistics");
-        
+
         try {
             StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
             return ResponseEntity.ok(stats);
-            
+
         } catch (Exception e) {
             log.error("❌ Error fetching stock movement statistics: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().build();
         }
     }
 
-
-    /**-------------------------------------------------------------------------------------
+    /**
+     * -------------------------------------------------------------------------------------
      * Toplu stok hareketi
      */
 
@@ -132,15 +134,29 @@ public class StockMovementController {
     @ResponseBody
     public ResponseEntity<?> createBulkMovements(@RequestBody BulkStockMovementCreateDTO bulkDto) {
         try {
-        List<StockMovementResponseDTO> response = stockMovementService.createBulkStockMovements(bulkDto);
-        return ResponseEntity.ok(response);
+            List<StockMovementResponseDTO> response = stockMovementService.createBulkStockMovements(bulkDto);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("❌ Error bulk creating stock movement: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        }        
+        }
     }
 
- /**
+    /**
+     * Toplu stok hareketi girişi
+     */    
+    @PostMapping("/upload-csv")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> uploadCsv(@RequestParam("file") MultipartFile file) {
+        try {
+            stockMovementService.importFromCsv(file);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Başarıyla yüklendi"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Yükleme hatası: " + e.getMessage()));
+        }
+    }
+
+    /**
      * Bugünün hareketlerini getirir
      */
     @GetMapping("/bulk/today")
@@ -153,15 +169,9 @@ public class StockMovementController {
      */
     @GetMapping("/bulk/by-date")
     public List<StockMovementResponseDTO> getMovementsByDateRange(
-            @RequestParam("start")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         return stockMovementService.getStockMovementsByDateRange(start, end);
     }
-
-    
-    
-
 
 }
