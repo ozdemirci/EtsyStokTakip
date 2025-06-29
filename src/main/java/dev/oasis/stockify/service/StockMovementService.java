@@ -271,7 +271,12 @@ public class StockMovementService {
     @Transactional
     public List<StockMovementResponseDTO> createBulkStockMovements(BulkStockMovementCreateDTO bulkDto) {
         return bulkDto.getMovements().stream()
-                .map(this::createStockMovement)
+                .map(dto -> {
+                    StockMovementResponseDTO response = createStockMovement(dto);
+                    productRepository.findById(dto.getProductId())
+                            .ifPresent(stockNotificationService::checkAndCreateLowStockNotification);
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -290,6 +295,8 @@ public class StockMovementService {
                 dto.setNotes(nextLine.length > 3 ? nextLine[3] : null);
                 // Gerekirse diğer alanlar
                 createStockMovement(dto);
+                productRepository.findById(dto.getProductId())
+                        .ifPresent(stockNotificationService::checkAndCreateLowStockNotification);
                 count++;
             }
         }
