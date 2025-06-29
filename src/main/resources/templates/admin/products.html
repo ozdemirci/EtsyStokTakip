@@ -816,12 +816,42 @@
          * Hızlı stok ekleme işlemini gerçekleştirir.
          */
         function quickRestock(productId) {
-            const quantity = prompt('Stoğa eklenecek adedi girin:');
-            if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
-                if (quantity !== null) alert('Lütfen geçerli bir pozitif sayı girin.');
+            const quantityStr = prompt('Stoğa eklenecek adedi girin:');
+            const quantity = parseInt(quantityStr);
+            if (!quantity || isNaN(quantity) || quantity <= 0) {
+                if (quantityStr !== null) alert('Lütfen geçerli bir pozitif sayı girin.');
                 return;
-            } alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`;
-        }        // ================================
+            }
+
+            const tenantSpan = document.querySelector('.tenant-badge');
+            const tenantId = tenantSpan ? tenantSpan.textContent.trim() : null;
+
+            fetch('/admin/products/quick-restock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(tenantId ? { 'X-TenantId': tenantId } : {})
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: quantity,
+                    operation: 'ADD'
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message || 'Stock updated successfully.');
+                loadLowStockProducts();
+                location.reload();
+            })
+            .catch(error => {
+                alert('Stok güncellenirken hata oluştu: ' + error.message);
+            });
+        }
+        // ================================
         // PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -857,7 +887,8 @@
                 });
             }
         });
-    </script>
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
