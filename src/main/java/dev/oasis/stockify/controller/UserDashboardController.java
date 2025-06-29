@@ -75,7 +75,7 @@ public class UserDashboardController {
 
         // Add individual metrics for template
         model.addAttribute("totalProducts", metrics.getTotalProducts());
-        model.addAttribute("activeProducts", Math.max(0, metrics.getTotalProducts() - metrics.getLowStockProducts()));
+        model.addAttribute("activeProducts", metrics.getActiveProducts());
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
         model.addAttribute("outOfStockProducts", 0L); // TODO: Add to DashboardMetricsDTO
         model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));

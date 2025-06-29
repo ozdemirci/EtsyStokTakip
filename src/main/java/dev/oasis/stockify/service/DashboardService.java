@@ -44,6 +44,7 @@ public class DashboardService {
         
         return DashboardMetricsDTO.builder()
                 .totalProducts(productCount)
+                .activeProducts(countActiveProducts())
                 .totalUsers(tenantUserCount)
                 .totalInventoryValue(calculateTotalInventoryValue())
                 .lowStockProducts(countLowStockProducts())
@@ -133,12 +134,19 @@ public class DashboardService {
     private long countLowStockProducts() {
         String currentTenant = TenantContext.getCurrentTenant();
         List<Product> products = productRepository.findAll();
-        log.debug("📦 Counting low stock products for tenant: {} - Total products: {}", 
+        log.debug("📦 Counting low stock products for tenant: {} - Total products: {}",
                  currentTenant, products.size());
-        
+
         return products.stream()
                 .filter(product -> product.getStockLevel() < product.getLowStockThreshold())
                 .count();
+    }
+
+    private long countActiveProducts() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        long count = productRepository.countByIsActive(true);
+        log.debug("🔁 Counting active products for tenant: {} = {}", currentTenant, count);
+        return count;
     }
 
     private double getMonthlyRevenue() {
