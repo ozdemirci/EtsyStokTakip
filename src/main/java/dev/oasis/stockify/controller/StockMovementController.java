@@ -5,6 +5,8 @@ import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.service.StockMovementService;
+import dev.oasis.stockify.config.tenant.TenantContext;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,6 +41,7 @@ public class StockMovementController {
     public String stockMovementsPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            HttpServletRequest request,
             Model model) {
 
         log.info("📋 Displaying stock movements page - Page: {}, Size: {}", page, size);
@@ -46,6 +49,11 @@ public class StockMovementController {
         try {
             Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
             StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
+
+            String tenantId = getCurrentTenantId(request);
+            TenantContext.setCurrentTenant(tenantId);
+
+            model.addAttribute("currentTenantId", tenantId);
 
             model.addAttribute("movements", movements);
             model.addAttribute("stats", stats);
@@ -172,6 +180,30 @@ public class StockMovementController {
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         return stockMovementService.getStockMovementsByDateRange(start, end);
+    }
+
+    private String getCurrentTenantId(HttpServletRequest request) {
+        String currentTenantId = TenantContext.getCurrentTenant();
+        if (currentTenantId != null && !currentTenantId.isEmpty()) {
+            return currentTenantId;
+        }
+
+        currentTenantId = (String) request.getSession().getAttribute("tenantId");
+        if (currentTenantId != null && !currentTenantId.isEmpty()) {
+            return currentTenantId;
+        }
+
+        currentTenantId = request.getHeader("X-TenantId");
+        if (currentTenantId != null && !currentTenantId.isEmpty()) {
+            return currentTenantId.toLowerCase();
+        }
+
+        currentTenantId = request.getParameter("tenant_id");
+        if (currentTenantId != null && !currentTenantId.isEmpty()) {
+            return currentTenantId.toLowerCase();
+        }
+
+        return "public";
     }
 
 }
