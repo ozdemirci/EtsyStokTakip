@@ -22,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -113,6 +114,12 @@ public class AdminDashboardController {
         model.addAttribute("currentTenantId", currentTenantId);
         
         return "admin/dashboard";
+    }
+
+    @GetMapping("/metrics")
+    @ResponseBody
+    public DashboardMetricsDTO getMetrics() {
+        return dashboardService.getDashboardMetrics();
     }
     
     /**
