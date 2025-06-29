@@ -3,6 +3,7 @@ package dev.oasis.stockify.controller;
 import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
+import dev.oasis.stockify.dto.ValidationErrorDTO;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.config.tenant.TenantContext;
@@ -89,6 +90,16 @@ public class StockMovementController {
         }
     }
 
+    @PostMapping("/validate")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> validateMovement(@RequestBody StockMovementCreateDTO dto) {
+        List<String> errors = stockMovementService.validateStockMovement(dto);
+        return ResponseEntity.ok(Map.of(
+                "valid", errors.isEmpty(),
+                "errors", errors
+        ));
+    }
+
     /**
      * Get stock movements by product (AJAX)
      */
@@ -150,6 +161,16 @@ public class StockMovementController {
         }
     }
 
+    @PostMapping("/bulk-validate")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> validateBulk(@RequestBody BulkStockMovementCreateDTO bulkDto) {
+        List<ValidationErrorDTO> errors = stockMovementService.validateBulkStockMovements(bulkDto);
+        return ResponseEntity.ok(Map.of(
+                "valid", errors.isEmpty(),
+                "errors", errors
+        ));
+    }
+
     /**
      * Toplu stok hareketi girişi
      */    
@@ -161,6 +182,20 @@ public class StockMovementController {
             return ResponseEntity.ok(Map.of("success", true, "message", "Başarıyla yüklendi"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Yükleme hatası: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/validate-csv")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> validateCsv(@RequestParam("file") MultipartFile file) {
+        try {
+            List<ValidationErrorDTO> errors = stockMovementService.validateCsv(file);
+            return ResponseEntity.ok(Map.of(
+                    "valid", errors.isEmpty(),
+                    "errors", errors
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("valid", false, "message", e.getMessage()));
         }
     }
 

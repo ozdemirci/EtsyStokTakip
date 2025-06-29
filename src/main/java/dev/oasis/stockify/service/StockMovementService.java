@@ -4,6 +4,7 @@ import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
+import dev.oasis.stockify.dto.ValidationErrorDTO;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.StockMovement;
@@ -23,14 +24,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVReader;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.opencsv.CSVReader;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -278,6 +278,65 @@ public class StockMovementService {
                     return response;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<ValidationErrorDTO> validateBulkStockMovements(BulkStockMovementCreateDTO bulkDto) {
+        List<ValidationErrorDTO> errors = new ArrayList<>();
+        List<StockMovementCreateDTO> list = bulkDto.getMovements();
+        for (int i = 0; i < list.size(); i++) {
+            List<String> val = validateStockMovement(list.get(i));
+            if (!val.isEmpty()) {
+                errors.add(new ValidationErrorDTO(i, String.join("; ", val)));
+            }
+        }
+        return errors;
+    }
+
+    public List<String> validateStockMovement(StockMovementCreateDTO dto) {
+        List<String> errors = new ArrayList<>();
+        if (dto.getProductId() == null) {
+            errors.add("Product ID is required");
+            return errors;
+        }
+        Product product = productRepository.findById(dto.getProductId()).orElse(null);
+        if (product == null) {
+            errors.add("Product not found: " + dto.getProductId());
+            return errors;
+        }
+        if (dto.getMovementType() == null) {
+            errors.add("Movement type is required");
+        }
+        if (dto.getQuantity() == null) {
+            errors.add("Quantity is required");
+        } else {
+            Integer newStock = calculateNewStock(product.getStockLevel(), dto.getMovementType(), dto.getQuantity());
+            if (newStock < 0) {
+                errors.add("Negative resulting stock for product " + product.getTitle());
+            }
+        }
+        return errors;
+    }
+
+    public List<ValidationErrorDTO> validateCsv(MultipartFile file) throws IOException, com.opencsv.exceptions.CsvValidationException {
+        List<ValidationErrorDTO> errors = new ArrayList<>();
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            String[] nextLine;
+            int index = 0;
+            reader.readNext();
+            while ((nextLine = reader.readNext()) != null) {
+                StockMovementCreateDTO dto = new StockMovementCreateDTO();
+                dto.setProductId(Long.parseLong(nextLine[0]));
+                dto.setMovementType(StockMovement.MovementType.valueOf(nextLine[1]));
+                dto.setQuantity(Integer.parseInt(nextLine[2]));
+                dto.setReferenceId(nextLine.length > 3 ? nextLine[3] : null);
+                List<String> val = validateStockMovement(dto);
+                if (!val.isEmpty()) {
+                    errors.add(new ValidationErrorDTO(index, String.join("; ", val)));
+                }
+                index++;
+            }
+        }
+        return errors;
     }
 
     public int importFromCsv(MultipartFile file) throws IOException, com.opencsv.exceptions.CsvValidationException {

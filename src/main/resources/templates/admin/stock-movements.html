@@ -509,31 +509,39 @@
                 quantity: parseInt(formData.get('quantity')),
                 referenceId: formData.get('referenceId') || null,
                 notes: formData.get('notes') || null,
-                createdBy: null // Will be set by the server
+                createdBy: null
             };
 
-            fetch('/admin/stock-movements/create', {
+            fetch('/admin/stock-movements/validate', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
+                .then(res => res.json())
+                .then(result => {
+                    if (!result.valid) {
+                        alert(result.errors.join('\n'));
+                        return;
                     }
+                    if (!confirm('Confirm and save?')) return;
+                    return fetch('/admin/stock-movements/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                })
+                .then(response => {
+                    if (!response) return;
+                    if (response.ok) return response.json();
                     throw new Error('Network response was not ok');
                 })
-                .then(data => {
-                    // Close modal and reload page
+                .then(() => {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('createMovementModal'));
                     modal.hide();
                     location.reload();
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error creating stock movement: ' + error.message);
+                    if (error) alert('Error creating stock movement: ' + error.message);
                 });
         }
 
@@ -571,22 +579,37 @@
                 }
             });
 
-            fetch('/admin/stock-movements/bulk-create', {
+            fetch('/admin/stock-movements/bulk-validate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ movements })
             })
+                .then(res => res.json())
+                .then(result => {
+                    if (!result.valid) {
+                        const msgs = result.errors.map(e => 'Row ' + (e.index + 1) + ': ' + e.message);
+                        alert(msgs.join('\n'));
+                        return;
+                    }
+                    if (!confirm('Confirm and save all?')) return;
+                    return fetch('/admin/stock-movements/bulk-create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ movements })
+                    });
+                })
                 .then(response => {
+                    if (!response) return;
                     if (response.ok) return response.json();
                     throw new Error('Network response was not ok');
                 })
-                .then(data => {
+                .then(() => {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('createBulkMovementModal'));
                     modal.hide();
                     location.reload();
                 })
                 .catch(error => {
-                    alert('Error creating bulk stock movements: ' + error.message);
+                    if (error) alert('Error creating bulk stock movements: ' + error.message);
                 });
         }
 
@@ -596,21 +619,35 @@
             const form = e.target;
             const formData = new FormData(form);
 
-            fetch('/admin/stock-movements/upload-csv', {
+            fetch('/admin/stock-movements/validate-csv', {
                 method: 'POST',
                 body: formData
             })
+                .then(res => res.json())
+                .then(result => {
+                    if (!result.valid) {
+                        const msgs = result.errors.map(e => 'Row ' + (e.index + 1) + ': ' + e.message);
+                        alert(msgs.join('\n'));
+                        return;
+                    }
+                    if (!confirm('Confirm upload?')) return;
+                    return fetch('/admin/stock-movements/upload-csv', {
+                        method: 'POST',
+                        body: formData
+                    });
+                })
                 .then(response => {
+                    if (!response) return;
                     if (response.ok) return response.json();
                     throw new Error('Network response was not ok');
                 })
-                .then(data => {
+                .then(() => {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('uploadCsvModal'));
                     modal.hide();
                     location.reload();
                 })
                 .catch(error => {
-                    alert('Error uploading CSV: ' + error.message);
+                    if (error) alert('Error uploading CSV: ' + error.message);
                 });
         });
 
