@@ -167,7 +167,7 @@
                         <h1 class="h2">
                             <i class="bi bi-arrow-left-right"></i> Stock Movements
                         </h1>
-                       
+
                         <div class="btn-toolbar mb-2 mb-md-0">
                             <button class="btn btn-primary me-2" data-bs-toggle="modal"
                                 data-bs-target="#createMovementModal">
@@ -275,7 +275,7 @@
                                             <td>
                                                 <span
                                                     th:class="${movement.quantity > 0 ? 'text-success' : 'text-danger'}"
-                                                    th:text="${movement.quantity > 0 ? '+' + movement.quantity : movement.quantity}">
+                                                    th:text="${movement.quantity > 0 ? ' ' + movement.quantity : movement.quantity}">
                                                     +10
                                                 </span>
                                             </td>
@@ -423,7 +423,6 @@
                                     <td>
                                         <select class="form-select" name="productId[]" required>
                                             <option value="">Select product...</option>
-                                            <!-- AJAX ile doldurulacak -->
                                         </select>
                                     </td>
                                     <td>
@@ -561,13 +560,56 @@
                 });
         }
 
+        // Ürünleri AJAX ile yükle ve tüm product select'lere ekle
+        function loadProductsToSelects() {
+            fetch('/admin/products/api') // API endpoint'iniz burada olmalı
+                .then(response => response.json())
+                .then(products => {
+                    // Tüm productId[] select'lerini bul
+                    document.querySelectorAll('select[name="productId[]"]').forEach(select => {
+                        // Önce eski seçenekleri temizle
+                        select.innerHTML = '<option value="">Select product...</option>';
+                        // Ürünleri ekle
+                        products.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.id;
+                            option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
+                            select.appendChild(option);
+                        });
+                    });
+                });
+        }
 
-        // Load products for select
+        // Tekli hareket modalındaki ürün select'ini doldur
+        function loadProductsToSingleSelect() {
+            fetch('/admin/products/api')
+                .then(response => response.json())
+                .then(products => {
+                    const select = document.getElementById('productSelect');
+                    select.innerHTML = '<option value="">Select product...</option>';
+                    products.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
+                        select.appendChild(option);
+                    });
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            // This would load products via AJAX - for now just placeholder
-            const productSelect = document.getElementById('productSelect');
-            // TODO: Load products from /admin/products/api endpoint
+            loadProductsToSelects();
+            loadProductsToSingleSelect();
+
+            // Satır eklendiğinde yeni select'e de ürünleri ekle
+            window.addBulkRow = function () {
+                const table = document.getElementById('bulkMovementTable').getElementsByTagName('tbody')[0];
+                const newRow = table.rows[0].cloneNode(true);
+                Array.from(newRow.querySelectorAll('input, select')).forEach(el => el.value = '');
+                table.appendChild(newRow);
+                loadProductsToSelects(); // Yeni select için tekrar doldur
+            };
         });
+
 
 
     </script>

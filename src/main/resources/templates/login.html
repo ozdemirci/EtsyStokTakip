@@ -1,117 +1,113 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Giriş Yap</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 </head>
+
 <body class="bg-light">
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Giriş Yap</h2>
-                    <form th:action="@{/login}" method="post" id="loginForm">
-                        <input type="hidden" id="error" th:value="${param.error}"/>                        <div class="mb-3">
-                            <label for="tenant_id" class="form-label">
-                                <strong>Şirket ID</strong>
-                                <span class="text-muted">(Kayıt sırasında aldığınız benzersiz ID)</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   id="tenant_id"
-                                   name="tenant_id"
-                                   th:value="${tenantId}"
-                                   placeholder="Örn: company_a1b2c3"
-                                   required
-                                   pattern="[a-zA-Z0-9_]+"
-                                   title="Sadece harf, rakam ve alt çizgi kullanabilirsiniz"
-                                   maxlength="50"
-                                   autocomplete="off">
-                            <div class="form-text" th:if="${tenantId}">
-                                <i class="bi bi-info-circle"></i> Şirket ID'niz otomatik olarak dolduruldu.
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">Giriş Yap</h2>
+                        <form th:action="@{/login}" method="post" id="loginForm">
+                            <input type="hidden" id="error" th:value="${param.error}" />
+                            <div class="mb-3">
+                                <label for="tenant_id" class="form-label">
+                                    <strong>Kurum ID</strong>
+                                    <span class="text-muted"></span>
+                                </label>
+                                <input type="text" class="form-control" id="tenant_id" name="tenant_id"
+                                    th:value="${tenantId}" placeholder="" required pattern="[a-zA-Z0-9_]+"
+                                    title="Sadece harf, rakam ve alt çizgi kullanabilirsiniz" maxlength="50"
+                                    autocomplete="off">
+                                <div class="form-text" th:if="${tenantId}">
+                                    <i class="bi bi-info-circle"></i> Kurum ID inizi giriniz
+                                </div>
                             </div>
-                        </div>                        <div class="mb-3">
-                            <label for="username" class="form-label">
-                                Kullanıcı Adı
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   id="username"
-                                   name="username"
-                                   placeholder="Kullanıcı adınız"
-                                   required
-                                   autocomplete="off">
-                            <div class="form-text">
-                                <i class="bi bi-info-circle"></i>
-                                Kayıt sırasında belirlediğiniz kullanıcı adı ile giriş yapın.
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    Kullanıcı Adı
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder=""
+                                    required autocomplete="off">
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i>Kullanıcı adınızı giriniz
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Şifre</label>
-                            <input type="password"
-                                   class="form-control"
-                                   id="password"
-                                   name="password"
-                                   required
-                                   autocomplete="off">
-                            <div class="form-text"></div>
-                        </div>                        <button type="submit" class="btn btn-primary w-100 mb-3">Giriş Yap</button>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Şifre</label>
+                                <input type="password" class="form-control" id="password" name="password" required
+                                    autocomplete="off">
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i>Şifrenizi giriniz
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mb-3">Giriş Yap</button>
 
-                        <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            Hatalı tenant ID, kullanıcı adı veya şifre!
-                        </div>
-                        
-                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Çıkış yapıldı.
-                        </div>                          <div th:if="${(registrationSuccess != null and registrationSuccess) or (param.registered != null and !param.registered.empty)}" class="alert alert-success border-0" role="alert" style="background: linear-gradient(45deg, #d4edda, #c3e6cb); border-left: 4px solid #28a745 !important;">
-                            <h6 class="alert-heading mb-2">
-                                <i class="bi bi-check-circle-fill text-success"></i> 
-                                Kayıt Başarılı!
-                            </h6>
-                            <p class="mb-1" th:text="${successMessage ?: 'Hesabınız başarıyla oluşturuldu! Giriş yapabilirsiniz.'}"></p>
-                            <hr class="my-2">
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i> 
-                                Yukarıdaki Şirket ID alanı otomatik olarak doldurulmuştur.
-                            </small>
-                        </div>
-                        
-                        <div class="text-center mt-3">
-                            <a href="/" class="text-decoration-none">
-                                <i class="bi bi-arrow-left me-1"></i>Ana Sayfaya Dön
-                            </a>
-                            <span class="mx-2">|</span>
-                            <a href="/register" class="text-decoration-none">
-                                Hesap Oluştur
-                            </a>
-                        </div>
-                    </form>
+                            <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Hatalı tenant ID, kullanıcı adı veya şifre!
+                            </div>
+
+                            <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Çıkış yapıldı.
+                            </div>
+                            <div th:if="${(registrationSuccess != null and registrationSuccess) or (param.registered != null and !param.registered.empty)}"
+                                class="alert alert-success border-0" role="alert"
+                                style="background: linear-gradient(45deg, #d4edda, #c3e6cb); border-left: 4px solid #28a745 !important;">
+                                <h6 class="alert-heading mb-2">
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    Kayıt Başarılı!
+                                </h6>
+                                <p class="mb-1"
+                                    th:text="${successMessage ?: 'Hesabınız başarıyla oluşturuldu! Giriş yapabilirsiniz.'}">
+                                </p>
+                                <hr class="my-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i>
+                                    Yukarıdaki Şirket ID alanı otomatik olarak doldurulmuştur.
+                                </small>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <a href="/" class="text-decoration-none">
+                                    <i class="bi bi-arrow-left me-1"></i>Ana Sayfaya Dön
+                                </a>
+                                <span class="mx-2">|</span>
+                                <a href="/register" class="text-decoration-none">
+                                    Hesap Oluştur
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.getElementById('tenant_id').addEventListener('input', function(e) {
-    this.value = this.value.toLowerCase();
-});
+    <script>
+        document.getElementById('tenant_id').addEventListener('input', function (e) {
+            this.value = this.value.toLowerCase();
+        });
 
-// Form submit öncesi tenant_id kontrolü
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    const tenantId = document.getElementById('tenant_id').value.trim();
-    if (!tenantId) {
-        alert('Tenant ID boş olamaz!');
-        e.preventDefault();
-    }
-});
-</script>
+        // Form submit öncesi tenant_id kontrolü
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const tenantId = document.getElementById('tenant_id').value.trim();
+            if (!tenantId) {
+                alert('Tenant ID boş olamaz!');
+                e.preventDefault();
+            }
+        });
+    </script>
 
 </body>
+
 </html>

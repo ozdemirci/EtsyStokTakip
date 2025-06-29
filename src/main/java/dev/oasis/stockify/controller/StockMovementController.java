@@ -115,6 +115,7 @@ public class StockMovementController {
         }
     }
 
+
     /**-------------------------------------------------------------------------------------
      * Toplu stok hareketi
      */
@@ -127,9 +128,20 @@ public class StockMovementController {
     /**
      * Toplu stok hareketi girişi
      */
-    @PostMapping("/bulk")
-    public List<StockMovementResponseDTO> createBulkMovements(@RequestBody BulkStockMovementCreateDTO bulkDto) {
-        return stockMovementService.createBulkStockMovements(bulkDto);
+    @PostMapping("/bulk-create")
+    @ResponseBody
+    public ResponseEntity<?> createBulkMovements(@RequestBody BulkStockMovementCreateDTO bulkDto) {
+        try {
+        List<StockMovementResponseDTO> response = stockMovementService.createBulkStockMovements(bulkDto);
+        return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("❌ Error bulk creating stock movement: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+
+
+
+        
     }
 
  /**

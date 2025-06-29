@@ -31,7 +31,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.*;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -611,4 +610,39 @@ public class AdminProductController {
                 .body(Map.of("error", true, "message", "An unexpected error occurred"));
         }
     }
+
+    /**
+     * Get all products as JSON for AJAX (id, title, sku)
+     */
+    @GetMapping("/api")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getAllProductsForApi(HttpServletRequest request) {
+        try {
+            String tenantId = getCurrentTenantId(request);
+            log.info("🔗 [API] Getting all products for AJAX for tenant: {}", tenantId);
+
+            List<ProductResponseDTO> products = productService.getAllProducts();
+            // Sadece gerekli alanları döndür
+            List<Map<String, Object>> result = products.stream()
+                .map(p -> {
+                    Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("id", p.getId());
+                    map.put("title", p.getTitle());
+                    map.put("sku", p.getSku());
+                    return map;
+                })
+                .toList();
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("❌ [API] Failed to get products for AJAX: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of());
+        }
+    }
+
+
+
+
+
+    
 }
