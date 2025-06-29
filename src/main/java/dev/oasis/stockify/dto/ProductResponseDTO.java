@@ -26,7 +26,8 @@ public class ProductResponseDTO {
     private String category;
     private BigDecimal price;
     private int stockLevel;
-    private int lowStockThreshold;    private String etsyProductId;
+    private int lowStockThreshold;    
+    private String etsyProductId;
     private Boolean isActive;
     private Boolean isFeatured;
 

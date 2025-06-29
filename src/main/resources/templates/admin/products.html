@@ -1,44 +1,103 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Management - Stockify Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">   
-     <style>        .navbar-brand { font-weight: bold; }
-        .sidebar { height: 100vh; background-color: #f8f9fa; }
-        .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
-        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
-        .sidebar .nav-link.active { background-color: #007bff; color: white; }
-        .main-content { padding: 20px; }
-        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .table th { background-color: #f8f9fa; border-top: none; font-weight: 600; }
-        .btn-action { padding: 4px 8px; margin: 2px; }
-        .low-stock { background-color: #fff3cd; }
-        .out-of-stock { background-color: #f8d7da; }
-        .search-box { max-width: 300px; }
-        .tenant-badge { background-color: #e3f2fd; color: #1976d2; }
-        .category-color { width: 20px; height: 20px; border-radius: 50%; display: inline-block; border: 1px solid #dee2e6; }
-    </style>    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .sidebar {
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar .nav-link {
+            padding: 12px 20px;
+            color: #495057;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            padding: 4px 8px;
+            margin: 2px;
+        }
+
+        .low-stock {
+            background-color: #fff3cd;
+        }
+
+        .out-of-stock {
+            background-color: #f8d7da;
+        }
+
+        .search-box {
+            max-width: 300px;
+        }
+
+        .tenant-badge {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .category-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid #dee2e6;
+        }
+    </style>
 </head>
+
 <body>
-    
+
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="/admin/dashboard">
                 <i class="bi bi-boxes"></i> Stockify Admin
-            </a>            <div class="navbar-nav ms-auto">
+            </a>
+            <div class="navbar-nav ms-auto">
                 <a class="nav-link position-relative me-3" href="/admin/notifications" title="Notifications">
                     <i class="bi bi-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                          id="navNotificationBadge" 
-                          th:if="${unreadNotifications > 0}"
-                          th:text="${unreadNotifications}">0</span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        id="navNotificationBadge" th:if="${unreadNotifications > 0}"
+                        th:text="${unreadNotifications}">0</span>
                 </a>
                 <span class="navbar-text me-3">
-                    <i class="bi bi-building"></i> 
+                    <i class="bi bi-building"></i>
                     <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
                 </span>
                 <a class="nav-link" href="/logout">
@@ -52,7 +111,8 @@
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-2 sidebar">
-                <div class="position-sticky pt-3">                    <ul class="nav flex-column">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/dashboard">
                                 <i class="bi bi-speedometer2"></i> Dashboard
@@ -62,7 +122,7 @@
                             <a class="nav-link active" href="/admin/products">
                                 <i class="bi bi-box-seam"></i> Products
                             </a>
-                        </li>                        
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/users">
                                 <i class="bi bi-people"></i> Users
@@ -76,9 +136,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/notifications">
                                 <i class="bi bi-bell"></i> Notifications
-                                <span class="badge bg-danger ms-2" id="notificationBadge" 
-                                      th:if="${unreadNotifications > 0}"
-                                      th:text="${unreadNotifications}" style="display: inline;">0</span>
+                                <span class="badge bg-danger ms-2" id="notificationBadge"
+                                    th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}"
+                                    style="display: inline;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -86,8 +146,9 @@
             </nav>
 
             <!-- Main Content -->
-            <main class="col-md-10 ms-sm-auto main-content">                <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <main class="col-md-10 ms-sm-auto main-content"> <!-- Header -->
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">
                         <i class="bi bi-box-seam"></i> Product Management
                     </h1>
@@ -99,7 +160,8 @@
                             <a href="/admin/products/template" class="btn btn-outline-secondary">
                                 <i class="bi bi-download"></i> Template
                             </a>
-                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#importModal">
                                 <i class="bi bi-upload"></i> Import
                             </button>
                             <a href="/admin/products/export" class="btn btn-outline-info">
@@ -107,35 +169,40 @@
                             </a>
                         </div>
                     </div>
-                </div>                <!-- Product Tabs -->
+                </div> <!-- Product Tabs -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <ul class="nav nav-tabs" id="productTabs" role="tablist">                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="all-products-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#all-products" type="button" role="tab"
-                                        onclick="activateAllProductsTab()">
+                        <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="all-products-tab" data-bs-toggle="tab"
+                                    data-bs-target="#all-products" type="button" role="tab"
+                                    onclick="activateAllProductsTab()">
                                     <i class="bi bi-box-seam"></i> All Products
                                     <span class="badge bg-secondary ms-2" th:text="${totalProducts ?: 0}">0</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="low-stock-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#low-stock" type="button" role="tab"
-                                        onclick="activateLowStockTab()">
+                                <button class="nav-link" id="low-stock-tab" data-bs-toggle="tab"
+                                    data-bs-target="#low-stock" type="button" role="tab"
+                                    onclick="activateLowStockTab()">
                                     <i class="bi bi-exclamation-triangle"></i> Low Stock
                                     <span class="badge bg-warning ms-2" th:text="${lowStockCount ?: 0}">0</span>
                                 </button>
-                            </li>                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="categories-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#categories" type="button" role="tab"
-                                        onclick="activateCategoriesTab()">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="categories-tab" data-bs-toggle="tab"
+                                    data-bs-target="#categories" type="button" role="tab"
+                                    onclick="activateCategoriesTab()">
                                     <i class="bi bi-tags"></i> Categories
-                                    <span class="badge bg-info ms-2" th:text="${categories != null ? categories.size() : 0}">0</span>
+                                    <span class="badge bg-info ms-2"
+                                        th:text="${categories != null ? categories.size() : 0}">0</span>
                                 </button>
                             </li>
                         </ul>
                     </div>
-                </div><!-- Success/Error Messages -->
+                </div>
+
+                <!-- Success/Error Messages -->
                 <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -149,30 +216,39 @@
                 <div class="tab-content" id="productTabsContent">
                     <!-- All Products Tab -->
                     <div class="tab-pane fade show active" id="all-products" role="tabpanel">
-                        <!-- Search and Filters -->                        <div class="card mb-4">
+                        <!-- Search and Filters -->
+                        <div class="card mb-4">
                             <div class="card-body">
                                 <form method="get" action="/admin/products" class="row g-3" id="productSearchForm">
                                     <div class="col-md-6">
                                         <div class="input-group search-box">
-                                            <input type="text" class="form-control" name="search" th:value="${search}" 
-                                                   placeholder="Search products...">
+                                            <input type="text" class="form-control" name="search" th:value="${search}"
+                                                placeholder="Search products...">
                                             <button class="btn btn-outline-secondary" type="submit">
                                                 <i class="bi bi-search"></i>
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">                                        <select class="form-select" name="sortBy" id="sortBySelect">
-                                            <option value="title" th:selected="${sortBy == null or sortBy == 'title'}">Sort by Title</option>
-                                            <option value="category" th:selected="${sortBy == 'category'}">Sort by Category</option>
-                                            <option value="price" th:selected="${sortBy == 'price'}">Sort by Price</option>
-                                            <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by Stock Level</option>
-                                            <option value="lowStockThreshold" th:selected="${sortBy == 'lowStockThreshold'}">Sort by Low Threshold</option>
-                                            <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by Date</option>
+                                    <div class="col-md-3"> <select class="form-select" name="sortBy" id="sortBySelect">
+                                            <option value="title" th:selected="${sortBy == null or sortBy == 'title'}">
+                                                Sort by Title</option>
+                                            <option value="category" th:selected="${sortBy == 'category'}">Sort by
+                                                Category</option>
+                                            <option value="price" th:selected="${sortBy == 'price'}">Sort by Price
+                                            </option>
+                                            <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by
+                                                Stock Level</option>
+                                            <option value="lowStockThreshold"
+                                                th:selected="${sortBy == 'lowStockThreshold'}">Sort by Low Threshold
+                                            </option>
+                                            <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by
+                                                Date</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3">
                                         <select class="form-select" name="sortDir" id="sortDirSelect">
-                                            <option value="asc" th:selected="${sortDir == null or sortDir == 'asc'}">Ascending</option>
+                                            <option value="asc" th:selected="${sortDir == null or sortDir == 'asc'}">
+                                                Ascending</option>
                                             <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
                                         </select>
                                     </div>
@@ -185,7 +261,9 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-hover">
-                                        <thead>                                            <tr>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
                                                 <th>Product</th>
                                                 <th>Category</th>
                                                 <th>SKU</th>
@@ -195,7 +273,9 @@
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
-                                        </thead>                                        <tbody>                                            <tr th:if="${products != null and products.totalElements == 0}">
+                                        </thead>
+                                        <tbody>
+                                            <tr th:if="${products != null and products.totalElements == 0}">
                                                 <td colspan="8" class="text-center text-muted py-4">
                                                     <i class="bi bi-inbox display-4"></i>
                                                     <div class="mt-2">No products found</div>
@@ -207,27 +287,34 @@
                                                     <div class="mt-2">No products available</div>
                                                     <div class="text-muted">Click "Add Product" to get started</div>
                                                 </td>
-                                            </tr><tr th:each="product : ${products}" 
-                                                th:data-product-id="${product.id}"
+                                            </tr>
+                                            <tr th:each="product : ${products}" th:data-product-id="${product.id}"
                                                 th:class="${product.stockLevel == 0 ? 'out-of-stock' : (product.stockLevel <= product.lowStockThreshold ? 'low-stock' : '')}">
+                                                <td th:text="${product.id}">
+                                                    
+                                                </td>
                                                 <td>
                                                     <div class="fw-bold" th:text="${product.title}"></div>
                                                     <small class="text-muted" th:text="${product.description}"></small>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-secondary" th:text="${product.category}"></span>
+                                                    <span class="badge bg-secondary"
+                                                        th:text="${product.category}"></span>
                                                 </td>
                                                 <td>
                                                     <code th:text="${product.sku}"></code>
-                                                </td>                                                <td>
+                                                </td>
+                                                <td>
                                                     <span class="fw-bold" th:text="'$' + ${product.price}"></span>
                                                 </td>
                                                 <td>
-                                                    <span th:class="${product.stockLevel == 0 ? 'badge bg-danger' : (product.stockLevel <= product.lowStockThreshold ? 'badge bg-warning' : 'badge bg-success')}" 
-                                                          th:text="${product.stockLevel}"></span>
+                                                    <span
+                                                        th:class="${product.stockLevel == 0 ? 'badge bg-danger' : (product.stockLevel <= product.lowStockThreshold ? 'badge bg-warning' : 'badge bg-success')}"
+                                                        th:text="${product.stockLevel}"></span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-secondary" th:text="${product.lowStockThreshold}"></span>
+                                                    <span class="badge bg-secondary"
+                                                        th:text="${product.lowStockThreshold}"></span>
                                                 </td>
                                                 <td>
                                                     <span th:if="${product.isActive}" class="badge bg-success">
@@ -244,13 +331,13 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a th:href="@{/admin/products/{id}/edit (id=${product.id})}" 
-                                                           class="btn btn-outline-primary btn-action" title="Edit">
+                                                        <a th:href="@{/admin/products/{id}/edit (id=${product.id})}"
+                                                            class="btn btn-outline-primary btn-action" title="Edit">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <button type="button" class="btn btn-outline-danger btn-action" 
-                                                                title="Delete" data-bs-toggle="modal" 
-                                                                th:data-bs-target="'#deleteModal' + ${product.id}">
+                                                        <button type="button" class="btn btn-outline-danger btn-action"
+                                                            title="Delete" data-bs-toggle="modal"
+                                                            th:data-bs-target="'#deleteModal' + ${product.id}">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
@@ -264,17 +351,19 @@
                                 <nav th:if="${products != null and products.totalPages > 1}">
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item" th:class="${products.first} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/products(page=${products.number - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                            <a class="page-link"
+                                                th:href="@{/admin/products(page=${products.number - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
                                                 <i class="bi bi-chevron-left"></i>
                                             </a>
                                         </li>
-                                        <li th:each="page : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                                        <li th:each="page : ${#numbers.sequence(0, products.totalPages - 1)}"
                                             class="page-item" th:class="${page == products.number} ? 'active'">
-                                            <a class="page-link" th:text="${page + 1}" 
-                                               th:href="@{/admin/products(page=${page}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">1</a>
+                                            <a class="page-link" th:text="${page + 1}"
+                                                th:href="@{/admin/products(page=${page}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">1</a>
                                         </li>
                                         <li class="page-item" th:class="${products.last} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/products(page=${products.number + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                            <a class="page-link"
+                                                th:href="@{/admin/products(page=${products.number + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
                                                 <i class="bi bi-chevron-right"></i>
                                             </a>
                                         </li>
@@ -282,9 +371,11 @@
                                 </nav>
 
                                 <!-- Summary -->
-                                <div class="mt-3 text-muted text-center" th:if="${products != null and products.totalElements > 0}">
-                                    Showing <span th:text="${products.number * products.size + 1}">1</span> to 
-                                    <span th:text="${(products.number + 1) * products.size > products.totalElements ? products.totalElements : (products.number + 1) * products.size}">10</span>
+                                <div class="mt-3 text-muted text-center"
+                                    th:if="${products != null and products.totalElements > 0}">
+                                    Showing <span th:text="${products.number * products.size + 1}">1</span> to
+                                    <span
+                                        th:text="${(products.number + 1) * products.size > products.totalElements ? products.totalElements : (products.number + 1) * products.size}">10</span>
                                     of <span th:text="${products.totalElements}">100</span> results
                                 </div>
                             </div>
@@ -297,7 +388,8 @@
                         <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
                             <div>
-                                <strong>Low Stock Alert!</strong> These products need immediate attention for restocking.
+                                <strong>Low Stock Alert!</strong> These products need immediate attention for
+                                restocking.
                             </div>
                         </div>
 
@@ -329,10 +421,12 @@
                                                     </div>
                                                     <div class="mt-2">Loading low stock products...</div>
                                                 </td>
-                                            </tr>                                        </tbody>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </div>
-                            </div>                        </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Categories Tab -->
@@ -343,7 +437,8 @@
                                 <h5 class="mb-0">
                                     <i class="bi bi-tags"></i> Product Categories
                                 </h5>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#addCategoryModal">
                                     <i class="bi bi-plus-circle"></i> Add Category
                                 </button>
                             </div>
@@ -366,40 +461,47 @@
                                                 <td colspan="7" class="text-center text-muted py-4">
                                                     <i class="bi bi-tags display-4"></i>
                                                     <div class="mt-2">No categories available</div>
-                                                    <div class="text-muted">Create your first category to get started</div>
+                                                    <div class="text-muted">Create your first category to get started
+                                                    </div>
                                                 </td>
-                                            </tr>                                            <tr th:each="category : ${categories}">
+                                            </tr>
+                                            <tr th:each="category : ${categories}">
                                                 <td>
-                                                    <span class="category-color" 
-                                                          th:style="'background-color: ' + ${category.hexColor ?: '#6c757d'}" 
-                                                          th:title="${category.hexColor ?: 'No color'}"></span>
+                                                    <span class="category-color"
+                                                        th:style="'background-color: ' + ${category.hexColor ?: '#6c757d'}"
+                                                        th:title="${category.hexColor ?: 'No color'}"></span>
                                                 </td>
                                                 <td>
                                                     <strong th:text="${category.name}">Category Name</strong>
-                                                </td>                                                <td>
-                                                    <span th:text="${category.description ?: 'No description'}" 
-                                                          th:class="${category.description == null ? 'text-muted' : ''}">Description</span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-secondary" th:text="${category.sortOrder}">1</span>
+                                                    <span th:text="${category.description ?: 'No description'}"
+                                                        th:class="${category.description == null ? 'text-muted' : ''}">Description</span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-info" th:text="${category.productCount ?: 0}">0</span>
-                                                </td>                                                <td>                                                    <span th:if="${category.active}" class="badge bg-success">Active</span>
-                                                    <span th:unless="${category.active}" class="badge bg-secondary">Inactive</span>
-                                                </td><td>
+                                                    <span class="badge bg-secondary"
+                                                        th:text="${category.sortOrder}">1</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info"
+                                                        th:text="${category.productCount ?: 0}">0</span>
+                                                </td>
+                                                <td> <span th:if="${category.active}"
+                                                        class="badge bg-success">Active</span>
+                                                    <span th:unless="${category.active}"
+                                                        class="badge bg-secondary">Inactive</span>
+                                                </td>
+                                                <td>
                                                     <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-outline-primary btn-action" 
-                                                                title="Edit" 
-                                                                th:data-category-id="${category.id}"
-                                                                onclick="editCategory(this.getAttribute('data-category-id'))">
+                                                        <button type="button" class="btn btn-outline-primary btn-action"
+                                                            title="Edit" th:data-category-id="${category.id}"
+                                                            onclick="editCategory(this.getAttribute('data-category-id'))">
                                                             <i class="bi bi-pencil"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-danger btn-action" 
-                                                                title="Delete" 
-                                                                th:data-category-id="${category.id}"
-                                                                th:data-category-name="${category.name}"
-                                                                onclick="deleteCategory(this.getAttribute('data-category-id'), this.getAttribute('data-category-name'))">
+                                                        <button type="button" class="btn btn-outline-danger btn-action"
+                                                            title="Delete" th:data-category-id="${category.id}"
+                                                            th:data-category-name="${category.name}"
+                                                            onclick="deleteCategory(this.getAttribute('data-category-id'), this.getAttribute('data-category-name'))">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
@@ -432,7 +534,7 @@
                             <label for="importFile" class="form-label">CSV File</label>
                             <input type="file" class="form-control" id="importFile" name="file" accept=".csv" required>
                             <div class="form-text">
-                                Please select a CSV file to import. 
+                                Please select a CSV file to import.
                                 <a href="/admin/products/template">Download template</a> for proper format.
                             </div>
                         </div>
@@ -472,7 +574,8 @@
                     </form>
                 </div>
             </div>
-        </div>    </div>
+        </div>
+    </div>
 
     <!-- Add Category Modal -->
     <div class="modal fade" id="addCategoryModal" tabindex="-1">
@@ -492,15 +595,18 @@
                         </div>
                         <div class="mb-3">
                             <label for="categoryDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+                            <textarea class="form-control" id="categoryDescription" name="description"
+                                rows="3"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="categoryColor" class="form-label">Color</label>
-                            <input type="color" class="form-control form-control-color" id="categoryColor" name="hexColor" value="#6c757d">
+                            <input type="color" class="form-control form-control-color" id="categoryColor"
+                                name="hexColor" value="#6c757d">
                         </div>
                         <div class="mb-3">
                             <label for="categorySortOrder" class="form-label">Sort Order</label>
-                            <input type="number" class="form-control" id="categorySortOrder" name="sortOrder" value="1" min="1">
+                            <input type="number" class="form-control" id="categorySortOrder" name="sortOrder" value="1"
+                                min="1">
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="categoryActive" name="isActive" checked>
@@ -538,15 +644,18 @@
                         </div>
                         <div class="mb-3">
                             <label for="editCategoryDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="editCategoryDescription" name="description" rows="3"></textarea>
+                            <textarea class="form-control" id="editCategoryDescription" name="description"
+                                rows="3"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="editCategoryColor" class="form-label">Color</label>
-                            <input type="color" class="form-control form-control-color" id="editCategoryColor" name="hexColor">
+                            <input type="color" class="form-control form-control-color" id="editCategoryColor"
+                                name="hexColor">
                         </div>
                         <div class="mb-3">
                             <label for="editCategorySortOrder" class="form-label">Sort Order</label>
-                            <input type="number" class="form-control" id="editCategorySortOrder" name="sortOrder" min="1">
+                            <input type="number" class="form-control" id="editCategorySortOrder" name="sortOrder"
+                                min="1">
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="editCategoryActive" name="isActive">
@@ -564,7 +673,7 @@
                 </form>
             </div>
         </div>
-    </div>    
+    </div>
     <script>
         // ================================
         // TAB MANAGEMENT
@@ -578,7 +687,7 @@
         function switchToTab(tabId, contentId) {
             const targetTab = document.getElementById(tabId);
             if (!targetTab) return;
-            
+
             // Bootstrap'in kendi tab mekanizmasını kullanarak sekmeyi göster
             const tab = new bootstrap.Tab(targetTab);
             tab.show();
@@ -596,22 +705,22 @@
                 url.searchParams.delete('tab');
             }
             window.history.pushState({}, '', url);
-        }        
-        
+        }
+
         // --- Onclick Functions ---
         function activateAllProductsTab() {
             const tab = new bootstrap.Tab(document.getElementById('all-products-tab'));
             tab.show();
             updateUrl(null); // 'All Products' varsayılan olduğu için URL'den tab parametresini kaldır
         }
-        
+
         function activateLowStockTab() {
             const tab = new bootstrap.Tab(document.getElementById('low-stock-tab'));
             tab.show();
             loadLowStockProducts();
             updateUrl('low-stock');
         }
-        
+
         function activateCategoriesTab() {
             const tab = new bootstrap.Tab(document.getElementById('categories-tab'));
             tab.show();
@@ -658,8 +767,8 @@
                 .catch(error => {
                     tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle display-4"></i><div class="mt-2">Ürünler yüklenirken bir hata oluştu.</div></td></tr>`;
                 });
-        }        
-        
+        }
+
         /**
          * Kategori düzenleme modalını sunucudan gelen veriyle doldurur.
          */
@@ -676,17 +785,17 @@
                     document.getElementById('editCategoryColor').value = category.hexColor || '#6c757d';
                     document.getElementById('editCategorySortOrder').value = category.sortOrder || 1;
                     document.getElementById('editCategoryActive').checked = category.active === true;
-                    
+
                     const form = document.getElementById('editCategoryForm');
                     form.action = `/admin/products/categories/${categoryId}`;
-                    
+
                     const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
                     modal.show();
                 })
                 .catch(error => {
                     alert('Kategori verileri yüklenirken bir hata oluştu.');
                 });
-        }        
+        }
         /**
          * Kullanıcıdan onay alarak kategoriyi siler.
          */
@@ -700,8 +809,8 @@
                 document.body.appendChild(form);
                 form.submit();
             }
-        }        
-        
+        }
+
         /**
          * Hızlı stok ekleme işlemini gerçekleştirir.
          */
@@ -710,10 +819,10 @@
             if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
                 if (quantity !== null) alert('Lütfen geçerli bir pozitif sayı girin.');
                 return;
-            }            alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`);
+            } alert(`Stoğa ${quantity} adet ürün eklendi. (Bu özellik yakında backend'e bağlanacak)`;
         }        // ================================
         // PAGE INITIALIZATION
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
             const activeTabName = urlParams.get('tab');
 
@@ -738,15 +847,16 @@
             const productSearchForm = document.getElementById('productSearchForm');
 
             if (sortBySelect && sortDirSelect && productSearchForm) {
-                sortBySelect.addEventListener('change', function() {
+                sortBySelect.addEventListener('change', function () {
                     productSearchForm.submit();
                 });
 
-                sortDirSelect.addEventListener('change', function() {
+                sortDirSelect.addEventListener('change', function () {
                     productSearchForm.submit();
                 });
             }
         });
     </script>
 </body>
+
 </html>
