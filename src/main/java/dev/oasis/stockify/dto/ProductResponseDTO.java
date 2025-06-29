@@ -25,8 +25,8 @@ public class ProductResponseDTO {
     private String sku;
     private String category;
     private BigDecimal price;
-    private int stockLevel;
-    private int lowStockThreshold;    
+    private Integer stockLevel;
+    private Integer lowStockThreshold;
     private String etsyProductId;
     private Boolean isActive;
     private Boolean isFeatured;
@@ -38,6 +38,9 @@ public class ProductResponseDTO {
     private Long updatedBy;
 
     public boolean isLowStock() {
+        if (stockLevel == null || lowStockThreshold == null) {
+            return false;
+        }
         return stockLevel <= lowStockThreshold;
     }
 }

@@ -144,6 +144,7 @@ public class AdminProductController {
             model.addAttribute("pageSize", size);
             model.addAttribute("sortBy", sortBy);
             model.addAttribute("sortDir", sortDir);
+            model.addAttribute("currentTenantId", tenantId);
             model.addAttribute("totalPages", products.getTotalPages());
             model.addAttribute("totalElements", products.getTotalElements());
             model.addAttribute("tenantId", tenantId);
