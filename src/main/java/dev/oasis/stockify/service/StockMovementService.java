@@ -354,8 +354,6 @@ public class StockMovementService {
                 dto.setNotes(nextLine.length > 3 ? nextLine[3] : null);
                 // Gerekirse diğer alanlar
                 createStockMovement(dto);
-                productRepository.findById(dto.getProductId())
-                        .ifPresent(stockNotificationService::checkAndCreateLowStockNotification);
                 count++;
             }
         }
