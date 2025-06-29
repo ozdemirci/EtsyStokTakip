@@ -27,6 +27,12 @@ public class StockNotificationService {
     @Transactional
     public void checkAndCreateLowStockNotification(Product product) {
         if (product.isLowStock()) {
+            boolean exists = notificationRepository.existsByProductAndReadFalse(product);
+            if (exists) {
+                logger.debug("Low stock notification already exists for product: {}", product.getTitle());
+                return;
+            }
+
             StockNotification notification = new StockNotification();
             notification.setProduct(product);
             notification.setMessage(String.format("'%s' ürününün stok seviyesi düşük! Mevcut stok: %d, Eşik: %d",
