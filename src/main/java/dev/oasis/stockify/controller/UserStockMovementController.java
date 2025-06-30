@@ -48,42 +48,22 @@ public class UserStockMovementController {
     public String stockMovementsPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "timestamp") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) StockMovement.MovementType type,
-            @RequestParam(required = false) String search,
             HttpServletRequest request,
-            Authentication authentication,
             Model model) {
-
-        String tenantId = getCurrentTenantId(request);
-        log.info("📋 User viewing stock movements - tenant: {} page: {} size: {}", tenantId, page, size);
-
         try {
-            Page<StockMovementResponseDTO> movements = stockMovementService.getStockMovements(page, size, sortBy, sortDir, search, type);
-            StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
-
+            Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
             model.addAttribute("movements", movements);
-            model.addAttribute("stockMovements", movements.getContent());
-            model.addAttribute("stats", stats);
             model.addAttribute("currentPage", page);
             model.addAttribute("size", size);
-            model.addAttribute("sortBy", sortBy);
-            model.addAttribute("sortDir", sortDir);
-            model.addAttribute("type", type != null ? type.name() : null);
-            model.addAttribute("search", search);
             model.addAttribute("totalPages", movements.getTotalPages());
             model.addAttribute("totalElements", movements.getTotalElements());
-            model.addAttribute("currentTenantId", tenantId);
-            if (authentication != null) {
-                model.addAttribute("currentUser", authentication.getName());
-            }
+            model.addAttribute("currentTenantId", getCurrentTenantId(request));
 
             return "user/stock-movements";
 
         } catch (Exception e) {
-            log.error("❌ Error loading stock movements page for user: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to load stock movements: " + e.getMessage());
+            log.error("Error loading stock movements: {}", e.getMessage(), e);
+            model.addAttribute("error", "Internal server error: " + e.getMessage());
             return "user/stock-movements";
         }
     }
