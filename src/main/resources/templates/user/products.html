@@ -182,8 +182,8 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr th:each="product : ${products.content}" 
-                                                th:class="${product.quantity <= 10} ? 'low-stock' : (${product.quantity == 0} ? 'out-of-stock' : '')">
+                                            <tr th:each="product : ${products.content}"
+                                                th:class="${product.stockLevel <= 10} ? 'low-stock' : (${product.stockLevel == 0} ? 'out-of-stock' : '')">
                                                 <td>
                                                     <strong th:text="${product.title}">Product Name</strong>
                                                     <br>
@@ -322,7 +322,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script th:inline="javascript">
         // Low Stock functionality for user view
         function loadLowStockProducts() {
             const tableBody = document.getElementById('lowStockTableBody');
