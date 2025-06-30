@@ -73,4 +73,15 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
 
     List<StockMovement> findByCreatedAtBetweenOrderByCreatedAtDesc(LocalDateTime start, LocalDateTime end);
 
+    @Query("""
+            SELECT sm FROM StockMovement sm
+            JOIN sm.product p
+            WHERE (:search IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :search, '%')))
+              AND (:movementType IS NULL OR sm.movementType = :movementType)
+            "")
+    Page<StockMovement> searchMovements(@Param("search") String search,
+                                        @Param("movementType") StockMovement.MovementType movementType,
+                                        Pageable pageable);
+
 }

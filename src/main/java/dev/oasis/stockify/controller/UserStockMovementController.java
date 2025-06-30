@@ -4,6 +4,7 @@ import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.ValidationErrorDTO;
+import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,6 +34,13 @@ public class UserStockMovementController {
 
     private final StockMovementService stockMovementService;
 
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        String tenantId = getCurrentTenantId(request);
+        TenantContext.setCurrentTenant(tenantId);
+        log.debug("Set tenant context to: {}", tenantId);
+    }
+
     /**
      * Display stock movements page for users (read-only)
      */
@@ -40,22 +48,39 @@ public class UserStockMovementController {
     public String stockMovementsPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "timestamp") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) StockMovement.MovementType type,
+            @RequestParam(required = false) String search,
+            HttpServletRequest request,
+            Authentication authentication,
             Model model) {
-        
-        log.info("📋 User viewing stock movements page - Page: {}, Size: {}", page, size);
-        
+
+        String tenantId = getCurrentTenantId(request);
+        log.info("📋 User viewing stock movements - tenant: {} page: {} size: {}", tenantId, page, size);
+
         try {
-            Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
+            Page<StockMovementResponseDTO> movements = stockMovementService.getStockMovements(page, size, sortBy, sortDir, search, type);
             StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
-            
+
             model.addAttribute("movements", movements);
+            model.addAttribute("stockMovements", movements.getContent());
             model.addAttribute("stats", stats);
             model.addAttribute("currentPage", page);
+            model.addAttribute("size", size);
+            model.addAttribute("sortBy", sortBy);
+            model.addAttribute("sortDir", sortDir);
+            model.addAttribute("type", type != null ? type.name() : null);
+            model.addAttribute("search", search);
             model.addAttribute("totalPages", movements.getTotalPages());
             model.addAttribute("totalElements", movements.getTotalElements());
-            
+            model.addAttribute("currentTenantId", tenantId);
+            if (authentication != null) {
+                model.addAttribute("currentUser", authentication.getName());
+            }
+
             return "user/stock-movements";
-            
+
         } catch (Exception e) {
             log.error("❌ Error loading stock movements page for user: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to load stock movements: " + e.getMessage());

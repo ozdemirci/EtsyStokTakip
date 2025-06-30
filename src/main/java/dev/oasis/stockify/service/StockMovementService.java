@@ -118,6 +118,33 @@ public class StockMovementService {
         return movements.map(this::convertToResponseDTO);
     }
 
+    public Page<StockMovementResponseDTO> getStockMovements(int page,
+                                                            int size,
+                                                            String sortBy,
+                                                            String sortDir,
+                                                            String search,
+                                                            StockMovement.MovementType type) {
+        String tenant = TenantContext.getCurrentTenant();
+        log.debug("📋 Fetching stock movements for tenant: {} page {} size {} sortBy {} sortDir {} search '{}' type {}",
+                tenant, page, size, sortBy, sortDir, search, type);
+
+        Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        String sortField = switch (sortBy) {
+            case "productName" -> "product.title";
+            case "type" -> "movementType";
+            case "quantity" -> "quantity";
+            default -> "createdAt";
+        };
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+        Page<StockMovement> pageResult = stockMovementRepository.searchMovements(
+                (search != null && !search.isBlank()) ? search : null,
+                type,
+                pageable);
+
+        return pageResult.map(this::convertToResponseDTO);
+    }
+
     /**
      * Get stock movements by product ID
      */
