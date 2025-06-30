@@ -84,6 +84,18 @@
                     <h1 class="h2">
                         <i class="bi bi-arrow-left-right"></i> Stock Movements
                     </h1>
+
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#createMovementModal">
+                            <i class="bi bi-plus-circle me-2"></i>New Movement
+                        </button>
+                        <button class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#createBulkMovementModal">
+                            <i class="bi bi-plus-square me-2"></i>Bulk Movement
+                        </button>
+                        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadCsvModal">
+                            <i class="bi bi-upload me-2"></i>Upload CSV
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Statistics Cards -->
@@ -304,6 +316,284 @@
         </div>
     </div>
 
+    <!-- Create Movement Modal -->
+    <div class="modal fade" id="createMovementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Stock Movement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createMovementForm">
+                        <div class="mb-3">
+                            <label for="productSelect" class="form-label">Product</label>
+                            <select class="form-select" id="productSelect" name="productId" required>
+                                <option value="">Select product...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="movementType" class="form-label">Movement Type</label>
+                            <select class="form-select" id="movementType" name="movementType" required>
+                                <option value="">Select type...</option>
+                                <option value="IN">Stock In</option>
+                                <option value="OUT">Stock Out</option>
+                                <option value="ADJUSTMENT">Adjustment</option>
+                                <option value="RETURN">Return</option>
+                                <option value="TRANSFER">Transfer</option>
+                                <option value="DAMAGED">Damaged</option>
+                                <option value="EXPIRED">Expired</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="referenceId" class="form-label">Reference ID (Optional)</label>
+                            <input type="text" class="form-control" id="referenceId" name="referenceId" placeholder="e.g., PO-001, INV-123">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Movement description..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="createStockMovement()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Movement Modal -->
+    <div class="modal fade" id="createBulkMovementModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Bulk Stock Movement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createBulkMovementForm">
+                        <table class="table table-bordered" id="bulkMovementTable">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Movement Type</th>
+                                    <th>Quantity</th>
+                                    <th>Reference ID</th>
+                                    <th>Notes</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select class="form-select" name="productId[]" required>
+                                            <option value="">Select product...</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select" name="movementType[]" required>
+                                            <option value="">Select type...</option>
+                                            <option value="IN">Stock In</option>
+                                            <option value="OUT">Stock Out</option>
+                                            <option value="ADJUSTMENT">Adjustment</option>
+                                            <option value="RETURN">Return</option>
+                                            <option value="TRANSFER">Transfer</option>
+                                            <option value="DAMAGED">Damaged</option>
+                                            <option value="EXPIRED">Expired</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" name="quantity[]" required min="1">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="referenceId[]" placeholder="e.g., PO-001">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="notes[]" placeholder="Notes...">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeBulkRow(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-outline-success" onclick="addBulkRow()">Add Row</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="createBulkStockMovement()">Save All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV Upload Modal -->
+    <div class="modal fade" id="uploadCsvModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="csvUploadForm" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload Stock Movements CSV</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="csvFile" name="file" accept=".csv" required>
+                            <div class="form-text">CSV columns: productId, movementType, quantity, referenceId, notes</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createStockMovement() {
+            const form = document.getElementById('createMovementForm');
+            const formData = new FormData(form);
+            const data = {
+                productId: parseInt(formData.get('productId')),
+                movementType: formData.get('movementType'),
+                quantity: parseInt(formData.get('quantity')),
+                referenceId: formData.get('referenceId') || null,
+                notes: formData.get('notes') || null,
+                createdBy: null
+            };
+
+            fetch('/user/stock-movements/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+                .then(res => { if (!res.ok) throw new Error('Server error: ' + res.status); return res.json(); })
+                .then(result => {
+                    if (!result.valid) { alert(result.errors.join('\n')); return; }
+                    if (!confirm('Confirm and save?')) return;
+                    return fetch('/user/stock-movements/create', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+                    });
+                })
+                .then(response => { if (!response) return; if (response.ok) return response.json(); throw new Error('Network response was not ok'); })
+                .then(() => { const modal = bootstrap.Modal.getInstance(document.getElementById('createMovementModal')); modal.hide(); location.reload(); })
+                .catch(error => { if (error) alert('Error creating stock movement: ' + error.message); });
+        }
+
+        function addBulkRow() {
+            const table = document.getElementById('bulkMovementTable').getElementsByTagName('tbody')[0];
+            const newRow = table.rows[0].cloneNode(true);
+            Array.from(newRow.querySelectorAll('input, select')).forEach(el => el.value = '');
+            table.appendChild(newRow);
+        }
+
+        function removeBulkRow(btn) {
+            const row = btn.closest('tr');
+            const table = row.parentNode;
+            if (table.rows.length > 1) { row.remove(); }
+        }
+
+        function createBulkStockMovement() {
+            const form = document.getElementById('createBulkMovementForm');
+            const rows = form.querySelectorAll('tbody tr');
+            const movements = [];
+            rows.forEach(row => {
+                const productId = parseInt(row.querySelector('[name="productId[]"]').value);
+                const movementType = row.querySelector('[name="movementType[]"]').value;
+                const quantity = parseInt(row.querySelector('[name="quantity[]"]').value);
+                const referenceId = row.querySelector('[name="referenceId[]"]').value || null;
+                const notes = row.querySelector('[name="notes[]"]').value || null;
+                if (productId && movementType && quantity) { movements.push({ productId, movementType, quantity, referenceId, notes }); }
+            });
+
+            fetch('/user/stock-movements/bulk-validate', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ movements })
+            })
+                .then(res => { if (!res.ok) throw new Error('Server error: ' + res.status); return res.json(); })
+                .then(result => {
+                    if (!result.valid) { const msgs = result.errors.map(e => 'Row ' + (e.index + 1) + ': ' + e.message); alert(msgs.join('\n')); return; }
+                    if (!confirm('Confirm and save all?')) return;
+                    return fetch('/user/stock-movements/bulk-create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ movements }) });
+                })
+                .then(response => { if (!response) return; if (response.ok) return response.json(); throw new Error('Network response was not ok'); })
+                .then(() => { const modal = bootstrap.Modal.getInstance(document.getElementById('createBulkMovementModal')); modal.hide(); location.reload(); })
+                .catch(error => { if (error) alert('Error creating bulk stock movements: ' + error.message); });
+        }
+
+        document.getElementById('csvUploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            fetch('/user/stock-movements/validate-csv', { method: 'POST', body: formData })
+                .then(res => { if (!res.ok) throw new Error('Server error: ' + res.status); return res.json(); })
+                .then(result => {
+                    if (!result.valid) { const msgs = result.errors.map(e => 'Row ' + (e.index + 1) + ': ' + e.message); alert(msgs.join('\n')); return; }
+                    if (!confirm('Confirm upload?')) return;
+                    return fetch('/user/stock-movements/upload-csv', { method: 'POST', body: formData });
+                })
+                .then(response => { if (!response) return; if (response.ok) return response.json(); throw new Error('Network response was not ok'); })
+                .then(() => { const modal = bootstrap.Modal.getInstance(document.getElementById('uploadCsvModal')); modal.hide(); location.reload(); })
+                .catch(error => { if (error) alert('Error uploading CSV: ' + error.message); });
+        });
+
+        function loadProductsToSelects() {
+            fetch('/user/products/api')
+                .then(response => { if (!response.ok) throw new Error('Server error: ' + response.status); return response.json(); })
+                .then(products => {
+                    document.querySelectorAll('select[name="productId[]"]').forEach(select => {
+                        select.innerHTML = '<option value="">Select product...</option>';
+                        products.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.id;
+                            option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
+                            select.appendChild(option);
+                        });
+                    });
+                })
+                .catch(err => console.error('Failed to load products', err));
+        }
+
+        function loadProductsToSingleSelect() {
+            fetch('/user/products/api')
+                .then(response => { if (!response.ok) throw new Error('Server error: ' + response.status); return response.json(); })
+                .then(products => {
+                    const select = document.getElementById('productSelect');
+                    select.innerHTML = '<option value="">Select product...</option>';
+                    products.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
+                        select.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Failed to load products', err));
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadProductsToSelects();
+            loadProductsToSingleSelect();
+
+            window.addBulkRow = function () {
+                const table = document.getElementById('bulkMovementTable').getElementsByTagName('tbody')[0];
+                const newRow = table.rows[0].cloneNode(true);
+                Array.from(newRow.querySelectorAll('input, select')).forEach(el => el.value = '');
+                table.appendChild(newRow);
+                loadProductsToSelects();
+            };
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
