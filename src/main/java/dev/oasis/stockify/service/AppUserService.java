@@ -85,8 +85,12 @@ public class AppUserService {
             throw new RuntimeException("Kullanıcı adı zaten mevcut: " + userCreateDTO.getUsername());
         }
         
+        if (userCreateDTO.getPassword() == null || userCreateDTO.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Şifre boş olamaz");
+        }
+
         AppUser appUser = userMapper.toEntity(userCreateDTO);
-        appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
+        appUser.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         AppUser savedUser = appUserRepository.save(appUser);
         return userMapper.toDto(savedUser);
     }    /**
@@ -101,8 +105,12 @@ public class AppUserService {
             throw new RuntimeException("Kullanıcı adı zaten mevcut: " + userCreateDTO.getUsername());
         }
         
+        if (userCreateDTO.getPassword() == null || userCreateDTO.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Şifre boş olamaz");
+        }
+
         AppUser appUser = userMapper.toEntity(userCreateDTO);
-        appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
+        appUser.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         return appUserRepository.save(appUser);
     }/**
      * Retrieves all active users from the database for the current tenant
