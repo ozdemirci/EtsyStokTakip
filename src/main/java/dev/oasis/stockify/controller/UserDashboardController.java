@@ -37,27 +37,30 @@ public class UserDashboardController {
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
         String currentTenantId = getCurrentTenantId(request);
-        
         log.debug("User Dashboard - Current tenant ID: {}", currentTenantId);
-        
+
         TenantDTO currentTenant = null;
         try {
             currentTenant = tenantManagementService.getTenant(currentTenantId);
-
         } catch (Exception e) {
             log.warn("Could not get tenant info for: {}, error: {}", currentTenantId, e.getMessage());
-        }        // Get dashboard metrics
+        }
+
+        // Get dashboard metrics
         DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();
-        
+
         // Get notification data
         List<StockNotification> notifications = stockNotificationService.getAllNotifications();
         long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
-        
+
         // Get stock movement data for user dashboard
         try {
             List<StockMovementResponseDTO> recentStockMovements = dashboardService.getRecentStockMovements();
+            if (recentStockMovements == null) {
+                recentStockMovements = List.of();
+            }
             StockMovementService.StockMovementStats stockStats = dashboardService.getStockMovementStats();
-            
+
             model.addAttribute("recentStockMovements", recentStockMovements);
             model.addAttribute("totalStockMovements", stockStats.getTotalMovements());
             model.addAttribute("stockInMovements", stockStats.getInMovements());
@@ -69,8 +72,8 @@ public class UserDashboardController {
             model.addAttribute("stockInMovements", 0);
             model.addAttribute("stockOutMovements", 0);
         }
-        
-        log.debug("Found metrics for tenant: {} - Products: {}, Stock Value: {}", 
+
+        log.debug("Found metrics for tenant: {} - Products: {}, Stock Value: {}",
                 currentTenantId, metrics.getTotalProducts(), metrics.getTotalInventoryValue());
 
         // Add individual metrics for template
@@ -80,16 +83,16 @@ public class UserDashboardController {
         model.addAttribute("outOfStockProducts", 0L); // TODO: Add to DashboardMetricsDTO
         model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));
         model.addAttribute("unreadNotifications", unreadNotifications);
-        
+
         // Add collections
         model.addAttribute("metrics", metrics);
         model.addAttribute("currentTenant", currentTenant);
         model.addAttribute("currentTenantId", currentTenantId);
         model.addAttribute("currentUser", authentication.getName());
-        
+
         return "user/dashboard";
     }
-    
+
     /**
      * Ensure tenant context is set for all requests in this controller
      */

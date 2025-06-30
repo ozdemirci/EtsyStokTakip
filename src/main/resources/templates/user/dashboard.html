@@ -350,39 +350,34 @@
                                             <tbody>
                                                 <tr th:each="movement : ${recentStockMovements}">
                                                     <td>
-                                                        <small
-                                                            th:text="${movement.timestamp != null ? #temporals.format(movement.timestamp, 'MM-dd HH:mm') : 'N/A'}">
-                                                            01-01 12:00
-                                                        </small>
+                                                        <small th:text="${movement.timestamp != null ? #temporals.format(movement.timestamp, 'MM-dd HH:mm') : 'N/A'}">01-01 12:00</small>
                                                     </td>
                                                     <td>
                                                         <span th:text="${movement.productName}">Product Name</span>
                                                         <br>
-                                                        <small class="text-muted"
-                                                            th:text="${movement.productSku}">SKU-001</small>
+                                                        <small class="text-muted" th:text="${movement.productSku}">SKU-001</small>
                                                     </td>
                                                     <td>
                                                         <span class="badge"
-                                                            th:class="${'badge ' + 
-                                                                       (movement.type == 'IN' ? 'bg-success' : 
-                                                                        movement.type == 'OUT' ? 'bg-danger' : 
-                                                                        movement.type == 'ADJUSTMENT' ? 'bg-warning' : 'bg-info')}"
-                                                            th:text="${movement.type}">
+                                                              th:class="${'badge ' + 
+                                                                         (movement.type == 'IN' ? 'bg-success' : 
+                                                                          movement.type == 'OUT' ? 'bg-danger' : 
+                                                                          movement.type == 'ADJUSTMENT' ? 'bg-warning' : 'bg-info')}"
+                                                              th:text="${movement.type}">
                                                             IN
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <span
-                                                            th:class="${movement.type == 'IN' ? 'text-success' : 
-                                                                       (movement.type == 'OUT' ? 'text-danger' : 'text-primary')}"
-                                                            th:text="${(movement.type == 'IN' ? '+' : 
-                                                                       (movement.type == 'OUT' ? '-' : '')) + movement.quantity}">
+                                                        <span th:class="${movement.type == 'IN' ? 'text-success' : 
+                                                                         (movement.type == 'OUT' ? 'text-danger' : 'text-primary')}"
+                                                              th:text="${(movement.type == 'IN' ? '+' : 
+                                                                         (movement.type == 'OUT' ? '-' : '')) + movement.quantity}">
                                                             +10
                                                         </span>
                                                     </td>
                                                     <td>
                                                         <small th:text="${movement.reason ?: 'No reason'}"
-                                                            th:title="${movement.reason}">
+                                                               th:title="${movement.reason}">
                                                             Stock replenishment
                                                         </small>
                                                     </td>
