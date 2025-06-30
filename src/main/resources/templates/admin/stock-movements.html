@@ -517,7 +517,10 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('Server error: ' + res.status);
+                    return res.json();
+                })
                 .then(result => {
                     if (!result.valid) {
                         alert(result.errors.join('\n'));
@@ -584,7 +587,10 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ movements })
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('Server error: ' + res.status);
+                    return res.json();
+                })
                 .then(result => {
                     if (!result.valid) {
                         const msgs = result.errors.map(e => 'Row ' + (e.index + 1) + ': ' + e.message);
@@ -623,7 +629,10 @@
                 method: 'POST',
                 body: formData
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('Server error: ' + res.status);
+                    return res.json();
+                })
                 .then(result => {
                     if (!result.valid) {
                         const msgs = result.errors.map(e => 'Row ' + (e.index + 1) + ': ' + e.message);
@@ -654,7 +663,10 @@
         // Ürünleri AJAX ile yükle ve tüm product select'lere ekle
         function loadProductsToSelects() {
             fetch('/admin/products/api') // API endpoint'iniz burada olmalı
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Server error: ' + response.status);
+                    return response.json();
+                })
                 .then(products => {
                     // Tüm productId[] select'lerini bul
                     document.querySelectorAll('select[name="productId[]"]').forEach(select => {
@@ -668,13 +680,17 @@
                             select.appendChild(option);
                         });
                     });
-                });
+                })
+                .catch(err => console.error('Failed to load products', err));
         }
 
         // Tekli hareket modalındaki ürün select'ini doldur
         function loadProductsToSingleSelect() {
             fetch('/admin/products/api')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Server error: ' + response.status);
+                    return response.json();
+                })
                 .then(products => {
                     const select = document.getElementById('productSelect');
                     select.innerHTML = '<option value="">Select product...</option>';
@@ -684,7 +700,8 @@
                         option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
                         select.appendChild(option);
                     });
-                });
+                })
+                .catch(err => console.error('Failed to load products', err));
         }
 
         document.addEventListener('DOMContentLoaded', function () {
