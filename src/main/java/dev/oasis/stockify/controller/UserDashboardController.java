@@ -101,35 +101,38 @@ public class UserDashboardController {
     }
 
     private String getCurrentTenantId(HttpServletRequest request) {
-        // First, try to get from current tenant context
-        String currentTenantId = TenantContext.getCurrentTenant();
-        log.debug("1. From context: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
+        // 1) Check current context
+        String tenantId = TenantContext.getCurrentTenant();
+        log.debug("1. From context: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            return tenantId.toLowerCase();
         }
-        
-        // Try to get from session (stored during login)
-        currentTenantId = (String) request.getSession().getAttribute("tenantId");
-        log.debug("2. From session: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
+
+        // 2) Check session
+        tenantId = (String) request.getSession().getAttribute("tenantId");
+        log.debug("2. From session: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            return tenantId.toLowerCase();
         }
-        
-        // Try to get from header
-        currentTenantId = request.getHeader("X-TenantId");
-        log.debug("3. From header: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
+
+        // 3) Check header (support both header names)
+        tenantId = request.getHeader("X-TenantId");
+        if (tenantId == null || tenantId.isBlank()) {
+            tenantId = request.getHeader("X-Tenant-ID");
         }
-        
-        // Try to get from parameter
-        currentTenantId = request.getParameter("tenant_id");
-        log.debug("4. From parameter: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
+        log.debug("3. From header: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            return tenantId.toLowerCase();
         }
-        
-        // Default to public tenant for testing
+
+        // 4) Check request parameter
+        tenantId = request.getParameter("tenant_id");
+        log.debug("4. From parameter: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            return tenantId.toLowerCase();
+        }
+
+        // Fallback
         log.warn("⚠️ Could not determine tenant ID from any source, using default 'public'");
         return "public";
     }
