@@ -360,4 +360,23 @@ public class StockMovementService {
         return count;
     }
 
+    /**
+     * Get all stock movements for the current user (for user dashboard/table)
+     */
+    public List<StockMovementResponseDTO> getMovementsForUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ArrayList<>();
+        }
+        String username = authentication.getName();
+        AppUser user = appUserRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        // Fetch all products for this user (if needed, or fetch all movements created by this user)
+        List<StockMovement> movements = stockMovementRepository.findByCreatedBy(user.getId());
+        return movements.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
 }
