@@ -468,13 +468,6 @@
                 .catch(error => { if (error) alert('Error creating stock movement: ' + error.message); });
         }
 
-        function addBulkRow() {
-            const table = document.getElementById('bulkMovementTable').getElementsByTagName('tbody')[0];
-            const newRow = table.rows[0].cloneNode(true);
-            Array.from(newRow.querySelectorAll('input, select')).forEach(el => el.value = '');
-            table.appendChild(newRow);
-        }
-
         function removeBulkRow(btn) {
             const row = btn.closest('tr');
             const table = row.parentNode;
