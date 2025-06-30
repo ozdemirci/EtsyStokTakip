@@ -18,9 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -218,20 +216,7 @@ public class StockMovementController {
         return stockMovementService.getStockMovementsByDateRange(start, end);
     }
 
-    /**
-     * Kullanıcıya özel stok hareketlerini getirir
-     */
-    @GetMapping("/user/stock-movements")
-    public String getStockMovements(Model model) {
-        try {
-            List<StockMovementResponseDTO> movements = stockMovementService.getMovementsForUser();
-            model.addAttribute("stockMovements", movements != null ? movements : Collections.emptyList());
-        } catch (Exception e) {
-            model.addAttribute("stockMovements", Collections.emptyList());
-            model.addAttribute("errorMessage", "Could not load stock movements. Please try again later.");
-        }
-        return "user/stock-movements";
-    }
+   
 
     private String getCurrentTenantId(HttpServletRequest request) {
         String currentTenantId = TenantContext.getCurrentTenant();

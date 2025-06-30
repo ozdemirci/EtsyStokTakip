@@ -16,7 +16,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -187,7 +189,9 @@ public class UserStockMovementController {
         return stockMovementService.getStockMovementsByDateRange(start, end);
     }
 
-    private String getCurrentTenantId(javax.servlet.http.HttpServletRequest request) {
+     
+
+    private String getCurrentTenantId(HttpServletRequest request) {
         String currentTenantId = TenantContext.getCurrentTenant();
         if (currentTenantId != null && !currentTenantId.isEmpty()) {
             return currentTenantId;
