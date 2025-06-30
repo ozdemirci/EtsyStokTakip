@@ -350,7 +350,7 @@
                                             <tbody>
                                                 <tr th:each="movement : ${recentStockMovements}">
                                                     <td>
-                                                        <small th:text="${movement.timestamp != null ? #temporals.format(movement.timestamp, 'MM-dd HH:mm') : 'N/A'}">01-01 12:00</small>
+                                                        <small th:text="${movement.createdAt != null ? #temporals.format(movement.createdAt, 'MM-dd HH:mm') : 'N/A'}">01-01 12:00</small>
                                                     </td>
                                                     <td>
                                                         <span th:text="${movement.productName}">Product Name</span>
