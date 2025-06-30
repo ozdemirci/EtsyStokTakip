@@ -353,31 +353,31 @@
                                                         <small th:text="${movement.createdAt != null ? #temporals.format(movement.createdAt, 'MM-dd HH:mm') : 'N/A'}">01-01 12:00</small>
                                                     </td>
                                                     <td>
-                                                        <span th:text="${movement.productName}">Product Name</span>
+                                                        <span th:text="${movement.productTitle}">Product Name</span>
                                                         <br>
                                                         <small class="text-muted" th:text="${movement.productSku}">SKU-001</small>
                                                     </td>
                                                     <td>
                                                         <span class="badge"
                                                               th:class="${'badge ' + 
-                                                                         (movement.type == 'IN' ? 'bg-success' : 
-                                                                          movement.type == 'OUT' ? 'bg-danger' : 
-                                                                          movement.type == 'ADJUSTMENT' ? 'bg-warning' : 'bg-info')}"
-                                                              th:text="${movement.type}">
+                                                                         (movement.movementType == 'IN' ? 'bg-success' : 
+                                                                          movement.movementType == 'OUT' ? 'bg-danger' : 
+                                                                          movement.movementType == 'ADJUSTMENT' ? 'bg-warning' : 'bg-info')}"
+                                                              th:text="${movement.movementTypeDisplay}">
                                                             IN
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <span th:class="${movement.type == 'IN' ? 'text-success' : 
-                                                                         (movement.type == 'OUT' ? 'text-danger' : 'text-primary')}"
-                                                              th:text="${(movement.type == 'IN' ? '+' : 
-                                                                         (movement.type == 'OUT' ? '-' : '')) + movement.quantity}">
+                                                        <span th:class="${movement.movementType == 'IN' ? 'text-success' : 
+                                                                         (movement.movementType == 'OUT' ? 'text-danger' : 'text-primary')}"
+                                                              th:text="${(movement.movementType == 'IN' ? '+' : 
+                                                                         (movement.movementType == 'OUT' ? '-' : '')) + movement.quantity}">
                                                             +10
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <small th:text="${movement.reason ?: 'No reason'}"
-                                                               th:title="${movement.reason}">
+                                                        <small th:text="${movement.notes ?: 'No reason'}"
+                                                               th:title="${movement.notes}">
                                                             Stock replenishment
                                                         </small>
                                                     </td>
@@ -491,7 +491,7 @@
                 </div>
 
                 <!-- Tenant Info -->
-                <div class="row mt-4" th:if="${currentTenant}">
+                <div class="row mt-4">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
@@ -502,19 +502,15 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Tenant ID:</strong> <span th:text="${currentTenant.name}">N/A</span>
-                                        </p>
+                                        <p><strong>Tenant ID:</strong> <span th:text="${currentTenant.tenantId}">N/A</span></p>
+                                        <p><strong>Tenant Name:</strong> <span th:text="${currentTenant.companyName}">N/A</span></p>
                                         <p><strong>Status:</strong>
-                                            <span class="badge bg-success"
-                                                th:text="${currentTenant.status}">Active</span>
+                                            <span class="badge bg-success" th:text="${currentTenant.status}">Active</span>
                                         </p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Database:</strong> <span
-                                                th:text="${currentTenant.databaseName}">N/A</span></p>
                                         <p><strong>Created:</strong>
-                                            <span
-                                                th:text="${currentTenant.createdAt != null ? #temporals.format(currentTenant.createdAt, 'dd MMM yyyy') : 'N/A'}">N/A</span>
+                                            <span th:text="${currentTenant.createdAt != null ? #temporals.format(currentTenant.createdAt, 'dd MMM yyyy') : 'N/A'}">N/A</span>
                                         </p>
                                     </div>
                                 </div>

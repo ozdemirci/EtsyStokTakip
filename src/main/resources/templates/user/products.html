@@ -197,7 +197,8 @@
                                                 </td>
                                                 <td>
                                                     <strong>₺<span th:text="${#numbers.formatDecimal(product.price, 0, 2)}">0.00</span></strong>
-                                                </td>                                                <td>
+                                                </td>
+                                                <td>
                                                     <span th:text="${product.stockLevel}">0</span>
                                                     <span th:if="${product.unit}" class="text-muted" th:text="${product.unit}">unit</span>
                                                 </td>
@@ -326,8 +327,6 @@
         // Low Stock functionality for user view
         function loadLowStockProducts() {
             const tableBody = document.getElementById('lowStockTableBody');
-            
-            // Show loading state
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center text-muted py-4">
@@ -338,11 +337,14 @@
                     </td>
                 </tr>
             `;
-            
-            // Fetch low stock products from server
+
             fetch('/user/products/low-stock-data')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`Sunucu hatası: ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
+                    if (data.error) throw new Error(data.error);
                     if (data.length === 0) {
                         tableBody.innerHTML = `
                             <tr>
@@ -356,16 +358,17 @@
                         tableBody.innerHTML = data.map(product => `
                             <tr class="low-stock">
                                 <td>
-                                    <div class="fw-bold">${product.title}</div>
-                                    <small class="text-muted">${product.description || ''}</small>
+                                    <div class="fw-bold"></div>
+                                    <small class="text-muted"></small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary">${product.category}</span>
-                                </td>                                <td>
-                                    <span class="badge bg-danger">${product.stockLevel}</span>
+                                    <span class="badge bg-secondary"></span>
                                 </td>
                                 <td>
-                                    <strong>₺${parseFloat(product.price).toFixed(2)}</strong>
+                                    <span class="badge bg-danger"></span>
+                                </td>
+                                <td>
+                                    <strong>₺</strong>
                                 </td>
                                 <td>
                                     ${product.stockLevel === 0 ? 
@@ -381,12 +384,18 @@
                                 </td>
                             </tr>
                         `).join('');
-                        
-                        // Update badge count
+                        // Alanları güvenli şekilde doldur
+                        Array.from(tableBody.querySelectorAll('tr.low-stock')).forEach((row, i) => {
+                            const p = data[i];
+                            row.children[0].children[0].textContent = p.title || '';
+                            row.children[0].children[1].textContent = p.description || '';
+                            row.children[1].children[0].textContent = p.category || '';
+                            row.children[2].children[0].textContent = p.stockLevel;
+                            row.children[3].children[0].textContent = `₺${parseFloat(p.price).toFixed(2)}`;
+                        });
+                        // Badge güncelle
                         const badge = document.querySelector('#low-stock-tab .badge');
-                        if (badge) {
-                            badge.textContent = data.length;
-                        }
+                        if (badge) badge.textContent = data.length;
                     }
                 })
                 .catch(error => {
@@ -395,7 +404,7 @@
                         <tr>
                             <td colspan="6" class="text-center text-danger py-4">
                                 <i class="bi bi-exclamation-triangle display-4"></i>
-                                <div class="mt-2">Error loading low stock products. Please try again.</div>
+                                <div class="mt-2">Veri yüklenirken hata oluştu: ${error.message}</div>
                                 <button class="btn btn-outline-primary mt-2" onclick="loadLowStockProducts()">
                                     <i class="bi bi-arrow-clockwise"></i> Retry
                                 </button>
