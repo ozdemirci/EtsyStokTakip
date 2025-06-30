@@ -4,6 +4,7 @@ import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,74 +27,73 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/user/products")
 @PreAuthorize("hasRole('USER')")
+@RequiredArgsConstructor
 public class UserProductController {
 
     private final ProductService productService;
 
-    public UserProductController(ProductService productService) {
-        this.productService = productService;
+    /**
+     * Ensure tenant context is set for each request
+     */
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        String tenantId = getCurrentTenantId(request);
+        TenantContext.setCurrentTenant(tenantId);
+        log.debug("Set tenant context to: {}", tenantId);
     }
 
     /**
      * Get current tenant ID from various sources
      */
     private String getCurrentTenantId(HttpServletRequest request) {
-        // First, try to get from current tenant context
+        // 1) Try context
         String tenantId = TenantContext.getCurrentTenant();
-        log.debug("🏢 Tenant from context: {}", tenantId);
-        if (tenantId != null && !tenantId.trim().isEmpty()) {
-            tenantId = tenantId.trim().toLowerCase();
-            log.debug("🎯 Using tenant from context: {}", tenantId);
-            return tenantId;
+        log.debug("1. Tenant from context: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            return tenantId.toLowerCase();
         }
 
-        // Try to get from session (stored during login)
-        tenantId = (String) request.getSession().getAttribute("tenantId");
-        log.debug("🏢 Tenant from session: {}", tenantId);
-        if (tenantId != null && !tenantId.trim().isEmpty()) {
-            tenantId = tenantId.trim().toLowerCase();
-            TenantContext.setCurrentTenant(tenantId);
-            log.debug("🎯 Using tenant from session: {}", tenantId);
-            return tenantId;
+        // 2) Try session without creating a new one
+        var session = request.getSession(false);
+        if (session != null) {
+            tenantId = (String) session.getAttribute("tenantId");
+            log.debug("2. Tenant from session: '{}'", tenantId);
+            if (tenantId != null && !tenantId.isBlank()) {
+                tenantId = tenantId.toLowerCase();
+                TenantContext.setCurrentTenant(tenantId);
+                return tenantId;
+            }
         }
 
-        // Try to get from header
+        // 3) Try header (support both header names)
         tenantId = request.getHeader("X-TenantId");
-        log.debug("🏢 Tenant from header: {}", tenantId);
-        if (tenantId != null && !tenantId.trim().isEmpty()) {
-            tenantId = tenantId.trim().toLowerCase();
+        if (tenantId == null || tenantId.isBlank()) {
+            tenantId = request.getHeader("X-Tenant-ID");
+        }
+        log.debug("3. Tenant from header: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            tenantId = tenantId.toLowerCase();
             TenantContext.setCurrentTenant(tenantId);
-            log.debug("🎯 Using tenant from header: {}", tenantId);
             return tenantId;
         }
 
-        // Try to get from parameter
+        // 4) Try request parameter
         tenantId = request.getParameter("tenant_id");
-        log.debug("🏢 Tenant from parameter: {}", tenantId);
-        if (tenantId != null && !tenantId.trim().isEmpty()) {
-            tenantId = tenantId.trim().toLowerCase();
+        log.debug("4. Tenant from parameter: '{}'", tenantId);
+        if (tenantId != null && !tenantId.isBlank()) {
+            tenantId = tenantId.toLowerCase();
             TenantContext.setCurrentTenant(tenantId);
-            log.debug("🎯 Using tenant from parameter: {}", tenantId);
             return tenantId;
         }
 
-        // Try to get from current context one more time
-        tenantId = TenantContext.getCurrentTenant();
-        log.debug("🏢 Tenant from context: {}", tenantId);
-
-        // Use default tenant if still empty
-        if (tenantId == null || tenantId.trim().isEmpty()) {
-            tenantId = "public";
-            log.warn("⚠️ No tenant found, defaulting to: {}", tenantId);
-        }
-
-        log.info("🎯 Using tenant ID: {}", tenantId);
-        return tenantId;
+        log.warn("⚠️ Could not determine tenant ID, using default 'public'");
+        return "public";
     }
 
     /**
      * Display paginated and searchable list of products (read-only for users)
-     */    @GetMapping
+     */
+    @GetMapping
     public String listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -145,7 +145,9 @@ public class UserProductController {
 
         log.debug("📊 Found {} products for tenant: {}", products.getTotalElements(), tenantId);
         return "user/products";
-    }    /**
+    }
+
+    /**
      * Redirect to products page with low-stock tab active
      */
     @GetMapping("/low-stock")
@@ -173,7 +175,7 @@ public class UserProductController {
                 .filter(p -> p.getStockLevel() <= 10) // Using simplified low stock logic for user view
                 .toList();
                 
-            log.info("� Found {} low stock products for tenant: {}", 
+            log.info("✅ Found {} low stock products for tenant: {}",
                 lowStockProducts.size(), tenantId);
             return lowStockProducts;
         } catch (Exception e) {
@@ -190,7 +192,8 @@ public class UserProductController {
                              HttpServletRequest request,
                              Model model) {
         String tenantId = getCurrentTenantId(request);
-        log.info("👁️ User viewing product {} for tenant: {}", id, tenantId);        try {
+        log.info("👁️ User viewing product {} for tenant: {}", id, tenantId);
+        try {
             Optional<ProductResponseDTO> productOpt = productService.getProductById(id);
             if (productOpt.isEmpty()) {
                 log.error("❌ Product not found with ID: {} for tenant: {}", id, tenantId);
