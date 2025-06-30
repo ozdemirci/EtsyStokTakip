@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Optional;
@@ -166,7 +167,7 @@ public class UserProductController {
     /**
      * Get low stock products as JSON data for AJAX calls
      */
-    @GetMapping("/low-stock-data")
+    @GetMapping(value = "/low-stock-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request) {
         String tenantId = getCurrentTenantId(request);
