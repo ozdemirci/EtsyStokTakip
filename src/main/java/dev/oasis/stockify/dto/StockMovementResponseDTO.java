@@ -32,6 +32,10 @@ public class StockMovementResponseDTO {
     private String createdByUsername;
     private LocalDateTime createdAt;
 
+    public LocalDateTime getTimestamp() {
+        return createdAt;
+    }
+
     public static StockMovementResponseDTO fromEntity(StockMovement movement) {
         return StockMovementResponseDTO.builder()
                 .id(movement.getId())
