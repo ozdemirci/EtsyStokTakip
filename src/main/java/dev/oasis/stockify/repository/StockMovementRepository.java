@@ -73,15 +73,16 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
 
     List<StockMovement> findByCreatedAtBetweenOrderByCreatedAtDesc(LocalDateTime start, LocalDateTime end);
 
+    /**
+     * Search stock movements by product name/referenceId and movement type with pagination
+     */
     @Query("""
-            SELECT sm FROM StockMovement sm
-            JOIN sm.product p
-            WHERE (:search IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%'))
-                   OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :search, '%')))
-              AND (:movementType IS NULL OR sm.movementType = :movementType)
-            "")
-    Page<StockMovement> searchMovements(@Param("search") String search,
-                                        @Param("movementType") StockMovement.MovementType movementType,
-                                        Pageable pageable);
-
+        SELECT sm FROM StockMovement sm
+        JOIN FETCH sm.product p
+        WHERE
+            (:search IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(sm.referenceId) LIKE LOWER(CONCAT('%', :search, '%')))
+            AND (:type IS NULL OR sm.movementType = :type)
+        ORDER BY sm.createdAt DESC
+    """)
+    Page<StockMovement> searchMovements(@Param("search") String search, @Param("type") StockMovement.MovementType type, Pageable pageable);
 }
