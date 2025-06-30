@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -102,7 +103,8 @@ public class UserProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String tab,
             HttpServletRequest request,
-            Model model) {
+            Model model,
+            Authentication authentication) {
         
         String tenantId = getCurrentTenantId(request);
         log.info("📦 User viewing products for tenant: {}", tenantId);
@@ -139,6 +141,7 @@ public class UserProductController {
         model.addAttribute("totalProducts", totalProducts);
         model.addAttribute("lowStockCount", lowStockCount);
         model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
+        model.addAttribute("currentUser", authentication.getName());
 
         log.debug("📊 Found {} total products, {} low stock for tenant: {}", 
             totalProducts, lowStockCount, tenantId);

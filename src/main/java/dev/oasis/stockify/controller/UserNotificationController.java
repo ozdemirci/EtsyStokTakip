@@ -6,6 +6,7 @@ import dev.oasis.stockify.service.StockNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,7 @@ public class UserNotificationController {
     public UserNotificationController(StockNotificationService stockNotificationService) {
         this.stockNotificationService = stockNotificationService;
     }    @GetMapping
-    public String notifications(HttpServletRequest request, Model model) {
+    public String notifications(HttpServletRequest request, Model model, Authentication authentication) {
         String tenantId = getCurrentTenantId(request);
         log.info("🔔 User accessing notifications for tenant: {}", tenantId);
         
@@ -42,6 +43,7 @@ public class UserNotificationController {
         model.addAttribute("totalNotifications", totalNotifications);
         model.addAttribute("unreadNotifications", unreadNotifications);
         model.addAttribute("tenantId", tenantId);
+        model.addAttribute("currentUser", authentication.getName());
         
         log.info("📊 Notification stats for user in tenant {}: Total={}, Unread={}", 
             tenantId, totalNotifications, unreadNotifications);

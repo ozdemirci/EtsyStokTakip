@@ -10,8 +10,8 @@
         .navbar-brand { font-weight: bold; }
         .sidebar { height: 100vh; background-color: #f8f9fa; }
         .sidebar .nav-link { padding: 12px 20px; color: #495057; border-radius: 8px; margin: 2px 8px; }
-        .sidebar .nav-link:hover { background-color: #e9ecef; color: #28a745; }
-        .sidebar .nav-link.active { background-color: #28a745; color: white; }
+        .sidebar .nav-link:hover { background-color: #e9ecef; color: #007bff; }
+        .sidebar .nav-link.active { background-color: #007bff; color: white; }
         .main-content { padding: 20px; }
         .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
         .table th { background-color: #f8f9fa; border-top: none; font-weight: 600; }
@@ -32,9 +32,19 @@
                 <i class="bi bi-boxes"></i> Stockify User
             </a>
             <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/user/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
                 <span class="navbar-text me-3">
-                    <i class="bi bi-building"></i> 
+                    <i class="bi bi-building"></i>
                     <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
+                </span>
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle"></i>
+                    Welcome, <span th:text="${currentUser}">User</span>
                 </span>
                 <a class="nav-link" href="/logout">
                     <i class="bi bi-box-arrow-right"></i> Logout
@@ -57,6 +67,11 @@
                         <li class="nav-item">
                             <a class="nav-link active" href="/user/products">
                                 <i class="bi bi-box-seam"></i> Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/stock-movements">
+                                <i class="bi bi-arrow-left-right"></i> Stock Movements
                             </a>
                         </li>
                         <li class="nav-item">
