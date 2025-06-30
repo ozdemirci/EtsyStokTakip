@@ -4,6 +4,7 @@ import dev.oasis.stockify.model.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class UserCreateDTO {
     @Size(min = 3, max = 20, message = "Kullanıcı adı 3 ile 20 karakter arasında olmalıdır")
     private String username;
     
-    @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
+    @Pattern(regexp = "^$|.{6,}", message = "Şifre en az 6 karakter olmalıdır")
     private String password;
     
     @NotNull(message = "Rol boş olamaz")
