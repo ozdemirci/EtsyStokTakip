@@ -287,6 +287,13 @@ public class TenantManagementService {
                 stmt.setString(3, "STRING");
                 stmt.setString(4, "Tenant activation status");
                 stmt.executeUpdate();
+                
+                // Subscription plan - default to TRIAL for new tenants
+                stmt.setString(1, "subscription_plan");
+                stmt.setString(2, "TRIAL");
+                stmt.setString(3, "STRING");
+                stmt.setString(4, "Tenant subscription plan");
+                stmt.executeUpdate();
             }
         }
     }

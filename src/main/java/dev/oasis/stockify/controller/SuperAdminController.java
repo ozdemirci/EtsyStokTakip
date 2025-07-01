@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.*;
@@ -382,7 +383,83 @@ public class SuperAdminController {
             superAdminService.clearTenantContext();
         }
     }    
-   
+
+    /**
+     * Tenant Subscription Management - View and manage subscription plans
+     */
+    @GetMapping("/subscription-management")
+    public String subscriptionManagement(Model model, Principal principal) {
+        log.info("💳 Super Admin '{}' accessing subscription management", principal.getName());
+        
+        try {
+            Map<String, String> tenantPlans = superAdminService.getAllTenantSubscriptionPlans();
+            
+            // Convert to subscription objects for the template
+            List<Map<String, Object>> subscriptions = new ArrayList<>();
+            for (Map.Entry<String, String> entry : tenantPlans.entrySet()) {
+                Map<String, Object> subscription = new HashMap<>();
+                subscription.put("tenant", entry.getKey());
+                subscription.put("subscriptionPlan", entry.getValue() != null ? entry.getValue() : "TRIAL");
+                subscription.put("error", null); // No error since we got the data
+                subscriptions.add(subscription);
+            }
+            
+            // Calculate plan counts
+            Map<String, Long> planCounts = new HashMap<>();
+            planCounts.put("trial", tenantPlans.values().stream().filter(plan -> "TRIAL".equals(plan)).count());
+            planCounts.put("basic", tenantPlans.values().stream().filter(plan -> "BASIC".equals(plan)).count());
+            planCounts.put("premium", tenantPlans.values().stream().filter(plan -> "PREMIUM".equals(plan)).count());
+            planCounts.put("enterprise", tenantPlans.values().stream().filter(plan -> "ENTERPRISE".equals(plan)).count());
+            
+            model.addAttribute("subscriptions", subscriptions);
+            model.addAttribute("planCounts", planCounts);
+            model.addAttribute("currentUser", principal.getName());
+            
+            return "superadmin/subscription-management";
+            
+        } catch (Exception e) {
+            log.error("❌ Error loading subscription management: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to load subscription data");
+            model.addAttribute("subscriptions", new ArrayList<>());
+            model.addAttribute("planCounts", Map.of("trial", 0L, "basic", 0L, "premium", 0L, "enterprise", 0L));
+            model.addAttribute("currentUser", principal.getName());
+            return "superadmin/subscription-management";
+        } finally {
+            superAdminService.clearTenantContext();
+        }
+    }
+
+    /**
+     * Update tenant subscription plan
+     */
+    @PostMapping("/subscription-management/update")
+    public String updateSubscriptionPlan(
+            @RequestParam String tenant,
+            @RequestParam String subscriptionPlan,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+        
+        log.info("🔄 Super Admin '{}' updating subscription plan for tenant '{}' to '{}'", 
+                principal.getName(), tenant, subscriptionPlan);
+        
+        try {
+            superAdminService.updateTenantSubscriptionPlan(tenant, subscriptionPlan);
+            
+            redirectAttributes.addFlashAttribute("message", 
+                "Subscription plan for tenant '" + tenant + "' updated to " + subscriptionPlan + " successfully!");
+            
+            return "redirect:/superadmin/subscription-management";
+                
+        } catch (Exception e) {
+            log.error("❌ Error updating subscription plan for tenant '{}': {}", tenant, e.getMessage());
+            redirectAttributes.addFlashAttribute("error", 
+                "Failed to update subscription plan for tenant '" + tenant + "': " + e.getMessage());
+            
+            return "redirect:/superadmin/subscription-management";
+        } finally {
+            superAdminService.clearTenantContext();
+        }
+    }
 
     
 
