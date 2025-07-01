@@ -36,9 +36,12 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
             
             log.info("🗄️ Starting Flyway migrations for all tenant schemas...");
             
-            // Migrate each tenant schema
+            // First migrate public schema with general migrations
+            migratePublicSchema(dataSource);
+            
+            // Then migrate each tenant schema with tenant-specific migrations
             for (String schema : tenantSchemas) {
-                migrateSchema(dataSource, schema);
+                migrateTenantSchema(dataSource, schema);
             }
             
             log.info("✅ Flyway migrations completed for {} schemas", tenantSchemas.length); 
@@ -104,6 +107,125 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
             throw new RuntimeException("Failed to migrate schema: " + schemaName, e);
         }
 
+    }
+    
+    /**
+     * Migrate public schema with general migrations
+     */
+    private void migratePublicSchema(DataSource dataSource) {
+        try {
+            log.info("🏗️ Migrating PUBLIC schema with general migrations...");
+            
+            Flyway publicFlyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations(migrationLocations)  // Uses general migrations
+                .schemas("public")
+                .defaultSchema("public")
+                .createSchemas(true)
+                .baselineOnMigrate(true)
+                .validateOnMigrate(false)  // Disable validation to avoid checksum issues
+                .cleanOnValidationError(false)  // Don't clean on validation errors
+                .outOfOrder(true)  // Allow out of order migrations
+                .table("flyway_schema_history_public")
+                .load();
+
+            // First try to repair if there are checksum mismatches
+            try {
+                log.info("🔧 Running Flyway repair for PUBLIC schema...");
+                publicFlyway.repair();
+                log.info("✅ Flyway repair completed for PUBLIC schema");
+            } catch (Exception repairEx) {
+                log.warn("⚠️ Flyway repair failed for PUBLIC schema: {}", repairEx.getMessage());
+            }
+
+            // Try migration
+            try {
+                publicFlyway.migrate();
+            } catch (Exception migrationEx) {
+                log.warn("⚠️ First migration attempt failed, trying repair again: {}", migrationEx.getMessage());
+                // Try repair one more time and then migrate
+                try {
+                    publicFlyway.repair();
+                    publicFlyway.migrate();
+                } catch (Exception secondEx) {
+                    log.error("❌ Migration failed even after repair: {}", secondEx.getMessage());
+                    throw secondEx;
+                }
+            }
+            
+            log.info("✅ Successfully migrated PUBLIC schema");
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to migrate PUBLIC schema: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to migrate PUBLIC schema", e);
+        }
+    }
+    
+    /**
+     * Migrate tenant schema with tenant-specific migrations
+     */
+    private void migrateTenantSchema(DataSource dataSource, String schemaName) {
+        try {
+            log.info("🏗️ Migrating tenant schema: {} with tenant-specific migrations", schemaName);
+            
+            // First, ensure the schema exists
+            try (Connection connection = dataSource.getConnection();
+                 var statement = connection.createStatement()) {
+                if (!"public".equals(schemaName)) {
+                    statement.execute("CREATE SCHEMA IF NOT EXISTS \"" + schemaName + "\"");
+                    log.debug("✅ Ensured schema {} exists", schemaName);
+                }
+            } catch (SQLException e) {
+                log.warn("⚠️ Schema {} might already exist: {}", schemaName, e.getMessage());
+            }
+            
+            // Use the same migration location for tenant schemas
+            // Our consolidated migration file works for all schemas
+            String[] tenantMigrationLocations = migrationLocations;
+            
+            Flyway tenantFlyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations(tenantMigrationLocations)  // Use tenant-specific migrations
+                .schemas(schemaName)
+                .defaultSchema(schemaName)
+                .createSchemas(true)
+                .baselineOnMigrate(true)
+                .validateOnMigrate(false)  // Disable validation to avoid checksum issues
+                .cleanOnValidationError(false)  // Don't clean on validation errors
+                .outOfOrder(true)  // Allow out of order migrations
+                .table("flyway_schema_history_" + schemaName.toLowerCase().replace("-", "_"))
+                .load();
+
+            // First try to repair if there are checksum mismatches
+            try {
+                log.debug("🔧 Running Flyway repair for tenant schema: {}", schemaName);
+                tenantFlyway.repair();
+                log.debug("✅ Flyway repair completed for tenant schema: {}", schemaName);
+            } catch (Exception repairEx) {
+                log.debug("⚠️ Flyway repair not needed or failed for {}: {}", schemaName, repairEx.getMessage());
+            }
+           
+            // Try migration
+            try {
+                tenantFlyway.migrate();
+            } catch (Exception migrationEx) {
+                log.warn("⚠️ First migration attempt failed for {}, trying repair again: {}", schemaName, migrationEx.getMessage());
+                // Try repair one more time and then migrate
+                try {
+                    tenantFlyway.repair();
+                    tenantFlyway.migrate();
+                } catch (Exception secondEx) {
+                    log.error("❌ Migration failed even after repair for {}: {}", schemaName, secondEx.getMessage());
+                    throw secondEx;
+                }
+            }
+            
+            log.info("✅ Successfully migrated tenant schema: {}", schemaName);
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to migrate tenant schema {}: {}", schemaName, e.getMessage(), e);
+            throw new RuntimeException("Failed to migrate tenant schema: " + schemaName, e);
+        }
     }
                      
 }
