@@ -20,6 +20,7 @@
         .badge-out-of-stock { background-color: #dc3545; }
         .badge-in-stock { background-color: #28a745; }
         .info-card { background-color: #f8f9fa; }
+        .placeholder-icon { font-size: 4rem; }
     </style>
 </head>
 <body>
@@ -91,12 +92,9 @@
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-body text-center">
-                                <img th:if="${product.imageUrl}" 
-                                     th:src="${product.imageUrl}" 
-                                     th:alt="${product.title}"
-                                     class="product-image img-fluid">
-                                <div th:unless="${product.imageUrl}" class="product-image d-flex align-items-center justify-content-center bg-light">
-                                    <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                                <!-- No image field in DTO, always show placeholder -->
+                                <div class="product-image d-flex align-items-center justify-content-center bg-light">
+                                    <i class="bi bi-image text-muted placeholder-icon"></i>
                                 </div>
                             </div>
                         </div>
@@ -107,6 +105,17 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title mb-0" th:text="${product.title}">Product Title</h3>
+                                <div class="mt-2">
+                                    <span th:if="${product.isActive}" class="badge bg-success me-2">
+                                        <i class="bi bi-check-circle"></i> Active
+                                    </span>
+                                    <span th:unless="${product.isActive}" class="badge bg-secondary me-2">
+                                        <i class="bi bi-pause-circle"></i> Inactive
+                                    </span>
+                                    <span th:if="${product.isFeatured}" class="badge bg-warning">
+                                        <i class="bi bi-star-fill"></i> Featured
+                                    </span>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -120,29 +129,35 @@
                                             <p><strong>Price:</strong> 
                                                 <span class="h5 text-success">₺<span th:text="${#numbers.formatDecimal(product.price, 0, 2)}">0.00</span></span>
                                             </p>
-                                            <p><strong>Unit:</strong> <span th:text="${product.unit ?: 'N/A'}">piece</span></p>
+                                            <p><strong>Status:</strong>
+                                                <span th:if="${product.isActive}" class="badge bg-success">Active</span>
+                                                <span th:unless="${product.isActive}" class="badge bg-secondary">Inactive</span>
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <h5>Stock Information</h5>
                                         <div class="info-card p-3 rounded mb-3">
                                             <p><strong>Current Stock:</strong> 
-                                                <span class="h5" th:text="${product.quantity}">0</span>
-                                                <span th:if="${product.unit}" class="text-muted" th:text="${product.unit}">unit</span>
+                                                <span class="h5" th:text="${product.stockLevel}">0</span>
+                                                <span class="text-muted">units</span>
                                             </p>
-                                            <p><strong>Status:</strong>
-                                                <span th:if="${product.quantity == 0}" class="badge badge-out-of-stock">
+                                            <p><strong>Low Stock Threshold:</strong> 
+                                                <span th:text="${product.lowStockThreshold}">5</span> units
+                                            </p>
+                                            <p><strong>Stock Status:</strong>
+                                                <span th:if="${product.stockLevel == 0}" class="badge badge-out-of-stock">
                                                     <i class="bi bi-x-circle"></i> Out of Stock
                                                 </span>
-                                                <span th:if="${product.quantity > 0 and product.quantity <= 10}" class="badge badge-low-stock">
+                                                <span th:if="${product.isLowStock()}" class="badge badge-low-stock">
                                                     <i class="bi bi-exclamation-triangle"></i> Low Stock
                                                 </span>
-                                                <span th:if="${product.quantity > 10}" class="badge badge-in-stock">
+                                                <span th:if="${product.stockLevel > product.lowStockThreshold}" class="badge badge-in-stock">
                                                     <i class="bi bi-check-circle"></i> In Stock
                                                 </span>
                                             </p>
                                             <p><strong>Total Value:</strong> 
-                                                <span class="h6 text-info">₺<span th:text="${#numbers.formatDecimal(product.price * product.quantity, 0, 2)}">0.00</span></span>
+                                                <span class="h6 text-info">₺<span th:text="${#numbers.formatDecimal(product.price * product.stockLevel, 0, 2)}">0.00</span></span>
                                             </p>
                                         </div>
                                     </div>
@@ -175,6 +190,10 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <p><strong>Product ID:</strong> <span th:text="${product.id}">1</span></p>
+                                        <p><strong>SKU:</strong> <code th:text="${product.sku}">SKU001</code></p>
+                                        <p th:if="${product.etsyProductId}"><strong>Etsy ID:</strong> 
+                                            <code th:text="${product.etsyProductId}">ETSY123</code>
+                                        </p>
                                         <p><strong>Created:</strong> 
                                             <span th:text="${product.createdAt != null ? #temporals.format(product.createdAt, 'dd MMM yyyy HH:mm') : 'N/A'}">N/A</span>
                                         </p>
@@ -183,25 +202,31 @@
                                         <p><strong>Last Updated:</strong> 
                                             <span th:text="${product.updatedAt != null ? #temporals.format(product.updatedAt, 'dd MMM yyyy HH:mm') : 'N/A'}">N/A</span>
                                         </p>
+                                        <p><strong>Featured:</strong>
+                                            <span th:if="${product.isFeatured}" class="badge bg-warning">
+                                                <i class="bi bi-star-fill"></i> Featured
+                                            </span>
+                                            <span th:unless="${product.isFeatured}" class="text-muted">Not Featured</span>
+                                        </p>
                                         <p><strong>Tenant:</strong> 
                                             <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
                                         </p>
                                     </div>
                                     <div class="col-md-4">
-                                        <!-- Stock Level Warning -->
-                                        <div th:if="${product.quantity <= 10}" class="alert alert-warning mb-0">
-                                            <i class="bi bi-exclamation-triangle me-2"></i>
-                                            <strong>Low Stock Warning!</strong>
-                                            <br>
-                                            <small>This product is running low on stock.</small>
-                                        </div>
-                                        <div th:if="${product.quantity == 0}" class="alert alert-danger mb-0">
+                                        <!-- Stock Level Warning using DTO method -->
+                                        <div th:if="${product.stockLevel == 0}" class="alert alert-danger mb-0">
                                             <i class="bi bi-x-circle me-2"></i>
                                             <strong>Out of Stock!</strong>
                                             <br>
                                             <small>This product is currently out of stock.</small>
                                         </div>
-                                        <div th:if="${product.quantity > 10}" class="alert alert-success mb-0">
+                                        <div th:if="${product.isLowStock() and product.stockLevel > 0}" class="alert alert-warning mb-0">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <strong>Low Stock Warning!</strong>
+                                            <br>
+                                            <small>Stock level (<span th:text="${product.stockLevel}">0</span>) is below threshold (<span th:text="${product.lowStockThreshold}">5</span>).</small>
+                                        </div>
+                                        <div th:if="${!product.isLowStock() and product.stockLevel > 0}" class="alert alert-success mb-0">
                                             <i class="bi bi-check-circle me-2"></i>
                                             <strong>Good Stock Level</strong>
                                             <br>
