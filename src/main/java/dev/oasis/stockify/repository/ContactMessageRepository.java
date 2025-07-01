@@ -40,7 +40,7 @@ public interface ContactMessageRepository extends JpaRepository<ContactMessage, 
     /**
      * Count responded messages
      */
-    long countByIsRespondedTrue();
+    long countByRespondedTrue();
     
     /**
      * Find messages by subject
