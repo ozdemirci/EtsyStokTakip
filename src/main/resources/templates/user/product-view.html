@@ -31,6 +31,12 @@
                 <i class="bi bi-boxes"></i> Stockify User
             </a>
             <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative me-3" href="/user/notifications" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${unreadNotifications > 0}"
+                          th:text="${unreadNotifications}">0</span>
+                </a>
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i> 
                     <span class="badge tenant-badge" th:text="${tenantId}">Tenant</span>
@@ -66,6 +72,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/user/notifications">
                                 <i class="bi bi-bell"></i> Notifications
+                                <span class="badge bg-danger ms-2" th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}">0</span>
                             </a>
                         </li>
                     </ul>

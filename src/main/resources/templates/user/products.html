@@ -83,6 +83,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/user/notifications">
                                 <i class="bi bi-bell"></i> Notifications
+                                <span class="badge bg-danger ms-2" th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}">0</span>
                             </a>
                         </li>
                     </ul>
@@ -166,16 +167,24 @@
                                     <div class="col-md-3">
                                         <label for="sortBySelect" class="form-label">Sort By</label>
                                         <select class="form-select" name="sortBy" id="sortBySelect" title="Sort By">
+                                            <option value="id" th:selected="${sortBy == 'id'}">Sort by ID</option>
                                             <option value="title" th:selected="${sortBy == null or sortBy == 'title'}">
                                                 Sort by Title</option>
+                                            <option value="sku" th:selected="${sortBy == 'sku'}">Sort by SKU</option>
                                             <option value="category" th:selected="${sortBy == 'category'}">Sort by
                                                 Category</option>
                                             <option value="price" th:selected="${sortBy == 'price'}">Sort by Price
                                             </option>
                                             <option value="stockLevel" th:selected="${sortBy == 'stockLevel'}">Sort by
                                                 Stock Level</option>
+                                            <option value="lowStockThreshold" th:selected="${sortBy == 'lowStockThreshold'}">Sort by
+                                                Low Stock Threshold</option>
+                                            <option value="isActive" th:selected="${sortBy == 'isActive'}">Sort by Status</option>
+                                            <option value="isFeatured" th:selected="${sortBy == 'isFeatured'}">Sort by Featured</option>
                                             <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Sort by
-                                                Date</option>
+                                                Date Created</option>
+                                            <option value="updatedAt" th:selected="${sortBy == 'updatedAt'}">Sort by
+                                                Date Updated</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3">
@@ -203,7 +212,14 @@
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>ID</th>
+                                                <th>
+                                                    <a th:href="@{/user/products(page=${currentPage}, size=${pageSize}, sortBy='id', sortDir=${sortBy == 'id' and sortDir == 'asc' ? 'desc' : 'asc'}, search=${search})}" 
+                                                       class="text-decoration-none text-dark">
+                                                        ID
+                                                        <i th:if="${sortBy == 'id'}" 
+                                                           th:class="${sortDir == 'asc' ? 'bi bi-sort-numeric-down' : 'bi bi-sort-numeric-down-alt'}"></i>
+                                                    </a>
+                                                </th>
                                                 <th>
                                                     <a th:href="@{/user/products(page=${currentPage}, size=${pageSize}, sortBy='title', sortDir=${sortBy == 'title' and sortDir == 'asc' ? 'desc' : 'asc'}, search=${search})}" 
                                                        class="text-decoration-none text-dark">
@@ -212,8 +228,22 @@
                                                            th:class="${sortDir == 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-down-alt'}"></i>
                                                     </a>
                                                 </th>
-                                                <th>SKU</th>
-                                                <th>Category</th>
+                                                <th>
+                                                    <a th:href="@{/user/products(page=${currentPage}, size=${pageSize}, sortBy='sku', sortDir=${sortBy == 'sku' and sortDir == 'asc' ? 'desc' : 'asc'}, search=${search})}" 
+                                                       class="text-decoration-none text-dark">
+                                                        SKU
+                                                        <i th:if="${sortBy == 'sku'}" 
+                                                           th:class="${sortDir == 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-down-alt'}"></i>
+                                                    </a>
+                                                </th>
+                                                <th>
+                                                    <a th:href="@{/user/products(page=${currentPage}, size=${pageSize}, sortBy='category', sortDir=${sortBy == 'category' and sortDir == 'asc' ? 'desc' : 'asc'}, search=${search})}" 
+                                                       class="text-decoration-none text-dark">
+                                                        Category
+                                                        <i th:if="${sortBy == 'category'}" 
+                                                           th:class="${sortDir == 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-down-alt'}"></i>
+                                                    </a>
+                                                </th>
                                                 <th>
                                                     <a th:href="@{/user/products(page=${currentPage}, size=${pageSize}, sortBy='price', sortDir=${sortBy == 'price' and sortDir == 'asc' ? 'desc' : 'asc'}, search=${search})}" 
                                                        class="text-decoration-none text-dark">

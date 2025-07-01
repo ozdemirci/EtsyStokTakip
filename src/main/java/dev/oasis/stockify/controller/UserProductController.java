@@ -100,6 +100,39 @@ public class UserProductController {
     }
 
     /**
+     * Validate and sanitize sort field to prevent injection attacks
+     * Only allow predefined sort fields that exist in ProductResponseDTO
+     */
+    private String validateSortField(String sortBy) {
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            return "title"; // Default sort
+        }
+        
+        // Define allowed sort fields based on ProductResponseDTO fields
+        return switch (sortBy.toLowerCase()) {
+            case "id" -> "id";
+            case "title" -> "title";
+            case "description" -> "description";
+            case "sku" -> "sku";
+            case "category" -> "category";
+            case "price" -> "price";
+            case "stocklevel" -> "stockLevel";
+            case "lowstockthreshold" -> "lowStockThreshold";
+            case "etsyproductid" -> "etsyProductId";
+            case "isactive" -> "isActive";
+            case "isfeatured" -> "isFeatured";
+            case "createdat" -> "createdAt";
+            case "updatedat" -> "updatedAt";
+            case "createdby" -> "createdBy";
+            case "updatedby" -> "updatedBy";
+            default -> {
+                log.warn("⚠️ Invalid sort field '{}', using default 'title'", sortBy);
+                yield "title";
+            }
+        };
+    }
+
+    /**
      * Display paginated and searchable list of products (read-only for users)
      */
     @GetMapping
@@ -117,9 +150,13 @@ public class UserProductController {
         String tenantId = getCurrentTenantId(request);
         log.info("📦 User viewing products for tenant: {}", tenantId);
 
+        // Validate and sanitize sortBy parameter for security
+        String validatedSortBy = validateSortField(sortBy);
+        log.debug("🔄 Sort field validated: {} -> {}", sortBy, validatedSortBy);
+
         // Create sort object
         Sort sort = Sort.by(sortDir.equals("desc") ? 
-            Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+            Sort.Direction.DESC : Sort.Direction.ASC, validatedSortBy);
         
         Pageable pageable = PageRequest.of(page, size, sort);
 
@@ -135,7 +172,7 @@ public class UserProductController {
         List<ProductResponseDTO> allProducts = productService.getAllProducts();
         long totalProducts = allProducts.size();
         long lowStockCount = allProducts.stream()
-            .filter(p -> p.getStockLevel() <= 10) // Using simplified low stock logic for user view
+            .filter(p -> p.isLowStock()) // Use DTO method for accurate low stock detection
             .count();
 
         // Get categories for the categories tab
@@ -152,7 +189,7 @@ public class UserProductController {
         model.addAttribute("products", products);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
-        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortBy", validatedSortBy); // Use validated sort field
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("totalPages", products.getTotalPages());
         model.addAttribute("totalElements", products.getTotalElements());
@@ -197,7 +234,7 @@ public class UserProductController {
         try {
             List<ProductResponseDTO> lowStockProducts = productService.getAllProducts()
                 .stream()
-                .filter(p -> p.getStockLevel() <= 10) // Using simplified low stock logic for user view
+                .filter(p -> p.isLowStock()) // Use DTO method for accurate low stock detection
                 .toList();
                 
             log.info("✅ Found {} low stock products for tenant: {}",
