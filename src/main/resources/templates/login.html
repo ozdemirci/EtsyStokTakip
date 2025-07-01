@@ -168,6 +168,20 @@
             gap: 0.5rem;
         }
         
+        .password-toggle {
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 1.2rem 1.5rem;
+            color: #6c757d;
+            transition: color 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .password-toggle:hover {
+            color: #667eea;
+        }
+        
         .btn-login {
             width: 100%;
             padding: 1.2rem 2rem;
@@ -394,6 +408,10 @@
                             </span>
                             <input type="password" class="form-control" id="password" name="password" 
                                 placeholder="Şifrenizi girin" required autocomplete="off">
+                            <button type="button" class="password-toggle" 
+                                    onclick="togglePassword()" title="Şifreyi göster/gizle">
+                                <i class="bi bi-eye" id="passwordIcon"></i>
+                            </button>
                         </div>
                         <div class="form-text-modern">
                             
@@ -451,6 +469,20 @@
     </div>
 
     <script>
+        // Password toggle function
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'bi bi-eye';
+            }
+        }
+
         // Tenant ID lowercase conversion
         document.getElementById('tenant_id').addEventListener('input', function (e) {
             this.value = this.value.toLowerCase();
