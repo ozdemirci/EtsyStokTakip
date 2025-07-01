@@ -48,8 +48,13 @@ public class UserStockMovementController {
     public String stockMovementsPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
             HttpServletRequest request,
-            Model model) {
+            Model model,
+            Authentication authentication) {
         try {
             Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
             model.addAttribute("stockMovements", movements.getContent());
@@ -59,6 +64,14 @@ public class UserStockMovementController {
             model.addAttribute("totalElements", movements.getTotalElements());
             model.addAttribute("numberOfElements", movements.getNumberOfElements());
             model.addAttribute("currentTenantId", getCurrentTenantId(request));
+            model.addAttribute("currentUser", authentication.getName());
+            
+            // Add filter parameters to model
+            model.addAttribute("search", search);
+            model.addAttribute("type", type);
+            model.addAttribute("sortBy", sortBy);
+            model.addAttribute("sortDir", sortDir);
+            
             model.addAttribute("stats", stockMovementService.getStockMovementStats());
             return "user/stock-movements";
         } catch (Exception e) {
@@ -71,6 +84,14 @@ public class UserStockMovementController {
             model.addAttribute("totalElements", 0);
             model.addAttribute("numberOfElements", 0);
             model.addAttribute("currentTenantId", getCurrentTenantId(request));
+            model.addAttribute("currentUser", authentication != null ? authentication.getName() : "Unknown");
+            
+            // Add filter parameters to model even on error
+            model.addAttribute("search", search);
+            model.addAttribute("type", type);
+            model.addAttribute("sortBy", sortBy);
+            model.addAttribute("sortDir", sortDir);
+            
             model.addAttribute("stats", null);
             return "user/stock-movements";
         }
