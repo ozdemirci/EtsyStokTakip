@@ -726,7 +726,7 @@
                 }
             }
 
-            setInterval(refreshMetrics, 5000);
+             setInterval(refreshMetrics, 10000);
 
             // Subscription plan badge refresh functionality
             async function refreshSubscriptionPlan() {
@@ -746,10 +746,10 @@
                     
                     const data = await response.json();
                     
-                    console.log('🔍 AJAX Response received:', data);
+                    // console.log('🔍 AJAX Response received:', data);
                     
                     if (data.success) {
-                        console.log(`📊 Plan Data - Raw: '${data.subscriptionPlan}', Display: '${data.planDisplayName}', Price: '${data.planPrice}'`);
+                       // console.log(`📊 Plan Data - Raw: '${data.subscriptionPlan}', Display: '${data.planDisplayName}', Price: '${data.planPrice}'`);
                         // Find subscription plan badge elements by ID
                         const navBadge = document.getElementById('subscription-plan-badge');
                         const dashboardBadge = document.getElementById('dashboard-plan-badge');
@@ -875,7 +875,7 @@
             // Refresh subscription plan only on page load
             document.addEventListener('DOMContentLoaded', function() {
                 // Single refresh on page load
-                setTimeout(refreshSubscriptionPlan, 1000);
+                manualRefreshSubscriptionPlan();
             });
 
             // Add manual refresh button functionality (if needed)
