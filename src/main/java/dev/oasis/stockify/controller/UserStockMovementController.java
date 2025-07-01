@@ -52,18 +52,26 @@ public class UserStockMovementController {
             Model model) {
         try {
             Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
-            model.addAttribute("movements", movements);
-            model.addAttribute("currentPage", page);
-            model.addAttribute("size", size);
+            model.addAttribute("stockMovements", movements.getContent());
+            model.addAttribute("currentPage", movements.getNumber());
+            model.addAttribute("size", movements.getSize());
             model.addAttribute("totalPages", movements.getTotalPages());
             model.addAttribute("totalElements", movements.getTotalElements());
+            model.addAttribute("numberOfElements", movements.getNumberOfElements());
             model.addAttribute("currentTenantId", getCurrentTenantId(request));
-
+            model.addAttribute("stats", stockMovementService.getStockMovementStats());
             return "user/stock-movements";
-
         } catch (Exception e) {
             log.error("Error loading stock movements: {}", e.getMessage(), e);
             model.addAttribute("error", "Internal server error: " + e.getMessage());
+            model.addAttribute("stockMovements", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("size", 20);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalElements", 0);
+            model.addAttribute("numberOfElements", 0);
+            model.addAttribute("currentTenantId", getCurrentTenantId(request));
+            model.addAttribute("stats", null);
             return "user/stock-movements";
         }
     }
