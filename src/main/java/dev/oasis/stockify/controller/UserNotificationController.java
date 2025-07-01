@@ -39,14 +39,20 @@ public class UserNotificationController {
         long totalNotifications = notifications.size();
         long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
         
+        // Calculate critical alerts (out of stock notifications)
+        long criticalAlerts = notifications.stream()
+            .filter(n -> "OUT_OF_STOCK".equals(n.getNotificationType()))
+            .count();
+        
         model.addAttribute("notifications", notifications);
         model.addAttribute("totalNotifications", totalNotifications);
         model.addAttribute("unreadNotifications", unreadNotifications);
+        model.addAttribute("criticalAlerts", criticalAlerts);
         model.addAttribute("tenantId", tenantId);
         model.addAttribute("currentUser", authentication.getName());
         
-        log.info("📊 Notification stats for user in tenant {}: Total={}, Unread={}", 
-            tenantId, totalNotifications, unreadNotifications);
+        log.info("📊 Notification stats for user in tenant {}: Total={}, Unread={}, Critical Alerts={}", 
+            tenantId, totalNotifications, unreadNotifications, criticalAlerts);
         
         return "user/notifications";
     }
@@ -108,6 +114,26 @@ public class UserNotificationController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Failed to delete notification");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PostMapping("/{id}/mark-read")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> markSingleAsRead(@PathVariable Long id) {
+        log.info("📧 markSingleAsRead endpoint called by user for notification ID: {}", id);
+        try {
+            stockNotificationService.markAsRead(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Notification marked as read");
+            log.info("✅ User marked notification {} as read successfully", id);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("❌ Error marking notification {} as read", id, e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Failed to mark notification as read: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
