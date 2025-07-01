@@ -105,6 +105,11 @@
                 <span class="navbar-text me-3">
                     <i class="bi bi-building"></i>
                     <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
+                    <!-- Subscription Plan Badge -->
+                    <span class="badge ms-2" 
+                          th:classappend="${isTrialPlan ? 'bg-warning text-dark' : (subscriptionPlanFromConfig == 'BASIC' ? 'bg-info' : (subscriptionPlanFromConfig == 'PREMIUM' ? 'bg-success' : (subscriptionPlanFromConfig == 'ENTERPRISE' ? 'bg-danger' : 'bg-secondary')))}"
+                          th:text="${subscriptionPlanFromConfig ?: 'TRIAL'}"
+                          th:title="${planDisplayName + ' - ' + planPrice}">TRIAL</span>
                 </span>
                 <a class="nav-link" href="/logout">
                     <i class="bi bi-box-arrow-right"></i> Logout
@@ -599,6 +604,18 @@
                                     <i class="bi bi-calendar me-2"></i>Oluşturulma:
                                     <span
                                         th:text="${#temporals.format(currentTenant.createdAt, 'dd/MM/yyyy')}">01/01/2024</span>
+                                </p>
+                                <!-- Subscription Plan Information -->
+                                <p class="mb-1">
+                                    <i class="bi bi-credit-card me-2"></i>Abonelik Planı: 
+                                    <span class="badge"
+                                          th:classappend="${isTrialPlan ? 'bg-warning text-dark' : (subscriptionPlanFromConfig == 'BASIC' ? 'bg-info' : (subscriptionPlanFromConfig == 'PREMIUM' ? 'bg-success' : (subscriptionPlanFromConfig == 'ENTERPRISE' ? 'bg-danger' : 'bg-secondary')))}"
+                                          th:text="${planDisplayName}">Trial Plan</span>
+                                    <small class="text-muted ms-1" th:text="${planPrice}">Free</small>
+                                </p>
+                                <p class="mb-1" th:if="${planFeatures}">
+                                    <i class="bi bi-list-check me-2"></i>
+                                    <small class="text-muted" th:text="${planFeatures}">Plan features</small>
                                 </p>
                                 <p class="mb-0" th:if="${currentTenant.lastActivity}">
                                     <i class="bi bi-clock me-2"></i>Son Aktivite:

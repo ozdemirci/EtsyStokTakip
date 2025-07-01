@@ -27,7 +27,7 @@ public class RegisterController {
      */
     @GetMapping("/register")
     public String showRegisterForm(@RequestParam(required = false) String plan, Model model) {
-        model.addAttribute("selectedPlan", plan != null ? plan : "starter");
+        model.addAttribute("selectedPlan", plan != null ? plan : "trial");
         model.addAttribute("registerRequest", new RegisterRequestDTO());
         
         // Add plan information for display

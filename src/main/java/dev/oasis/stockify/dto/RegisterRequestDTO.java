@@ -45,7 +45,7 @@ public class RegisterRequestDTO {
     private String confirmPassword;
     
     @NotBlank(message = "Plan seçimi yapmalısınız")
-    private String selectedPlan; // starter, professional, enterprise
+    private String selectedPlan; // trial, basic, premium, enterprise
     
     @Builder.Default
     private Boolean acceptTerms = false;

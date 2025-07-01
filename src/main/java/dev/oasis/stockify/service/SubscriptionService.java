@@ -156,7 +156,7 @@ public class SubscriptionService {
      * Get tenant's current plan
      */
     public PlanType getTenantPlan() {
-        String planCode = getTenantConfig("subscription_plan", "starter");
+        String planCode = getTenantConfig("subscription_plan", "trial");
         return PlanType.fromCode(planCode);
     }
     

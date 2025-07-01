@@ -11,6 +11,7 @@ import dev.oasis.stockify.service.DashboardService;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.service.SubscriptionService;
 import dev.oasis.stockify.service.TenantManagementService;
+import dev.oasis.stockify.service.TenantConfigService;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.StockNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class AdminDashboardController {
     private final AppUserService appUserService;
     private final StockNotificationService stockNotificationService;
     private final SubscriptionService subscriptionService;
+    private final TenantConfigService tenantConfigService;
     
 
     @GetMapping
@@ -99,13 +101,38 @@ public class AdminDashboardController {
         model.addAttribute("unreadNotifications", unreadNotifications);
         model.addAttribute("criticalNotifications", criticalNotifications);
         
-        // Add subscription information
-        PlanType currentPlan = subscriptionService.getTenantPlan();
-        model.addAttribute("subscriptionPlan", currentPlan);
-        model.addAttribute("planDisplayName", currentPlan.getDisplayName());
-        model.addAttribute("planFeatures", currentPlan.getFeaturesDescription());
-        model.addAttribute("planPrice", currentPlan.getPriceDescription());
-        model.addAttribute("isTrialPlan", currentPlan.isTrial());
+        // Add subscription information from tenant_config
+        try {
+            String subscriptionPlanFromConfig = tenantConfigService.getSubscriptionPlan();
+            String companyName = tenantConfigService.getCompanyName();
+            String tenantStatus = tenantConfigService.getTenantStatus();
+            
+            model.addAttribute("subscriptionPlanFromConfig", subscriptionPlanFromConfig);
+            model.addAttribute("tenantCompanyName", companyName);
+            model.addAttribute("tenantStatus", tenantStatus);
+            
+            // Also get the enum-based plan for compatibility
+            PlanType currentPlan = subscriptionService.getTenantPlan();
+            model.addAttribute("subscriptionPlan", currentPlan);
+            model.addAttribute("planDisplayName", getDisplayNameForPlan(subscriptionPlanFromConfig));
+            model.addAttribute("planFeatures", getFeaturesForPlan(subscriptionPlanFromConfig));
+            model.addAttribute("planPrice", getPriceForPlan(subscriptionPlanFromConfig));
+            model.addAttribute("isTrialPlan", "TRIAL".equals(subscriptionPlanFromConfig));
+            
+            log.debug("📊 Subscription info - Plan: {}, Company: {}, Status: {}", 
+                     subscriptionPlanFromConfig, companyName, tenantStatus);
+            
+        } catch (Exception e) {
+            log.warn("Could not get subscription info from tenant_config: {}", e.getMessage());
+            // Fallback to original subscription service
+            PlanType currentPlan = subscriptionService.getTenantPlan();
+            model.addAttribute("subscriptionPlan", currentPlan);
+            model.addAttribute("subscriptionPlanFromConfig", "TRIAL");
+            model.addAttribute("planDisplayName", currentPlan.getDisplayName());
+            model.addAttribute("planFeatures", currentPlan.getFeaturesDescription());
+            model.addAttribute("planPrice", currentPlan.getPriceDescription());
+            model.addAttribute("isTrialPlan", currentPlan.isTrial());
+        }
         
         // Add collections
         model.addAttribute("metrics", metrics);
@@ -163,5 +190,65 @@ public class AdminDashboardController {
         // Default to public tenant for testing
         log.warn("⚠️ Could not determine tenant ID from any source, using default 'public'");
         return "public";
+    }
+    
+    /**
+     * Get display name for subscription plan string
+     */
+    private String getDisplayNameForPlan(String planString) {
+        if (planString == null) return "Trial Plan";
+        
+        switch (planString.toUpperCase()) {
+            case "TRIAL":
+                return "Trial Plan";
+            case "BASIC":
+                return "Basic Plan";
+            case "PREMIUM":
+                return "Premium Plan";
+            case "ENTERPRISE":
+                return "Enterprise Plan";
+            default:
+                return "Trial Plan";
+        }
+    }
+    
+    /**
+     * Get features description for subscription plan string
+     */
+    private String getFeaturesForPlan(String planString) {
+        if (planString == null) return "Basic features for trial period";
+        
+        switch (planString.toUpperCase()) {
+            case "TRIAL":
+                return "Up to 2 users, 100 products, 30-day trial";
+            case "BASIC":
+                return "Up to 5 users, 1,000 products, email support";
+            case "PREMIUM":
+                return "Up to 20 users, unlimited products, priority support";
+            case "ENTERPRISE":
+                return "Unlimited users, custom features, 24/7 support";
+            default:
+                return "Basic features for trial period";
+        }
+    }
+    
+    /**
+     * Get price description for subscription plan string
+     */
+    private String getPriceForPlan(String planString) {
+        if (planString == null) return "Free";
+        
+        switch (planString.toUpperCase()) {
+            case "TRIAL":
+                return "Free";
+            case "BASIC":
+                return "$29/month";
+            case "PREMIUM":
+                return "$79/month";
+            case "ENTERPRISE":
+                return "$199/month";
+            default:
+                return "Free";
+        }
     }
 }

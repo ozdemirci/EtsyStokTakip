@@ -4,9 +4,10 @@ package dev.oasis.stockify.model;
  * Enum for subscription plan types
  */
 public enum PlanType {
-    STARTER("starter", 1, 100, 30, "Başlangıç Paketi"),
-    PROFESSIONAL("professional", 10, 1000, -1, "Profesyonel Paket"),
-    ENTERPRISE("enterprise", -1, -1, -1, "Kurumsal Paket");
+    TRIAL("trial", 2, 100, 30, "Trial Plan"),
+    BASIC("basic", 5, 1000, -1, "Basic Plan"),
+    PREMIUM("premium", 20, -1, -1, "Premium Plan"),
+    ENTERPRISE("enterprise", -1, -1, -1, "Enterprise Plan");
     
     private final String code;
     private final int maxUsers;
@@ -59,7 +60,7 @@ public enum PlanType {
      */
     public static PlanType fromCode(String code) {
         if (code == null) {
-            return STARTER; // Default fallback
+            return TRIAL; // Default fallback
         }
         
         for (PlanType plan : values()) {
@@ -67,7 +68,7 @@ public enum PlanType {
                 return plan;
             }
         }
-        return STARTER; // Default fallback
+        return TRIAL; // Default fallback
     }
     
     /**
@@ -91,8 +92,9 @@ public enum PlanType {
         }
         
         switch (this) {
-            case STARTER -> features.append(", Temel Raporlar");
-            case PROFESSIONAL -> features.append(", Gelişmiş Raporlar");
+            case TRIAL -> features.append(", Temel Raporlar");
+            case BASIC -> features.append(", Temel Raporlar");
+            case PREMIUM -> features.append(", Gelişmiş Raporlar");
             case ENTERPRISE -> features.append(", Özel Raporlar");
         }
         
@@ -104,8 +106,9 @@ public enum PlanType {
      */
     public String getPriceDescription() {
         return switch (this) {
-            case STARTER -> "₺0/ay (30 gün deneme)";
-            case PROFESSIONAL -> "₺299/ay";
+            case TRIAL -> "₺0/ay (30 gün deneme)";
+            case BASIC -> "₺199/ay";
+            case PREMIUM -> "₺499/ay";
             case ENTERPRISE -> "₺999/ay";
         };
     }

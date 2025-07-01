@@ -540,15 +540,15 @@
                 Plan Seçin
               </h5>
 
-              <div class="plan-selector" onclick="selectPlan('starter')"
-                th:class="${selectedPlan == 'starter'} ? 'plan-selector selected' : 'plan-selector'">
-                <input type="radio" name="plan" value="starter" th:checked="${selectedPlan == 'starter'}" />
+              <div class="plan-selector" onclick="selectPlan('trial')"
+                th:class="${selectedPlan == 'trial'} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="trial" th:checked="${selectedPlan == 'trial'}" />
                 <div class="plan-header">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
                       <h6 class="mb-1 fw-bold d-flex align-items-center gap-2">
                         <i class="bi bi-play-circle text-success"></i>
-                        Başlangıç
+                        Deneme
                       </h6>
                       <p class="mb-0 text-muted">₺0/ay - İlk 30 gün ücretsiz</p>
                     </div>
@@ -558,39 +558,62 @@
                   </div>
                 </div>
                 <ul class="feature-list mt-2">
-                  <li><i class="bi bi-check"></i>1 Kullanıcı</li>
-                  <li><i class="bi bi-check"></i>1 Lokasyon</li>
-                  <li><i class="bi bi-check"></i>10 Ürün</li>
+                  <li><i class="bi bi-check"></i>2 Kullanıcı</li>
+                  <li><i class="bi bi-check"></i>100 Ürün</li>
+                  <li><i class="bi bi-check"></i>Temel Raporlar</li>
                   
                 </ul>
               </div>
 
-              <div class="plan-selector" onclick="selectPlan('professional')"
-                th:class="${selectedPlan == 'professional'} ? 'plan-selector selected' : 'plan-selector'">
-                <input type="radio" name="plan" value="professional" th:checked="${selectedPlan == 'professional'}" />
+              <div class="plan-selector" onclick="selectPlan('basic')"
+                th:class="${selectedPlan == 'basic'} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="basic" th:checked="${selectedPlan == 'basic'}" />
                 <div class="plan-header">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
                       <h6 class="mb-1 fw-bold d-flex align-items-center gap-2">
-                        <i class="bi bi-briefcase text-primary"></i>
-                        Profesyonel
+                        <i class="bi bi-bookmark text-info"></i>
+                        Temel
                       </h6>
-                      <p class="mb-0 text-muted">₺499/ay</p>
+                      <p class="mb-0 text-muted">₺199/ay</p>
                     </div>
                     <div class="text-end">
-                      <span class="badge bg-primary">POPÜLER</span>
+                      <span class="badge bg-info">TEMEL</span>
                     </div>
                   </div>
                 </div>
                 <ul class="feature-list mt-2">
                   <li><i class="bi bi-check"></i>5 Kullanıcı</li>
-                  <li><i class="bi bi-check"></i>1 Lokasyon</li>
                   <li><i class="bi bi-check"></i>1.000 Ürün</li>
+                  <li><i class="bi bi-check"></i>Temel Raporlar</li>
+                  <li><i class="bi bi-check"></i>Email Desteği</li>
+                </ul>
+              </div>
+
+              <div class="plan-selector" onclick="selectPlan('premium')"
+                th:class="${selectedPlan == 'premium'} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="premium" th:checked="${selectedPlan == 'premium'}" />
+                <div class="plan-header">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <h6 class="mb-1 fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-briefcase text-success"></i>
+                        Premium
+                      </h6>
+                      <p class="mb-0 text-muted">₺499/ay</p>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-success">POPÜLER</span>
+                    </div>
+                  </div>
+                </div>
+                <ul class="feature-list mt-2">
+                  <li><i class="bi bi-check"></i>20 Kullanıcı</li>
+                  <li><i class="bi bi-check"></i>Sınırsız Ürün</li>
                   <li><i class="bi bi-check"></i>Gelişmiş Raporlama</li>
                   <li><i class="bi bi-check"></i>Öncelikli Destek</li>
                   <li><i class="bi bi-check"></i>Mobil Erişim</li>
-                  <li><i class="bi bi-check"></i>Sınırlı API Erişimi</li>
-                  <li><i class="bi bi-check"></i>Temel Entegrasyonlar</li>
+                  <li><i class="bi bi-check"></i>API Erişimi</li>
                 </ul>
               </div>
 
@@ -612,12 +635,12 @@
                   </div>
                 </div>
                 <ul class="feature-list mt-2">
-                  <li><i class="bi bi-check"></i>25 Kullanıcı</li>
-                  <li><i class="bi bi-check"></i>5 Lokasyon</li>
-                  <li><i class="bi bi-check"></i>5.000 Ürün</li>
-                  <li><i class="bi bi-check"></i>E-mail Uyarı Desteği</li>
+                  <li><i class="bi bi-check"></i>Sınırsız Kullanıcı</li>
+                  <li><i class="bi bi-check"></i>Sınırsız Ürün</li>
                   <li><i class="bi bi-check"></i>Özel Raporlama</li>
-                  <li><i class="bi bi-check"></i>Mesai Saatlerinde Sınırsız Destek</li>
+                  <li><i class="bi bi-check"></i>7/24 Destek</li>
+                  <li><i class="bi bi-check"></i>Özel Entegrasyonlar</li>
+                  <li><i class="bi bi-check"></i>Kişisel Hesap Yöneticisi</li>
                   <li><i class="bi bi-check"></i>Mobil Erişim</li>
                   <li><i class="bi bi-check"></i>Tam API Erişimi</li>              
                 </ul>
