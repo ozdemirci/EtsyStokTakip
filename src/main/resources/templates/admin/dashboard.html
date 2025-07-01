@@ -726,7 +726,7 @@
                 }
             }
 
-             setInterval(refreshMetrics, 10000);
+             setInterval(refreshMetrics, 100000);
 
             // Subscription plan badge refresh functionality
             async function refreshSubscriptionPlan() {
@@ -813,7 +813,7 @@
                             navBadge.classList.add('badge-update-animation');
                             setTimeout(() => {
                                 navBadge.classList.remove('badge-update-animation');
-                            }, 500);
+                            }, 5000);
                         }
                         
                         // Update dashboard badge
@@ -825,7 +825,7 @@
                             dashboardBadge.classList.add('badge-update-animation');
                             setTimeout(() => {
                                 dashboardBadge.classList.remove('badge-update-animation');
-                            }, 500);
+                            }, 5000);
                         }
                         
                         // Update dashboard price
@@ -833,7 +833,7 @@
                             dashboardPrice.textContent = data.planPrice || 'Free';
                         }
                         
-                        console.log(`🔄 Subscription plan updated: ${data.subscriptionPlan} (${data.planDisplayName}) - ${data.planPrice}`);
+                        // console.log(`🔄 Subscription plan updated: ${data.subscriptionPlan} (${data.planDisplayName}) - ${data.planPrice}`);
                         
                         // Show success notification (optional)
                         if (window.location.search.includes('planUpdated=true')) {
@@ -881,7 +881,7 @@
             // Add manual refresh button functionality (if needed)
             function manualRefreshSubscriptionPlan() {
                 refreshSubscriptionPlan();
-                showNotification('Subscription plan refreshed manually', 'info');
+                //showNotification('Subscription plan refreshed manually', 'info');
             }
         </script>
 
