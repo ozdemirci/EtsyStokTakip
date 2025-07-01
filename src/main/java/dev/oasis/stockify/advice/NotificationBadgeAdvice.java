@@ -18,7 +18,8 @@ public class NotificationBadgeAdvice {
     @ModelAttribute
     public void addUnreadNotifications(Model model, HttpServletRequest request) {
         String uri = request.getRequestURI();
-        if (!uri.startsWith("/admin")) {
+        // Only add notifications for admin and user pages
+        if (!uri.startsWith("/admin") && !uri.startsWith("/user")) {
             return;
         }
         try {
