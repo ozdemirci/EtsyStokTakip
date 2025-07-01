@@ -68,6 +68,25 @@
             overflow-y: auto;
         }
 
+        /* Subscription plan badge animations */
+        #subscription-plan-badge, #dashboard-plan-badge {
+            transition: all 0.3s ease-in-out;
+        }
+
+        #subscription-plan-badge:hover, #dashboard-plan-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .badge-update-animation {
+            animation: badgeUpdate 0.5s ease-in-out;
+        }
+
+        @keyframes badgeUpdate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: #ffc107; }
+            100% { transform: scale(1); }
+        }
+
         .activity-item {
             border-left: 3px solid transparent;
             padding-left: 15px;
@@ -107,6 +126,7 @@
                     <span class="badge tenant-badge" th:text="${currentTenantId}">Tenant</span>
                     <!-- Subscription Plan Badge -->
                     <span class="badge ms-2" 
+                          id="subscription-plan-badge"
                           th:classappend="${isTrialPlan ? 'bg-warning text-dark' : (subscriptionPlanFromConfig == 'BASIC' ? 'bg-info' : (subscriptionPlanFromConfig == 'PREMIUM' ? 'bg-success' : (subscriptionPlanFromConfig == 'ENTERPRISE' ? 'bg-danger' : 'bg-secondary')))}"
                           th:text="${subscriptionPlanFromConfig ?: 'TRIAL'}"
                           th:title="${planDisplayName + ' - ' + planPrice}">TRIAL</span>
@@ -609,9 +629,10 @@
                                 <p class="mb-1">
                                     <i class="bi bi-credit-card me-2"></i>Abonelik Planı: 
                                     <span class="badge"
+                                          id="dashboard-plan-badge"
                                           th:classappend="${isTrialPlan ? 'bg-warning text-dark' : (subscriptionPlanFromConfig == 'BASIC' ? 'bg-info' : (subscriptionPlanFromConfig == 'PREMIUM' ? 'bg-success' : (subscriptionPlanFromConfig == 'ENTERPRISE' ? 'bg-danger' : 'bg-secondary')))}"
                                           th:text="${planDisplayName}">Trial Plan</span>
-                                    <small class="text-muted ms-1" th:text="${planPrice}">Free</small>
+                                    <small class="text-muted ms-1" id="dashboard-plan-price" th:text="${planPrice}">Free</small>
                                 </p>
                                 <p class="mb-1" th:if="${planFeatures}">
                                     <i class="bi bi-list-check me-2"></i>
@@ -706,6 +727,162 @@
             }
 
             setInterval(refreshMetrics, 5000);
+
+            // Subscription plan badge refresh functionality
+            async function refreshSubscriptionPlan() {
+                try {
+                    const response = await fetch('/admin/dashboard/api/subscription-plan', {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    console.log('🔍 AJAX Response received:', data);
+                    
+                    if (data.success) {
+                        console.log(`📊 Plan Data - Raw: '${data.subscriptionPlan}', Display: '${data.planDisplayName}', Price: '${data.planPrice}'`);
+                        // Find subscription plan badge elements by ID
+                        const navBadge = document.getElementById('subscription-plan-badge');
+                        const dashboardBadge = document.getElementById('dashboard-plan-badge');
+                        const dashboardPrice = document.getElementById('dashboard-plan-price');
+                        
+                        // Determine badge classes based on plan (normalize to uppercase)
+                        const normalizedPlan = (data.subscriptionPlan || 'TRIAL').trim().toUpperCase();
+                        let navBadgeClasses = 'badge ms-2 ';
+                        let dashboardBadgeClasses = 'badge ';
+                        
+                        switch (normalizedPlan) {
+                            case 'TRIAL':
+                                navBadgeClasses += 'bg-warning text-dark';
+                                dashboardBadgeClasses += 'bg-warning text-dark';
+                                break;
+                            case 'BASIC':
+                                navBadgeClasses += 'bg-info';
+                                dashboardBadgeClasses += 'bg-info';
+                                break;
+                            case 'PREMIUM':
+                                navBadgeClasses += 'bg-success';
+                                dashboardBadgeClasses += 'bg-success';
+                                break;
+                            case 'ENTERPRISE':
+                                navBadgeClasses += 'bg-danger';
+                                dashboardBadgeClasses += 'bg-danger';
+                                break;
+                            default:
+                                // Handle legacy lowercase values
+                                const lowerPlan = (data.subscriptionPlan || 'trial').trim().toLowerCase();
+                                switch (lowerPlan) {
+                                    case 'trial':
+                                        navBadgeClasses += 'bg-warning text-dark';
+                                        dashboardBadgeClasses += 'bg-warning text-dark';
+                                        break;
+                                    case 'basic':
+                                        navBadgeClasses += 'bg-info';
+                                        dashboardBadgeClasses += 'bg-info';
+                                        break;
+                                    case 'premium':
+                                        navBadgeClasses += 'bg-success';
+                                        dashboardBadgeClasses += 'bg-success';
+                                        break;
+                                    case 'enterprise':
+                                        navBadgeClasses += 'bg-danger';
+                                        dashboardBadgeClasses += 'bg-danger';
+                                        break;
+                                    default:
+                                        navBadgeClasses += 'bg-secondary';
+                                        dashboardBadgeClasses += 'bg-secondary';
+                                }
+                        }
+                        
+                        // Update navigation badge
+                        if (navBadge) {
+                            navBadge.className = navBadgeClasses;
+                            navBadge.textContent = data.subscriptionPlan || 'TRIAL'; // Use normalized version
+                            navBadge.title = `${data.planDisplayName || 'Trial Plan'} - ${data.planPrice || 'Free'}`;
+                            
+                            // Add visual feedback for update
+                            navBadge.classList.add('badge-update-animation');
+                            setTimeout(() => {
+                                navBadge.classList.remove('badge-update-animation');
+                            }, 500);
+                        }
+                        
+                        // Update dashboard badge
+                        if (dashboardBadge) {
+                            dashboardBadge.className = dashboardBadgeClasses;
+                            dashboardBadge.textContent = data.planDisplayName || 'Trial Plan'; // Use display name
+                            
+                            // Add visual feedback for update
+                            dashboardBadge.classList.add('badge-update-animation');
+                            setTimeout(() => {
+                                dashboardBadge.classList.remove('badge-update-animation');
+                            }, 500);
+                        }
+                        
+                        // Update dashboard price
+                        if (dashboardPrice) {
+                            dashboardPrice.textContent = data.planPrice || 'Free';
+                        }
+                        
+                        console.log(`🔄 Subscription plan updated: ${data.subscriptionPlan} (${data.planDisplayName}) - ${data.planPrice}`);
+                        
+                        // Show success notification (optional)
+                        if (window.location.search.includes('planUpdated=true')) {
+                            showNotification('Subscription plan updated successfully!', 'success');
+                        }
+                        
+                    } else {
+                        console.error('❌ Failed to refresh subscription plan:', data.error);
+                        showNotification('Failed to refresh subscription plan', 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to refresh subscription plan:', error);
+                    // Don't show error notification for network errors to avoid spam
+                }
+            }
+
+            // Helper function to show notifications
+            function showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                notification.innerHTML = `
+                    <i class="bi bi-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 3000);
+            }
+
+            // Refresh subscription plan only on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Single refresh on page load
+                setTimeout(refreshSubscriptionPlan, 1000);
+            });
+
+            // Add manual refresh button functionality (if needed)
+            function manualRefreshSubscriptionPlan() {
+                refreshSubscriptionPlan();
+                showNotification('Subscription plan refreshed manually', 'info');
+            }
         </script>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

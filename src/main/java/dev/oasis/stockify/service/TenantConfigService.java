@@ -33,15 +33,32 @@ public class TenantConfigService {
      * Get tenant configuration value by key with default value
      */
     public String getConfigValue(String configKey, String defaultValue) {
+        String tenantId = getCurrentTenantFromContext();
+        log.debug("🔍 Getting config '{}' for tenant: '{}'", configKey, tenantId);
+        
         try (Connection connection = dataSource.getConnection()) {
+            // CRITICAL: Tenant schema'sını açıkça ayarla
+            if (tenantId != null && !tenantId.isEmpty() && !"unknown".equals(tenantId)) {
+                String schema = tenantId.toLowerCase();
+                connection.setSchema(schema);
+                log.info("🔧 FORCED connection schema to: '{}' for tenant: '{}'", schema, tenantId);
+            }
+            
+            // Log current schema
+            String currentSchema = connection.getSchema();
+            log.info("📊 Current DB schema: '{}' for config key: '{}'", currentSchema, configKey);
+            
             String sql = "SELECT config_value FROM tenant_config WHERE config_key = ?";
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setString(1, configKey);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         String value = rs.getString("config_value");
-                        log.debug("📊 Retrieved config '{}' = '{}'", configKey, value);
+                        log.info("✅ Retrieved config '{}' = '{}' from schema: '{}'", configKey, value, currentSchema);
                         return value;
+                    } else {
+                        log.warn("⚠️ No value found for config key '{}' in schema '{}', using default: '{}'", 
+                                configKey, currentSchema, defaultValue);
                     }
                 }
             }
@@ -57,9 +74,17 @@ public class TenantConfigService {
      * Get all tenant configuration as a map
      */
     public Map<String, String> getAllConfig() {
+        String tenantId = getCurrentTenantFromContext();
         Map<String, String> config = new HashMap<>();
         
         try (Connection connection = dataSource.getConnection()) {
+            // CRITICAL: Tenant schema'sını açıkça ayarla
+            if (tenantId != null && !tenantId.isEmpty() && !"unknown".equals(tenantId)) {
+                String schema = tenantId.toLowerCase();
+                connection.setSchema(schema);
+                log.info("🔧 FORCED connection schema to: '{}' for tenant: '{}'", schema, tenantId);
+            }
+            
             String sql = "SELECT config_key, config_value FROM tenant_config";
             try (PreparedStatement stmt = connection.prepareStatement(sql);
                  ResultSet rs = stmt.executeQuery()) {
@@ -71,7 +96,7 @@ public class TenantConfigService {
                 }
             }
             
-            log.debug("📊 Retrieved {} config entries", config.size());
+            log.debug("📊 Retrieved {} config entries from schema: '{}'", config.size(), connection.getSchema());
             
         } catch (SQLException e) {
             log.error("❌ Failed to get all config: {}", e.getMessage());
@@ -84,7 +109,25 @@ public class TenantConfigService {
      * Get current tenant's subscription plan
      */
     public String getSubscriptionPlan() {
-        return getConfigValue("subscription_plan", "TRIAL");
+        String tenantId = getCurrentTenantFromContext();
+        log.info("🔍 Getting subscription plan for tenant: {}", tenantId);
+        
+        String plan = getConfigValue("subscription_plan", "TRIAL");
+        log.info("📊 Retrieved subscription plan: '{}' for tenant: '{}'", plan, tenantId);
+        
+        return plan;
+    }
+    
+    /**
+     * Get current tenant ID from context for debugging
+     */
+    private String getCurrentTenantFromContext() {
+        try {
+            return dev.oasis.stockify.config.tenant.TenantContext.getCurrentTenant();
+        } catch (Exception e) {
+            log.warn("Could not get tenant from context: {}", e.getMessage());
+            return "unknown";
+        }
     }
 
     /**
@@ -112,7 +155,17 @@ public class TenantConfigService {
      * Update tenant configuration value
      */
     public void updateConfigValue(String configKey, String configValue) {
+        String tenantId = getCurrentTenantFromContext();
+        log.info("🔄 Updating config '{}' = '{}' for tenant: '{}'", configKey, configValue, tenantId);
+        
         try (Connection connection = dataSource.getConnection()) {
+            // CRITICAL: Tenant schema'sını açıkça ayarla
+            if (tenantId != null && !tenantId.isEmpty() && !"unknown".equals(tenantId)) {
+                String schema = tenantId.toLowerCase();
+                connection.setSchema(schema);
+                log.info("🔧 FORCED connection schema to: '{}' for tenant: '{}'", schema, tenantId);
+            }
+            
             // First check if config exists
             String checkSql = "SELECT id FROM tenant_config WHERE config_key = ?";
             boolean exists = false;
@@ -132,7 +185,7 @@ public class TenantConfigService {
                     stmt.setString(2, configKey);
                     int updated = stmt.executeUpdate();
                     if (updated > 0) {
-                        log.info("✅ Updated config '{}' = '{}'", configKey, configValue);
+                        log.info("✅ Updated config '{}' = '{}' in schema: '{}'", configKey, configValue, connection.getSchema());
                     }
                 }
             } else {
@@ -145,7 +198,7 @@ public class TenantConfigService {
                     stmt.setString(4, "Configuration value for " + configKey);
                     int inserted = stmt.executeUpdate();
                     if (inserted > 0) {
-                        log.info("✅ Inserted new config '{}' = '{}'", configKey, configValue);
+                        log.info("✅ Inserted new config '{}' = '{}' in schema: '{}'", configKey, configValue, connection.getSchema());
                     }
                 }
             }

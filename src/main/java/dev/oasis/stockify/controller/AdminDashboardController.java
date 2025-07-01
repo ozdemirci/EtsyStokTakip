@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/dashboard")
@@ -150,6 +152,58 @@ public class AdminDashboardController {
     }
     
     /**
+     * Get current subscription plan information from database
+     */
+    @GetMapping("/api/subscription-plan")
+    @ResponseBody
+    public Map<String, Object> getCurrentSubscriptionPlan() {
+        try {
+            // Get current tenant ID for debugging
+            String currentTenantId = TenantContext.getCurrentTenant();
+            log.info("🔍 API: Getting subscription plan for tenant: {}", currentTenantId);
+            
+            // Get fresh data from database
+            String subscriptionPlanFromConfig = tenantConfigService.getSubscriptionPlan();
+            String companyName = tenantConfigService.getCompanyName();
+            String tenantStatus = tenantConfigService.getTenantStatus();
+            
+            // Log raw values from database
+            log.info("📊 RAW DB VALUES - Plan: '{}', Company: '{}', Status: '{}'", 
+                     subscriptionPlanFromConfig, companyName, tenantStatus);
+            
+            // Build response
+            Map<String, Object> response = new HashMap<>();
+            // Send normalized uppercase version for consistent frontend handling
+            String normalizedPlan = subscriptionPlanFromConfig != null ? 
+                                  subscriptionPlanFromConfig.trim().toUpperCase() : "TRIAL";
+            response.put("subscriptionPlan", normalizedPlan);
+            response.put("rawSubscriptionPlan", subscriptionPlanFromConfig); // Original value for debugging
+            response.put("planDisplayName", getDisplayNameForPlan(subscriptionPlanFromConfig));
+            response.put("planFeatures", getFeaturesForPlan(subscriptionPlanFromConfig));
+            response.put("planPrice", getPriceForPlan(subscriptionPlanFromConfig));
+            response.put("isTrialPlan", "TRIAL".equals(normalizedPlan));
+            response.put("companyName", companyName);
+            response.put("tenantStatus", tenantStatus);
+            response.put("success", true);
+            
+            // Log the transformed response
+            log.info("📤 API RESPONSE - Plan: '{}', DisplayName: '{}', Price: '{}'", 
+                     response.get("subscriptionPlan"), 
+                     response.get("planDisplayName"), 
+                     response.get("planPrice"));
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("❌ Error fetching subscription plan info: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to fetch subscription plan information");
+            return errorResponse;
+        }
+    }
+    
+    /**
      * Ensure tenant context is set for all requests in this controller
      */
     @ModelAttribute
@@ -198,7 +252,10 @@ public class AdminDashboardController {
     private String getDisplayNameForPlan(String planString) {
         if (planString == null) return "Trial Plan";
         
-        switch (planString.toUpperCase()) {
+        // Normalize to uppercase for consistent comparison
+        String normalizedPlan = planString.trim().toUpperCase();
+        
+        switch (normalizedPlan) {
             case "TRIAL":
                 return "Trial Plan";
             case "BASIC":
@@ -208,7 +265,19 @@ public class AdminDashboardController {
             case "ENTERPRISE":
                 return "Enterprise Plan";
             default:
-                return "Trial Plan";
+                // Handle legacy lowercase values
+                switch (planString.trim().toLowerCase()) {
+                    case "trial":
+                        return "Trial Plan";
+                    case "basic":
+                        return "Basic Plan";
+                    case "premium":
+                        return "Premium Plan";
+                    case "enterprise":
+                        return "Enterprise Plan";
+                    default:
+                        return "Trial Plan";
+                }
         }
     }
     
@@ -218,7 +287,10 @@ public class AdminDashboardController {
     private String getFeaturesForPlan(String planString) {
         if (planString == null) return "Basic features for trial period";
         
-        switch (planString.toUpperCase()) {
+        // Normalize to uppercase for consistent comparison
+        String normalizedPlan = planString.trim().toUpperCase();
+        
+        switch (normalizedPlan) {
             case "TRIAL":
                 return "Up to 2 users, 100 products, 30-day trial";
             case "BASIC":
@@ -228,7 +300,19 @@ public class AdminDashboardController {
             case "ENTERPRISE":
                 return "Unlimited users, custom features, 24/7 support";
             default:
-                return "Basic features for trial period";
+                // Handle legacy lowercase values
+                switch (planString.trim().toLowerCase()) {
+                    case "trial":
+                        return "Up to 2 users, 100 products, 30-day trial";
+                    case "basic":
+                        return "Up to 5 users, 1,000 products, email support";
+                    case "premium":
+                        return "Up to 20 users, unlimited products, priority support";
+                    case "enterprise":
+                        return "Unlimited users, custom features, 24/7 support";
+                    default:
+                        return "Basic features for trial period";
+                }
         }
     }
     
@@ -238,7 +322,10 @@ public class AdminDashboardController {
     private String getPriceForPlan(String planString) {
         if (planString == null) return "Free";
         
-        switch (planString.toUpperCase()) {
+        // Normalize to uppercase for consistent comparison
+        String normalizedPlan = planString.trim().toUpperCase();
+        
+        switch (normalizedPlan) {
             case "TRIAL":
                 return "Free";
             case "BASIC":
@@ -248,7 +335,19 @@ public class AdminDashboardController {
             case "ENTERPRISE":
                 return "$199/month";
             default:
-                return "Free";
+                // Handle legacy lowercase values
+                switch (planString.trim().toLowerCase()) {
+                    case "trial":
+                        return "Free";
+                    case "basic":
+                        return "$29/month";
+                    case "premium":
+                        return "$79/month";
+                    case "enterprise":
+                        return "$199/month";
+                    default:
+                        return "Free";
+                }
         }
     }
 }
