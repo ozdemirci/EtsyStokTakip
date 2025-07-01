@@ -2,6 +2,7 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.model.AppUser;
+import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,12 @@ public class SuperAdminController {
             // Get available tenants
             Set<String> availableTenants = superAdminService.getAvailableTenants();
             
+            // Get contact message statistics
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
+            
             model.addAttribute("tenantStats", tenantStats);
             model.addAttribute("availableTenants", availableTenants);
+            model.addAttribute("contactStats", contactStats);
             model.addAttribute("currentUser", principal.getName());
             
             log.info("✅ Super Admin dashboard loaded successfully");
@@ -307,6 +312,95 @@ public class SuperAdminController {
             
         } catch (Exception e) {
             log.error("❌ Error getting tenant statistics: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(Map.of(
+                    "success", false,
+                    "message", "Failed to get statistics: " + e.getMessage()
+                ));
+        } finally {
+            superAdminService.clearTenantContext();
+        }
+    }    
+
+    /**
+     * Contact Messages Management - View contact messages across all tenants
+     */
+    @GetMapping("/contact-messages")
+    public String contactMessages(Model model, Principal principal) {
+        log.info("📧 Super Admin '{}' accessing contact messages", principal.getName());
+        
+        try {
+            // Get contact message statistics
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
+            
+            // Get contact messages across all tenants
+            Map<String, List<ContactMessage>> tenantContactMessages = superAdminService.getAllContactMessagesAcrossAllTenants();
+            
+            model.addAttribute("contactStats", contactStats);
+            model.addAttribute("tenantContactMessages", tenantContactMessages);
+            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("currentUser", principal.getName());
+            
+            return "superadmin/contact-messages";
+            
+        } catch (Exception e) {
+            log.error("❌ Error loading contact messages: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to load contact messages data");
+            model.addAttribute("currentUser", principal.getName());
+            return "superadmin/contact-messages";
+        } finally {
+            superAdminService.clearTenantContext();
+        }
+    }
+
+    /**
+     * All Contact Messages Management - View messages across all tenants
+     */
+    @GetMapping("/contact-messages")
+    public String allContactMessages(Model model, Principal principal) {
+        log.info("💬 Super Admin '{}' accessing all contact messages", principal.getName());
+        
+        try {
+            Map<String, List<ContactMessage>> tenantContactMessages = superAdminService.getAllContactMessagesAcrossAllTenants();
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
+            
+            model.addAttribute("tenantContactMessages", tenantContactMessages);
+            model.addAttribute("contactStats", contactStats);
+            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
+            model.addAttribute("currentUser", principal.getName());
+            
+            return "superadmin/contact-messages";
+            
+        } catch (Exception e) {
+            log.error("❌ Error loading all contact messages: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to load contact messages data");
+            model.addAttribute("currentUser", principal.getName());
+            return "superadmin/contact-messages";
+        } finally {
+            superAdminService.clearTenantContext();
+        }
+    }
+
+    /**
+     * Get tenant statistics including contact messages
+     */
+    @GetMapping("/api/statistics/contact-messages")
+    @ResponseBody
+    public ResponseEntity<?> getTenantStatisticsWithContacts(Principal principal) {
+        log.info("📊 Super Admin '{}' requesting tenant statistics with contact messages", principal.getName());
+        
+        try {
+            Map<String, Map<String, Object>> stats = superAdminService.getTenantStatistics();
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "tenantStats", stats,
+                "contactStats", contactStats
+            ));
+            
+        } catch (Exception e) {
+            log.error("❌ Error getting tenant statistics with contact messages: {}", e.getMessage());
             return ResponseEntity.badRequest()
                 .body(Map.of(
                     "success", false,

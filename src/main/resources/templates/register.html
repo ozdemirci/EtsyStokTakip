@@ -6,167 +6,515 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kayıt Ol - Stockify</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --primary-color: #2563eb;
-      --secondary-color: #1e40af;
-      --accent-color: #059669;
-      --text-dark: #1f2937;
-      --text-light: #6b7280;
-      --bg-light: #f8fafc;
-    }
-
     body {
-      font-family: "Inter", sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
+      padding: 2rem 0;
+      position: relative;
+    }
+
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      top: 50%;
+      right: 15%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 80px;
+      height: 80px;
+      bottom: 20%;
+      left: 20%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 120px;
+      height: 120px;
+      top: 70%;
+      right: 40%;
+      animation-delay: 1s;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.7;
+      }
+
+      50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 1;
+      }
     }
 
     .register-container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.95);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       overflow: hidden;
-      max-width: 900px;
-      margin: 2rem auto;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .register-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     }
 
     .register-left {
-      background: linear-gradient(135deg,
-          var(--primary-color),
-          var(--secondary-color));
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       color: white;
       padding: 3rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      position: relative;
+    }
+
+    .register-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .brand-section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-logo {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .brand-logo i {
+      font-size: 2.5rem;
+      color: white;
     }
 
     .register-right {
       padding: 3rem;
     }
 
-    .form-control {
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .section-subtitle {
+      color: #6c757d;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .form-group-modern {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .modern-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.6rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .required::after {
+      content: " *";
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .modern-input {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      font-size: 1rem;
       transition: all 0.3s ease;
+      width: 100%;
     }
 
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg,
-          var(--primary-color),
-          var(--secondary-color));
-      border: none;
-      padding: 0.75rem 1.5rem;
-      font-weight: 500;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
+    .modern-input:focus {
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+      outline: none;
+    }
+
+    .modern-input:hover {
+      border-color: #dee2e6;
+    }
+
+    .modern-input.is-invalid {
+      border-color: #dc3545;
+      background: rgba(220, 53, 69, 0.05);
+    }
+
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      padding-left: 0.5rem;
+    }
+
+    .form-text {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-top: 0.5rem;
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .plan-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .plan-section h5 {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .plan-selector {
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 1rem;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      padding: 1.2rem;
       margin-bottom: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-selector::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .plan-selector:hover {
-      border-color: var(--primary-color);
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+    }
+
+    .plan-selector:hover::before {
+      opacity: 1;
     }
 
     .plan-selector.selected {
-      border-color: var(--primary-color);
-      background: rgba(37, 99, 235, 0.1);
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .plan-selector.selected::before {
+      opacity: 1;
     }
 
     .plan-selector input[type="radio"] {
       display: none;
     }
 
+    .plan-header {
+      position: relative;
+      z-index: 1;
+    }
+
     .feature-list {
       list-style: none;
       padding: 0;
-      margin-bottom: 1rem;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 1;
     }
 
     .feature-list li {
-      padding: 0.25rem 0;
+      padding: 0.4rem 0;
       display: flex;
       align-items: center;
       font-size: 0.9rem;
+      color: #495057;
     }
 
     .feature-list li i {
-      color: var(--accent-color);
-      margin-right: 0.5rem;
+      color: #28a745;
+      margin-right: 0.75rem;
       width: 16px;
+      font-weight: bold;
+    }
+
+    .btn-register {
+      width: 100%;
+      padding: 1.2rem 2rem;
+      border-radius: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-transform: uppercase;
+      margin-top: 1rem;
+    }
+
+    .btn-register:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+
+    .btn-register:active {
+      transform: translateY(-1px);
+    }
+
+    .btn-register:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .alert-modern {
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid;
+      font-weight: 500;
+    }
+
+    .alert-danger {
+      background: rgba(220, 53, 69, 0.1);
+      color: #721c24;
+      border-left-color: #dc3545;
+    }
+
+    .form-check-modern {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-check-modern .form-check-input {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 4px;
+      border: 2px solid #667eea;
+    }
+
+    .form-check-modern .form-check-input:checked {
+      background-color: #667eea;
+      border-color: #667eea;
+    }
+
+    .footer-links {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .footer-links a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-links a:hover {
+      color: #5a6fd8;
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .check-icon {
+      font-size: 1.2rem;
+    }
+
+    .policy-link {
+      color: #667eea !important;
+    }
+
+    @media (max-width: 768px) {
+
+      .register-right,
+      .register-left {
+        padding: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.75rem;
+      }
     }
   </style>
 </head>
 
 <body>
+  <!-- Floating Background Shapes -->
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
   <div class="container">
-    <div class="register-container">
+    <div class="register-container fade-in">
       <div class="row g-0">
         <!-- Left Side -->
         <div class="col-lg-5">
           <div class="register-left">
-            <div class="text-center mb-4">
-              <h2 class="fw-bold">
-                <i class="fas fa-boxes me-2"></i>Stockify
-              </h2>
-              <p class="lead">Modern Stok Yönetim Sistemi</p>
-            </div>
+            <div class="brand-section">
+              <div class="text-center mb-4">
+                <div class="brand-logo">
+                  <i class="bi bi-boxes"></i>
+                </div>
+                <h2 class="fw-bold mb-2">Stockify</h2>
+                <p class="lead opacity-90">Modern Stok Yönetim Sistemi</p>
+              </div>
 
-            <div class="mb-4">
-              <h4>Neden Stockify?</h4>
-              <ul class="list-unstyled mt-3">
-                <li class="mb-2">
-                  <i class="fas fa-check-circle me-2"></i>
-                  30 gün ücretsiz deneme
-                </li>
-                <li class="mb-2">
-                  <i class="fas fa-check-circle me-2"></i>
-                  Kurulum ücreti yok
-                </li>
-                <li class="mb-2">
-                  <i class="fas fa-check-circle me-2"></i>
-                  İstediğiniz zaman iptal
-                </li>
-                <li class="mb-2">
-                  <i class="fas fa-check-circle me-2"></i>
-                  7/24 destek
-                </li>
-                <li class="mb-2">
-                  <i class="fas fa-check-circle me-2"></i>
-                  Güvenli ve hızlı
-                </li>
-              </ul>
-            </div>
+              <div class="mb-4">
+                <h4 class="mb-3">
+                  <i class="bi bi-star-fill me-2"></i>
+                  Neden Stockify?
+                </h4>
+                <ul class="list-unstyled mt-3">
+                  <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 check-icon"></i>
+                    <span>30 gün ücretsiz deneme</span>
+                  </li>
+                  <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 check-icon"></i>
+                    <span>Kurulum ücreti yok</span>
+                  </li>
+                  <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 check-icon"></i>
+                    <span>İstediğiniz zaman iptal</span>
+                  </li>
+                  <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 check-icon"></i>
+                    <span>7/24 destek</span>
+                  </li>
+                  <li class="mb-3 d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 check-icon"></i>
+                    <span>Güvenli ve hızlı</span>
+                  </li>
+                </ul>
+              </div>
 
-            <div class="text-center">
-              <p class="small opacity-75">
-                Zaten hesabınız var mı?
-                <br />
-                <a href="/login" class="text-white fw-bold">Giriş Yapın</a>
-              </p>
+              <div class="text-center">
+                <p class="small opacity-75 mb-2">Zaten hesabınız var mı?</p>
+                <a href="/login" class="text-white fw-bold text-decoration-none d-inline-flex align-items-center gap-2">
+                  <i class="bi bi-box-arrow-in-right"></i>
+                  Giriş Yapın
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -174,71 +522,104 @@
         <!-- Right Side -->
         <div class="col-lg-7">
           <div class="register-right">
-            <div class="text-center mb-4">
-              <h3 class="fw-bold text-dark">Hesap Oluşturun</h3>
-              <p class="text-muted">
+            <!-- Header -->
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="bi bi-person-plus me-2"></i>
+                Hesap Oluşturun
+              </h3>
+              <p class="section-subtitle">
                 Birkaç dakikada hesabınızı oluşturun ve hemen başlayın
               </p>
             </div>
 
             <!-- Plan Selection -->
-            <div class="mb-4">
-              <h5 class="mb-3">Plan Seçin</h5>
+            <div class="plan-section">
+              <h5>
+                <i class="bi bi-list-check me-2"></i>
+                Plan Seçin
+              </h5>
 
               <div class="plan-selector" onclick="selectPlan('starter')"
                 th:class="${selectedPlan == 'starter'} ? 'plan-selector selected' : 'plan-selector'">
                 <input type="radio" name="plan" value="starter" th:checked="${selectedPlan == 'starter'}" />
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1 fw-bold">Başlangıç</h6>
-                    <p class="mb-0 text-muted">₺0/ay - İlk 30 gün ücretsiz</p>
-                  </div>
-                  <div class="text-end">
-                    <small class="text-success fw-bold">ÜCRETSIZ</small>
+                <div class="plan-header">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <h6 class="mb-1 fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-play-circle text-success"></i>
+                        Başlangıç
+                      </h6>
+                      <p class="mb-0 text-muted">₺0/ay - İlk 30 gün ücretsiz</p>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-success">ÜCRETSIZ</span>
+                    </div>
                   </div>
                 </div>
                 <ul class="feature-list mt-2">
-                  <li><i class="fas fa-check"></i>1 Lokasyon</li>
-                  <li><i class="fas fa-check"></i>100 Ürün</li>
-                  <li><i class="fas fa-check"></i>Temel Raporlar</li>
+                  <li><i class="bi bi-check"></i>1 Kullanıcı</li>
+                  <li><i class="bi bi-check"></i>1 Lokasyon</li>
+                  <li><i class="bi bi-check"></i>10 Ürün</li>
+                  
                 </ul>
               </div>
 
               <div class="plan-selector" onclick="selectPlan('professional')"
                 th:class="${selectedPlan == 'professional'} ? 'plan-selector selected' : 'plan-selector'">
                 <input type="radio" name="plan" value="professional" th:checked="${selectedPlan == 'professional'}" />
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1 fw-bold">Profesyonel</h6>
-                    <p class="mb-0 text-muted">₺299/ay</p>
-                  </div>
-                  <div class="text-end">
-                    <small class="text-primary fw-bold">POPÜLER</small>
+                <div class="plan-header">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <h6 class="mb-1 fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-briefcase text-primary"></i>
+                        Profesyonel
+                      </h6>
+                      <p class="mb-0 text-muted">₺499/ay</p>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-primary">POPÜLER</span>
+                    </div>
                   </div>
                 </div>
                 <ul class="feature-list mt-2">
-                  <li><i class="fas fa-check"></i>5 Lokasyon</li>
-                  <li><i class="fas fa-check"></i>1.000 Ürün</li>
-                  <li><i class="fas fa-check"></i>Gelişmiş Raporlar</li>
+                  <li><i class="bi bi-check"></i>5 Kullanıcı</li>
+                  <li><i class="bi bi-check"></i>1 Lokasyon</li>
+                  <li><i class="bi bi-check"></i>1.000 Ürün</li>
+                  <li><i class="bi bi-check"></i>Gelişmiş Raporlama</li>
+                  <li><i class="bi bi-check"></i>Öncelikli Destek</li>
+                  <li><i class="bi bi-check"></i>Mobil Erişim</li>
+                  <li><i class="bi bi-check"></i>Sınırlı API Erişimi</li>
+                  <li><i class="bi bi-check"></i>Temel Entegrasyonlar</li>
                 </ul>
               </div>
 
               <div class="plan-selector" onclick="selectPlan('enterprise')"
                 th:class="${selectedPlan == 'enterprise'} ? 'plan-selector selected' : 'plan-selector'">
                 <input type="radio" name="plan" value="enterprise" th:checked="${selectedPlan == 'enterprise'}" />
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1 fw-bold">Kurumsal</h6>
-                    <p class="mb-0 text-muted">₺999/ay</p>
-                  </div>
-                  <div class="text-end">
-                    <small class="text-warning fw-bold">PREMIUM</small>
+                <div class="plan-header">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <h6 class="mb-1 fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-building text-warning"></i>
+                        Kurumsal
+                      </h6>
+                      <p class="mb-0 text-muted">₺999/ay</p>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-warning text-dark">PREMIUM</span>
+                    </div>
                   </div>
                 </div>
                 <ul class="feature-list mt-2">
-                  <li><i class="fas fa-check"></i>Sınırsız Lokasyon</li>
-                  <li><i class="fas fa-check"></i>Sınırsız Ürün</li>
-                  <li><i class="fas fa-check"></i>Özel Raporlar</li>
+                  <li><i class="bi bi-check"></i>25 Kullanıcı</li>
+                  <li><i class="bi bi-check"></i>5 Lokasyon</li>
+                  <li><i class="bi bi-check"></i>5.000 Ürün</li>
+                  <li><i class="bi bi-check"></i>E-mail Uyarı Desteği</li>
+                  <li><i class="bi bi-check"></i>Özel Raporlama</li>
+                  <li><i class="bi bi-check"></i>Mesai Saatlerinde Sınırsız Destek</li>
+                  <li><i class="bi bi-check"></i>Mobil Erişim</li>
+                  <li><i class="bi bi-check"></i>Tam API Erişimi</li>              
                 </ul>
               </div>
             </div>
@@ -247,104 +628,141 @@
               <input type="hidden" name="selectedPlan" id="selectedPlanInput" th:field="*{selectedPlan}" />
 
               <!-- Error Messages -->
-              <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+              <div th:if="${errorMessage}" class="alert alert-modern alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <span th:text="${errorMessage}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" title="Kapat"></button>
               </div>
 
               <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="firstName" class="form-label">Ad</label>
-                  <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
-                    th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'" required />
-                  <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
-                    <span th:errors="*{firstName}"></span>
+                <div class="col-md-6">
+                  <div class="form-group-modern">
+                    <label for="firstName" class="modern-label required">
+                      <i class="bi bi-person"></i>
+                      Ad
+                    </label>
+                    <input type="text" class="modern-input" id="firstName" th:field="*{firstName}"
+                      th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'" placeholder="Adınızı girin"
+                      required />
+                    <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
+                      <span th:errors="*{firstName}"></span>
+                    </div>
                   </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label for="lastName" class="form-label">Soyad</label>
-                  <input type="text" class="form-control" id="lastName" th:field="*{lastName}"
-                    th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'" required />
-                  <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
-                    <span th:errors="*{lastName}"></span>
+                <div class="col-md-6">
+                  <div class="form-group-modern">
+                    <label for="lastName" class="modern-label required">
+                      <i class="bi bi-person"></i>
+                      Soyad
+                    </label>
+                    <input type="text" class="modern-input" id="lastName" th:field="*{lastName}"
+                      th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'" placeholder="Soyadınızı girin"
+                      required />
+                    <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
+                      <span th:errors="*{lastName}"></span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="companyName" class="form-label">Şirket Adı</label>
-                <input type="text" class="form-control" id="companyName" th:field="*{companyName}"
-                  th:classappend="${#fields.hasErrors('companyName')} ? 'is-invalid'" required />
+              <div class="form-group-modern">
+                <label for="companyName" class="modern-label required">
+                  <i class="bi bi-building"></i>
+                  Şirket Adı
+                </label>
+                <input type="text" class="modern-input" id="companyName" th:field="*{companyName}"
+                  th:classappend="${#fields.hasErrors('companyName')} ? 'is-invalid'" placeholder="Şirket adınızı girin"
+                  required />
                 <div th:if="${#fields.hasErrors('companyName')}" class="invalid-feedback">
                   <span th:errors="*{companyName}"></span>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="username" class="form-label">Kullanıcı Adı</label>
-                <input type="text" class="form-control" id="username" th:field="*{username}"
-                  th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" required />
+              <div class="form-group-modern">
+                <label for="username" class="modern-label required">
+                  <i class="bi bi-person-circle"></i>
+                  Kullanıcı Adı
+                </label>
+                <input type="text" class="modern-input" id="username" th:field="*{username}"
+                  th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" placeholder="Kullanıcı adınızı seçin"
+                  required />
                 <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
                   <span th:errors="*{username}"></span>
                 </div>
                 <div class="form-text" id="usernameHelp">
+                  <i class="bi bi-info-circle"></i>
                   Girişte kullanacağınız benzersiz kullanıcı adı
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="email" class="form-label">E-posta Adresi</label>
-                <input type="email" class="form-control" id="email" th:field="*{email}"
-                  th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required />
+              <div class="form-group-modern">
+                <label for="email" class="modern-label required">
+                  <i class="bi bi-envelope"></i>
+                  E-posta Adresi
+                </label>
+                <input type="email" class="modern-input" id="email" th:field="*{email}"
+                  th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" placeholder="E-posta adresinizi girin"
+                  required />
                 <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
                   <span th:errors="*{email}"></span>
                 </div>
                 <div class="form-text" id="emailHelp">
+                  <i class="bi bi-info-circle"></i>
                   Bildirimler için e-posta adresiniz
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="password" class="form-label">Şifre</label>
-                <input type="password" class="form-control" id="password" th:field="*{password}"
-                  th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" required />
+              <div class="form-group-modern">
+                <label for="password" class="modern-label required">
+                  <i class="bi bi-lock"></i>
+                  Şifre
+                </label>
+                <input type="password" class="modern-input" id="password" th:field="*{password}"
+                  th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" placeholder="Güvenli bir şifre seçin"
+                  required />
                 <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
                   <span th:errors="*{password}"></span>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
-                <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}"
-                  th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'" required />
+              <div class="form-group-modern">
+                <label for="confirmPassword" class="modern-label required">
+                  <i class="bi bi-lock-fill"></i>
+                  Şifre Tekrar
+                </label>
+                <input type="password" class="modern-input" id="confirmPassword" th:field="*{confirmPassword}"
+                  th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                  placeholder="Şifrenizi tekrar girin" required />
                 <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback">
                   <span th:errors="*{confirmPassword}"></span>
                 </div>
               </div>
 
-              <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" id="acceptTerms" th:field="*{acceptTerms}"
-                  th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid'" required />
-                <label class="form-check-label" for="acceptTerms">
-                  <a href="#" class="text-primary">Kullanım Şartları</a> ve
-                  <a href="#" class="text-primary">Gizlilik Politikası</a>'nı
-                  kabul ediyorum.
-                </label>
-                <div th:if="${#fields.hasErrors('acceptTerms')}" class="invalid-feedback">
-                  <span th:errors="*{acceptTerms}"></span>
+              <div class="form-check-modern">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="acceptTerms" th:field="*{acceptTerms}"
+                    th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid'" required />
+                  <label class="form-check-label" for="acceptTerms">
+                    <a href="#" class="text-decoration-none policy-link">Kullanım Şartları</a> ve
+                    <a href="#" class="text-decoration-none policy-link">Gizlilik Politikası</a>'nı
+                    kabul ediyorum.
+                  </label>
+                  <div th:if="${#fields.hasErrors('acceptTerms')}" class="invalid-feedback">
+                    <span th:errors="*{acceptTerms}"></span>
+                  </div>
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100 py-3" id="submitBtn">
-                <i class="fas fa-rocket me-2"></i>
+              <button type="submit" class="btn btn-register" id="submitBtn">
+                <i class="bi bi-rocket-takeoff me-2"></i>
                 Hesap Oluştur ve Başla
               </button>
             </form>
 
-            <div class="text-center mt-4">
-              <a href="/" class="text-decoration-none">
-                <i class="fas fa-arrow-left me-2"></i>Ana Sayfaya Dön
+            <div class="footer-links">
+              <a href="/">
+                <i class="bi bi-arrow-left"></i>
+                Ana Sayfaya Dön
               </a>
             </div>
           </div>
@@ -402,7 +820,7 @@
         // Show loading state
         submitBtn.disabled = true;
         submitBtn.innerHTML =
-          '<i class="fas fa-spinner fa-spin me-2"></i>Hesap Oluşturuluyor...';
+          '<i class="bi bi-hourglass-split me-2"></i>Hesap Oluşturuluyor...';
       });
 
     // Username validation
@@ -414,10 +832,10 @@
           .then((available) => {
             const usernameHelp = document.getElementById("usernameHelp");
             if (!available) {
-              usernameHelp.innerHTML = '<span class="text-danger">Bu kullanıcı adı zaten kullanılıyor</span>';
+              usernameHelp.innerHTML = '<i class="bi bi-exclamation-triangle text-danger"></i><span class="text-danger">Bu kullanıcı adı zaten kullanılıyor</span>';
               this.classList.add("is-invalid");
             } else {
-              usernameHelp.innerHTML = "Girişte kullanacağınız benzersiz kullanıcı adı";
+              usernameHelp.innerHTML = '<i class="bi bi-info-circle"></i>Girişte kullanacağınız benzersiz kullanıcı adı';
               this.classList.remove("is-invalid");
             }
           })
@@ -437,11 +855,11 @@
             const emailHelp = document.getElementById("emailHelp");
             if (!available) {
               emailHelp.innerHTML =
-                '<span class="text-danger">Bu e-posta adresi zaten kayıtlı</span>';
+                '<i class="bi bi-exclamation-triangle text-danger"></i><span class="text-danger">Bu e-posta adresi zaten kayıtlı</span>';
               this.classList.add("is-invalid");
             } else {
               emailHelp.innerHTML =
-                "Bildirimler için e-posta adresiniz";
+                '<i class="bi bi-info-circle"></i>Bildirimler için e-posta adresiniz';
               this.classList.remove("is-invalid");
             }
           })
@@ -464,6 +882,32 @@
           this.classList.remove("is-invalid");
         }
       });
+
+    // Focus enhancement for better UX
+    document.querySelectorAll('.modern-input').forEach(input => {
+      input.addEventListener('focus', function () {
+        this.style.transform = 'translateY(-2px)';
+      });
+
+      input.addEventListener('blur', function () {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Plan selection visual feedback
+    document.querySelectorAll('.plan-selector').forEach(selector => {
+      selector.addEventListener('mouseenter', function () {
+        if (!this.classList.contains('selected')) {
+          this.style.transform = 'translateY(-2px)';
+        }
+      });
+
+      selector.addEventListener('mouseleave', function () {
+        if (!this.classList.contains('selected')) {
+          this.style.transform = 'translateY(0)';
+        }
+      });
+    });
   </script>
 </body>
 
