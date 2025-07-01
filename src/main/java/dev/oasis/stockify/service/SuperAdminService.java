@@ -3,12 +3,15 @@ package dev.oasis.stockify.service;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.model.AppUser;
+import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.repository.AppUserRepository;
+import dev.oasis.stockify.repository.ContactMessageRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +29,30 @@ public class SuperAdminService {
 
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
+    private final ContactMessageRepository contactMessageRepository;
     private final AppUserService appUserService;
 
-    private static final Set<String> ALL_TENANTS = Set.of(
-        "public", "stockify", "acme_corp", "global_trade", "artisan_crafts", "tech_solutions"
-    );    /**
+    @Value("${spring.flyway.locations}")
+    private String[] migrationLocations;
+    
+    private Set<String> getAllTenants() {
+        Set<String> tenants = new HashSet<>();
+        for (String location : migrationLocations) {
+            // Extract tenant name from location path like "classpath:db/migration/stockify"
+            String[] parts = location.split("/");
+            if (parts.length > 0) {
+                String tenantName = parts[parts.length - 1];
+                if (!tenantName.isEmpty() && !tenantName.equals("migration")) {
+                    tenants.add(tenantName);
+                }
+            }
+        }
+        // Always include public tenant
+        tenants.add("public");
+        return tenants;
+    }    
+    
+    /**
      * Get all users across all tenants (SUPER_ADMIN only)
      * Returns both active and inactive users for comprehensive management
      * Note: SUPER_ADMIN users are only shown for the 'public' tenant
@@ -40,7 +62,7 @@ public class SuperAdminService {
         log.info("🔍 Super Admin: Fetching all users (active and inactive) across all tenants");
         
         Map<String, List<AppUser>> tenantUsers = new HashMap<>();
-          for (String tenant : ALL_TENANTS) {
+          for (String tenant : getAllTenants()) {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 // SuperAdmin can see both active and inactive users
@@ -77,7 +99,7 @@ public class SuperAdminService {
         
         Map<String, List<Product>> tenantProducts = new HashMap<>();
         
-        for (String tenant : ALL_TENANTS) {
+        for (String tenant : getAllTenants()) {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 List<Product> products = productRepository.findAll();
@@ -150,7 +172,7 @@ public class SuperAdminService {
      * Switch to a specific tenant context for operations (SUPER_ADMIN only)
      */
     public void switchToTenant(String targetTenant) {
-        if (!ALL_TENANTS.contains(targetTenant)) {
+        if (!getAllTenants().contains(targetTenant)) {
             throw new IllegalArgumentException("Invalid tenant: " + targetTenant);
         }
         
@@ -166,7 +188,7 @@ public class SuperAdminService {
         
         Map<String, Map<String, Object>> tenantStats = new HashMap<>();
         
-        for (String tenant : ALL_TENANTS) {
+        for (String tenant : getAllTenants()) {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 
@@ -197,6 +219,12 @@ public class SuperAdminService {
                 stats.put("totalStockValue", calculateTotalStockValue());
                 stats.put("lowStockProductCount", productRepository.countLowStockProducts());
                 
+                // Add contact message statistics
+                long totalContactMessages = contactMessageRepository.count();
+                long unreadContactMessages = contactMessageRepository.countByIsReadFalse();
+                stats.put("totalContactMessages", totalContactMessages);
+                stats.put("unreadContactMessages", unreadContactMessages);
+                
                 tenantStats.put(tenant, stats);
                 log.debug("📈 Tenant '{}' stats: {} users, {} products", tenant, userCount, stats.get("productCount"));
                 
@@ -221,7 +249,7 @@ public class SuperAdminService {
         
         Map<String, Map<Role, List<AppUser>>> result = new HashMap<>();
         
-        for (String tenant : ALL_TENANTS) {
+        for (String tenant : getAllTenants()) {
             try {
                 TenantContext.setCurrentTenant(tenant);
                 
@@ -278,7 +306,79 @@ public class SuperAdminService {
      * Get available tenants for the super admin
      */
     public Set<String> getAvailableTenants() {
-        return new HashSet<>(ALL_TENANTS);
+        return getAllTenants();
+    }
+
+    /**
+     * Get all contact messages across all tenants (SUPER_ADMIN only)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, List<ContactMessage>> getAllContactMessagesAcrossAllTenants() {
+        log.info("🔍 Super Admin: Fetching all contact messages across all tenants");
+        
+        Map<String, List<ContactMessage>> tenantContactMessages = new HashMap<>();
+        
+        for (String tenant : getAllTenants()) {
+            try {
+                TenantContext.setCurrentTenant(tenant);
+                List<ContactMessage> messages = contactMessageRepository.findAllByOrderByCreatedAtDesc();
+                tenantContactMessages.put(tenant, messages);
+                log.debug("📊 Tenant '{}': Found {} contact messages", tenant, messages.size());
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to fetch contact messages for tenant '{}': {}", tenant, e.getMessage());
+                tenantContactMessages.put(tenant, new ArrayList<>());
+            } finally {
+                TenantContext.clear();
+            }
+        }
+        
+        log.info("✅ Successfully retrieved contact messages from {} tenants", tenantContactMessages.size());
+        return tenantContactMessages;
+    }
+
+    /**
+     * Get contact message statistics across all tenants (SUPER_ADMIN only)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getContactMessageStatistics() {
+        log.info("📊 Super Admin: Generating contact message statistics");
+        
+        Map<String, Object> globalStats = new HashMap<>();
+        long totalMessages = 0;
+        long unreadMessages = 0;
+        long respondedMessages = 0;
+        
+        for (String tenant : getAllTenants()) {
+            try {
+                TenantContext.setCurrentTenant(tenant);
+                
+                long tenantTotal = contactMessageRepository.count();
+                long tenantUnread = contactMessageRepository.countByIsReadFalse();
+                long tenantResponded = contactMessageRepository.countByIsRespondedTrue();
+                
+                totalMessages += tenantTotal;
+                unreadMessages += tenantUnread;
+                respondedMessages += tenantResponded;
+                
+                log.debug("📊 Tenant '{}': {} total, {} unread, {} responded", 
+                         tenant, tenantTotal, tenantUnread, tenantResponded);
+                
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to get contact message stats for tenant '{}': {}", tenant, e.getMessage());
+            } finally {
+                TenantContext.clear();
+            }
+        }
+        
+        globalStats.put("totalMessages", totalMessages);
+        globalStats.put("unreadMessages", unreadMessages);
+        globalStats.put("respondedMessages", respondedMessages);
+        globalStats.put("pendingMessages", totalMessages - respondedMessages);
+        
+        log.info("✅ Global contact message stats: {} total, {} unread, {} responded", 
+                totalMessages, unreadMessages, respondedMessages);
+        
+        return globalStats;
     }
 
     /**
