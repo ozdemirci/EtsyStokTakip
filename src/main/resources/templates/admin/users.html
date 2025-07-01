@@ -272,7 +272,9 @@
                                                 </a>
                                                 <button type="button" class="btn btn-outline-danger btn-action" 
                                                         title="Delete" data-bs-toggle="modal" 
-                                                        th:data-bs-target="'#deleteModal' + ${user.id}">
+                                                        data-bs-target="#deleteModal"
+                                                        th:data-user-id="${user.id}"
+                                                        th:data-username="${user.username}">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </div>
@@ -345,24 +347,24 @@
                 </form>
             </div>
         </div>
-    </div>    <!-- Delete Modals -->
-    <div th:each="user : ${users}" th:if="${user != null}" class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1">
+    </div>    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
                         <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" title="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete the user:</p>
-                    <p class="fw-bold" th:text="${user.username ?: 'Unknown User'}">Username</p>
+                    <p class="fw-bold" id="deleteUserName">Username</p>
                     <p class="text-muted">This action cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form th:action="@{/admin/users/delete/{id} (id=${user.id})}" method="post" class="d-inline">
+                    <form id="deleteForm" method="post" class="d-inline">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Delete
                         </button>
@@ -372,6 +374,22 @@
         </div>
     </div>
 
-   
-</body>
-</html>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle delete modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteModal = document.getElementById('deleteModal');
+            const deleteForm = document.getElementById('deleteForm');
+            const deleteUserNameElement = document.getElementById('deleteUserName');
+            
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const username = button.getAttribute('data-username');
+                
+                // Update modal content
+                deleteUserNameElement.textContent = username || 'Unknown User';
+                deleteForm.action = `/admin/users/delete/${userId}`;
+            });
+        });
+    </script>

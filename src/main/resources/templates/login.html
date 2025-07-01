@@ -3,111 +3,479 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Giriş Yap</title>
+    <title>Giriş Yap - Stockify</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-header {
+            text-align: center;
+            padding: 3rem 3rem 2rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            position: relative;
+        }
+        
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .brand-logo i {
+            font-size: 2.5rem;
+            color: white;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .login-subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+            margin: 0;
+        }
+        
+        .login-form {
+            padding: 2rem 3rem 3rem;
+        }
+        
+        .form-group-modern {
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+        
+        .modern-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .modern-input-group {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .modern-input-group:focus-within {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .modern-input-group .input-group-text {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .modern-input-group .form-control {
+            background: transparent;
+            border: none;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .modern-input-group .form-control:focus {
+            background: transparent;
+            box-shadow: none;
+        }
+        
+        .form-text-modern {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            border-radius: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+        
+        .alert-modern {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            font-weight: 500;
+        }
+        
+        .alert-danger-modern {
+            background: rgba(220, 53, 69, 0.1);
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        
+        .alert-success-modern {
+            background: rgba(40, 167, 69, 0.1);
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        
+        .login-links {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .login-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .login-links a:hover {
+            color: #5a6fd8;
+            transform: translateY(-1px);
+        }
+        
+        .link-separator {
+            margin: 0 1rem;
+            color: #dee2e6;
+        }
+        
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @media (max-width: 576px) {
+            .login-header,
+            .login-form {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+            
+            .login-title {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-light">
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow">
-                    <div class="card-body p-4">
-                        <h2 class="text-center mb-4">Giriş Yap</h2>
-                        <form th:action="@{/login}" method="post" id="loginForm">
-                            <input type="hidden" id="error" th:value="${param.error}" />
-                            <div class="mb-3">
-                                <label for="tenant_id" class="form-label">
-                                    <strong>Kurum ID</strong>
-                                    <span class="text-muted"></span>
-                                </label>
-                                <input type="text" class="form-control" id="tenant_id" name="tenant_id"
-                                    th:value="${tenantId}" placeholder="" required pattern="[a-zA-Z0-9_]+"
-                                    title="Sadece harf, rakam ve alt çizgi kullanabilirsiniz" maxlength="50"
-                                    autocomplete="off">
-                                <div class="form-text" th:if="${tenantId}">
-                                    <i class="bi bi-info-circle"></i> Kurum ID inizi giriniz
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="username" class="form-label">
-                                    Kullanıcı Adı
-                                </label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder=""
-                                    required autocomplete="off">
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle"></i>Kullanıcı adınızı giriniz
-                                </div>
-                            </div>
+<body>
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Şifre</label>
-                                <input type="password" class="form-control" id="password" name="password" required
-                                    autocomplete="off">
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle"></i>Şifrenizi giriniz
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 mb-3">Giriş Yap</button>
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <!-- Header Section -->
+            <div class="login-header">
+                <div class="brand-logo">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <h1 class="login-title">Stockify</h1>
+                <p class="login-subtitle">Sisteme giriş yapın</p>
+            </div>
 
-                            <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                Hatalı tenant ID, kullanıcı adı veya şifre!
-                            </div>
+            <!-- Form Section -->
+            <div class="login-form">
+                <form th:action="@{/login}" method="post" id="loginForm">
+                    <input type="hidden" id="error" th:value="${param.error}" />
+                    
+                    <!-- Tenant ID -->
+                    <div class="form-group-modern">
+                        <label for="tenant_id" class="modern-label required">
+                            <i class="bi bi-building"></i>
+                            Kurum ID
+                        </label>
+                        <div class="modern-input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-building"></i>
+                            </span>
+                            <input type="text" class="form-control" id="tenant_id" name="tenant_id"
+                                th:value="${tenantId}" placeholder="Kurum ID'nizi girin" required 
+                                pattern="[a-zA-Z0-9_]+" maxlength="50" autocomplete="off">
+                        </div>
+                        <div class="form-text-modern" th:if="${tenantId}">
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- Username -->
+                    <div class="form-group-modern">
+                        <label for="username" class="modern-label required">
+                            <i class="bi bi-person"></i>
+                            Kullanıcı Adı
+                        </label>
+                        <div class="modern-input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                placeholder="Kullanıcı adınızı girin" required autocomplete="off">
+                        </div>
+                        <div class="form-text-modern">
+                            
+                        </div>
+                    </div>
 
-                            <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                                <i class="bi bi-check-circle-fill"></i>
-                                Çıkış yapıldı.
-                            </div>
-                            <div th:if="${(registrationSuccess != null and registrationSuccess) or (param.registered != null and !param.registered.empty)}"
-                                class="alert alert-success border-0" role="alert"
-                                style="background: linear-gradient(45deg, #d4edda, #c3e6cb); border-left: 4px solid #28a745 !important;">
-                                <h6 class="alert-heading mb-2">
-                                    <i class="bi bi-check-circle-fill text-success"></i>
-                                    Kayıt Başarılı!
-                                </h6>
-                                <p class="mb-1"
-                                    th:text="${successMessage ?: 'Hesabınız başarıyla oluşturuldu! Giriş yapabilirsiniz.'}">
-                                </p>
-                                <hr class="my-2">
+                    <!-- Password -->
+                    <div class="form-group-modern">
+                        <label for="password" class="modern-label required">
+                            <i class="bi bi-lock"></i>
+                            Şifre
+                        </label>
+                        <div class="modern-input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                placeholder="Şifrenizi girin" required autocomplete="off">
+                        </div>
+                        <div class="form-text-modern">
+                            
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" class="btn btn-login">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Giriş Yap
+                    </button>
+
+                    <!-- Error Messages -->
+                    <div th:if="${param.error}" class="alert alert-modern alert-danger-modern" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Hatalı tenant ID, kullanıcı adı veya şifre!
+                    </div>
+
+                    <!-- Logout Success -->
+                    <div th:if="${param.logout}" class="alert alert-modern alert-success-modern" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Çıkış yapıldı.
+                    </div>
+                    
+                    <!-- Registration Success -->
+                    <div th:if="${(registrationSuccess != null and registrationSuccess) or (param.registered != null and !param.registered.empty)}"
+                        class="alert alert-modern alert-success-modern" role="alert">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill me-2 mt-1"></i>
+                            <div>
+                                <h6 class="mb-1">Kayıt Başarılı!</h6>
+                                <p class="mb-2" th:text="${successMessage ?: 'Hesabınız başarıyla oluşturuldu! Giriş yapabilirsiniz.'}"></p>
                                 <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i>
-                                    Yukarıdaki Şirket ID alanı otomatik olarak doldurulmuştur.
+                                    
                                 </small>
                             </div>
-
-                            <div class="text-center mt-3">
-                                <a href="/" class="text-decoration-none">
-                                    <i class="bi bi-arrow-left me-1"></i>Ana Sayfaya Dön
-                                </a>
-                                <span class="mx-2">|</span>
-                                <a href="/register" class="text-decoration-none">
-                                    Hesap Oluştur
-                                </a>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Links -->
+                    <div class="login-links">
+                        <a href="/">
+                            <i class="bi bi-arrow-left"></i>
+                            Ana Sayfaya Dön
+                        </a>
+                        <span class="link-separator">|</span>
+                        <a href="/register">
+                            <i class="bi bi-person-plus"></i>
+                            Hesap Oluştur
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
+        // Tenant ID lowercase conversion
         document.getElementById('tenant_id').addEventListener('input', function (e) {
             this.value = this.value.toLowerCase();
         });
 
-        // Form submit öncesi tenant_id kontrolü
+        // Form validation
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             const tenantId = document.getElementById('tenant_id').value.trim();
             if (!tenantId) {
-                alert('Tenant ID boş olamaz!');
+                alert('Kurum ID boş olamaz!');
                 e.preventDefault();
             }
         });
-    </script>
 
+        // Focus enhancement for better UX
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.closest('.modern-input-group').style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.closest('.modern-input-group').style.transform = 'translateY(0)';
+            });
+        });
+    </script>
 </body>
 
 </html>
