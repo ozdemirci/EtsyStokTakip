@@ -2,7 +2,9 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductResponseDTO;
+import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
 import dev.oasis.stockify.service.ProductService;
+import dev.oasis.stockify.service.ProductCategoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ import java.util.Optional;
 public class UserProductController {
 
     private final ProductService productService;
+    private final ProductCategoryService categoryService;
 
     /**
      * Ensure tenant context is set for each request
@@ -135,6 +138,16 @@ public class UserProductController {
             .filter(p -> p.getStockLevel() <= 10) // Using simplified low stock logic for user view
             .count();
 
+        // Get categories for the categories tab
+        List<ProductCategoryResponseDTO> categories;
+        try {
+            categories = categoryService.getAllCategories();
+            log.debug("📋 Found {} categories for user view, tenant: {}", categories.size(), tenantId);
+        } catch (Exception e) {
+            log.error("❌ Failed to load categories for user view, tenant: {}", tenantId, e);
+            categories = List.of(); // Empty list as fallback
+        }
+
         // Add attributes to model
         model.addAttribute("products", products);
         model.addAttribute("currentPage", page);
@@ -142,11 +155,15 @@ public class UserProductController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("totalPages", products.getTotalPages());
-        model.addAttribute("totalElements", products.getTotalElements());        model.addAttribute("tenantId", tenantId);
+        model.addAttribute("totalElements", products.getTotalElements());
+        model.addAttribute("tenantId", tenantId);
         model.addAttribute("totalProducts", totalProducts);
         model.addAttribute("lowStockCount", lowStockCount);
+        model.addAttribute("categories", categories); // For categories tab
         model.addAttribute("activeTab", tab); // For JavaScript to know which tab to activate
         model.addAttribute("currentUser", authentication.getName());
+
+
 
         log.debug("📊 Found {} total products, {} low stock for tenant: {}", 
             totalProducts, lowStockCount, tenantId);
