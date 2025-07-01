@@ -354,7 +354,7 @@ public class SuperAdminService {
                 
                 long tenantTotal = contactMessageRepository.count();
                 long tenantUnread = contactMessageRepository.countByIsReadFalse();
-                long tenantResponded = contactMessageRepository.countByIsRespondedTrue();
+                long tenantResponded = contactMessageRepository.countByRespondedTrue();
                 
                 totalMessages += tenantTotal;
                 unreadMessages += tenantUnread;

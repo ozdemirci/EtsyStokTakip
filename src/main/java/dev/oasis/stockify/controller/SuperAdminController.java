@@ -354,34 +354,6 @@ public class SuperAdminController {
     }
 
     /**
-     * All Contact Messages Management - View messages across all tenants
-     */
-    @GetMapping("/contact-messages")
-    public String allContactMessages(Model model, Principal principal) {
-        log.info("💬 Super Admin '{}' accessing all contact messages", principal.getName());
-        
-        try {
-            Map<String, List<ContactMessage>> tenantContactMessages = superAdminService.getAllContactMessagesAcrossAllTenants();
-            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
-            
-            model.addAttribute("tenantContactMessages", tenantContactMessages);
-            model.addAttribute("contactStats", contactStats);
-            model.addAttribute("availableTenants", superAdminService.getAvailableTenants());
-            model.addAttribute("currentUser", principal.getName());
-            
-            return "superadmin/contact-messages";
-            
-        } catch (Exception e) {
-            log.error("❌ Error loading all contact messages: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to load contact messages data");
-            model.addAttribute("currentUser", principal.getName());
-            return "superadmin/contact-messages";
-        } finally {
-            superAdminService.clearTenantContext();
-        }
-    }
-
-    /**
      * Get tenant statistics including contact messages
      */
     @GetMapping("/api/statistics/contact-messages")
