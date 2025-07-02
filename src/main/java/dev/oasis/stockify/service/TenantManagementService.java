@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -73,9 +74,6 @@ public class TenantManagementService {
             
             // Create initial admin user
             createTenantAdmin(createDTO);
-            
-            // Create default configurations
-            setupDefaultConfigurations(tenantId, createDTO);
             
             log.info("✅ Successfully created tenant: {}", tenantId);
             
@@ -240,10 +238,23 @@ public class TenantManagementService {
         // Run Flyway migrations for the new schema
         try {
             log.info("🚀 Running Flyway migrations for schema: {}", schemaName);
+            log.debug("🔧 Using migration locations: {}", Arrays.toString(migrationLocations));
             
             // Use the same migration location as configured in application.properties
             // Our consolidated migration file works for all schemas
             String[] tenantMigrationLocations = {"classpath:db/migration"};
+            
+            // Check if migration files exist
+            try {
+                var migrationResource = getClass().getClassLoader().getResource("db/migration/V1__init_complete_schema.sql");
+                if (migrationResource != null) {
+                    log.debug("✅ Migration file found: {}", migrationResource.getPath());
+                } else {
+                    log.error("❌ Migration file NOT found: db/migration/V1__init_complete_schema.sql");
+                }
+            } catch (Exception e) {
+                log.error("❌ Error checking migration file: {}", e.getMessage());
+            }
             
             Flyway tenantFlyway = Flyway.configure()
                 .dataSource(dataSource)
@@ -258,6 +269,19 @@ public class TenantManagementService {
                 .table("flyway_schema_history_" + schemaName.replace("-", "_"))
                 .load();
             
+            log.debug("🔧 Flyway configured for schema: {}", schemaName);
+            
+            // Check current migration status before running
+            try {
+                var info = tenantFlyway.info();
+                log.debug("🔍 Current migration state for {}: {} migrations pending", schemaName, info.pending().length);
+                for (var migration : info.pending()) {
+                    log.debug("📄 Pending migration: {} - {}", migration.getVersion(), migration.getDescription());
+                }
+            } catch (Exception infoEx) {
+                log.debug("⚠️ Could not get migration info: {}", infoEx.getMessage());
+            }
+            
             // First try to repair if there are checksum mismatches
             try {
                 tenantFlyway.repair();
@@ -269,14 +293,30 @@ public class TenantManagementService {
             // Migrate the schema
             var migrationResult = tenantFlyway.migrate();
             
+            log.info("🔍 Migration result for schema {}: success={}, migrationsExecuted={}, warnings={}", 
+                    schemaName, migrationResult.success, migrationResult.migrationsExecuted, 
+                    migrationResult.warnings);
+            
             if (migrationResult.success) {
-                log.info("✅ Successfully migrated schema: {} with {} migrations", 
-                        schemaName, migrationResult.migrationsExecuted);
+                if (migrationResult.migrationsExecuted > 0) {
+                    log.info("✅ Successfully migrated schema: {} with {} migrations", 
+                            schemaName, migrationResult.migrationsExecuted);
+                } else {
+                    log.warn("⚠️ Migration successful but 0 migrations executed for schema: {}. This likely means the migration was already applied.", schemaName);
+                    log.info("🔧 Manually creating tables for schema: {}", schemaName);
+                    // Manually create tables since Flyway thinks they already exist
+                    manuallyCreateTables(schemaName);
+                }
                         
                 // Verify tables were created
                 verifySchemaTablesCreated(schemaName);
             } else {
-                throw new SQLException("Migration failed for schema: " + schemaName);
+                log.error("❌ Migration FAILED for schema: {}", schemaName);
+                log.info("🔧 Attempting manual table creation as fallback for schema: {}", schemaName);
+                // Try manual creation as fallback
+                manuallyCreateTables(schemaName);
+                // Verify tables were created
+                verifySchemaTablesCreated(schemaName);
             }
             
         } catch (Exception e) {
@@ -292,6 +332,7 @@ public class TenantManagementService {
         try (Connection connection = dataSource.getConnection()) {
             // Set the schema context
             connection.setSchema(schemaName);
+            log.debug("🔍 Verifying tables in schema: {}", schemaName);
             
             // List of expected tables from migration files (excluding contact_messages which is public-only)
             String[] expectedTables = {
@@ -306,9 +347,16 @@ public class TenantManagementService {
             // Get all tables in the schema
             try (ResultSet tables = metaData.getTables(null, schemaName.toUpperCase(), null, new String[]{"TABLE"})) {
                 while (tables.next()) {
-                    actualTables.add(tables.getString("TABLE_NAME").toLowerCase());
+                    String tableName = tables.getString("TABLE_NAME").toLowerCase();
+                    actualTables.add(tableName);
+                    log.debug("📄 Found table: {}", tableName);
                 }
             }
+            
+            log.info("📊 Schema {} verification: expected {} tables, found {} tables", 
+                    schemaName, expectedTables.length, actualTables.size());
+            log.debug("📋 Expected tables: {}", String.join(", ", expectedTables));
+            log.debug("📋 Actual tables: {}", String.join(", ", actualTables));
             
             // Check if all expected tables exist
             List<String> missingTables = new ArrayList<>();
@@ -323,7 +371,7 @@ public class TenantManagementService {
                         expectedTables.length, schemaName);
                 log.debug("📋 Created tables: {}", actualTables);
             } else {
-                log.warn("⚠️ Missing tables in schema {}: {}", schemaName, missingTables);
+                log.error("❌ Missing tables in schema {}: {}", schemaName, missingTables);
                 log.info("📋 Actual tables found: {}", actualTables);
                 
                 // Try to manually create missing critical tables if needed
@@ -339,77 +387,56 @@ public class TenantManagementService {
      * Manually create missing critical tables (fallback)
      */
     private void createMissingTables(Connection connection, String schemaName, List<String> missingTables) {
-        log.info("🔧 Attempting to manually create missing tables in schema: {}", schemaName);
+        log.warn("🔧 Attempting to manually create {} missing tables in schema: {}", missingTables.size(), schemaName);
+        log.warn("📋 Missing tables: {}", String.join(", ", missingTables));
         
         try {
-            // Read and execute migration files manually if Flyway failed
-            log.info("📄 Re-running migration manually for schema: {}", schemaName);
+            // Set the schema context
+            connection.setSchema(schemaName);
             
-            // Execute tenant-specific migration file
-            executeMigrationFile(connection, "T1__tenant_init_schema.sql");
+            // Re-run the complete migration script manually
+            log.info("📄 Re-running V1__init_complete_schema.sql manually for schema: {}", schemaName);
+            
+            // Read the migration file
+            InputStream migrationStream = getClass().getClassLoader()
+                    .getResourceAsStream("db/migration/V1__init_complete_schema.sql");
+            
+            if (migrationStream != null) {
+                String migrationSql = new String(migrationStream.readAllBytes(), StandardCharsets.UTF_8);
+                
+                // Split by semicolon and execute each statement
+                String[] statements = migrationSql.split(";");
+                
+                try (Statement stmt = connection.createStatement()) {
+                    int executedStatements = 0;
+                    for (String statement : statements) {
+                        String trimmedStmt = statement.trim();
+                        if (!trimmedStmt.isEmpty() && 
+                            !trimmedStmt.startsWith("--") && 
+                            !trimmedStmt.toLowerCase().contains("contact_messages")) { // Skip contact_messages
+                            try {
+                                stmt.execute(trimmedStmt);
+                                executedStatements++;
+                                log.debug("✅ Executed statement: {}", trimmedStmt.substring(0, Math.min(50, trimmedStmt.length())));
+                            } catch (SQLException e) {
+                                // Log but continue with other statements (tables may already exist)
+                                log.debug("⚠️ Statement execution warning (ignoring): {}", e.getMessage());
+                            }
+                        }
+                    }
+                    log.info("✅ Manual migration completed: executed {} statements for schema: {}", executedStatements, schemaName);
+                }
+                
+                migrationStream.close();
+            } else {
+                log.error("❌ Could not find migration file: V1__init_complete_schema.sql");
+            }
             
             log.info("✅ Manual table creation completed for schema: {}", schemaName);
             
         } catch (Exception e) {
-            log.error("❌ Failed to manually create tables for schema {}: {}", schemaName, e.getMessage());
+            log.error("❌ Failed to manually create tables for schema {}: {}", schemaName, e.getMessage(), e);
         }
-    }
-    
-    /**
-     * Execute a specific migration file
-     */
-    private void executeMigrationFile(Connection connection, String fileName) {
-        try {
-            // Use tenant-specific migration file path
-            String resourcePath = "/db/migration/tenant/" + fileName;
-            
-            try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
-                if (inputStream == null) {
-                    log.warn("⚠️ Tenant migration file not found: {}", resourcePath);
-                    // Fallback to main migration files
-                    resourcePath = "/db/migration/" + fileName;
-                    try (InputStream fallbackStream = getClass().getResourceAsStream(resourcePath)) {
-                        if (fallbackStream == null) {
-                            log.warn("⚠️ Migration file not found in fallback: {}", resourcePath);
-                            return;
-                        }
-                        executeStatements(connection, fallbackStream, fileName);
-                    }
-                    return;
-                }
-                
-                executeStatements(connection, inputStream, fileName);
-                
-            }
-        } catch (Exception e) {
-            log.error("❌ Failed to execute migration file {}: {}", fileName, e.getMessage());
-        }
-    }
-    
-    /**
-     * Execute SQL statements from input stream
-     */
-    private void executeStatements(Connection connection, InputStream inputStream, String fileName) throws Exception {
-        String sql = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        
-        // Split SQL by semicolons and execute each statement
-        String[] statements = sql.split(";");
-        
-        try (Statement stmt = connection.createStatement()) {
-            for (String statement : statements) {
-                String trimmedStmt = statement.trim();
-                if (!trimmedStmt.isEmpty() && !trimmedStmt.startsWith("--")) {
-                    try {
-                        stmt.execute(trimmedStmt);
-                    } catch (SQLException e) {
-                        // Log but continue with other statements
-                        log.debug("⚠️ Statement execution warning: {}", e.getMessage());
-                    }
-                }
-            }
-        }
-        
-        log.debug("📄 Executed migration file: {}", fileName);
     }
 
     private void setupTenantConfiguration(String tenantId, TenantCreateDTO createDTO) throws SQLException {
@@ -417,7 +444,11 @@ public class TenantManagementService {
             connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
             
             String insertConfigSQL = """
-                INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES (?, ?, ?, ?)
+                INSERT INTO tenant_config (config_key, config_value, config_type, description) 
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT (config_key) DO UPDATE SET 
+                    config_value = EXCLUDED.config_value,
+                    updated_at = CURRENT_TIMESTAMP
                 """;
             
             try (PreparedStatement stmt = connection.prepareStatement(insertConfigSQL)) {
@@ -448,6 +479,33 @@ public class TenantManagementService {
                 stmt.setString(3, "STRING");
                 stmt.setString(4, "Tenant subscription plan");
                 stmt.executeUpdate();
+                
+                // Default configurations
+                stmt.setString(1, "timezone");
+                stmt.setString(2, "UTC");
+                stmt.setString(3, "STRING");
+                stmt.setString(4, "Default timezone");
+                stmt.executeUpdate();
+                
+                stmt.setString(1, "currency");
+                stmt.setString(2, "USD");
+                stmt.setString(3, "STRING");
+                stmt.setString(4, "Default currency");
+                stmt.executeUpdate();
+                
+                stmt.setString(1, "low_stock_threshold");
+                stmt.setString(2, "5");
+                stmt.setString(3, "INTEGER");
+                stmt.setString(4, "Default low stock threshold");
+                stmt.executeUpdate();
+                
+                stmt.setString(1, "email_notifications");
+                stmt.setString(2, "true");
+                stmt.setString(3, "BOOLEAN");
+                stmt.setString(4, "Enable email notifications");
+                stmt.executeUpdate();
+                
+                log.debug("✅ Tenant configuration completed for: {}", tenantId);
             }
         }
     }
@@ -465,26 +523,6 @@ public class TenantManagementService {
         } catch (Exception e) {
             log.error("❌ Failed to create admin user: {}", e.getMessage());
             throw new RuntimeException("Failed to create admin user", e);
-        }
-    }
-
-    private void setupDefaultConfigurations(String tenantId, TenantCreateDTO createDTO) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setSchema(tenantId.toLowerCase(Locale.ROOT));
-            
-            String[] defaultConfigs = {
-                "('timezone', 'UTC', 'STRING', 'Default timezone')",
-                "('currency', 'USD', 'STRING', 'Default currency')",
-                "('low_stock_threshold', '5', 'INTEGER', 'Default low stock threshold')",
-                "('email_notifications', 'true', 'BOOLEAN', 'Enable email notifications')"
-            };
-            
-            try (Statement statement = connection.createStatement()) {
-                for (String config : defaultConfigs) {
-                    String sql = "INSERT INTO tenant_config (config_key, config_value, config_type, description) VALUES " + config;
-                    statement.execute(sql);
-                }
-            }
         }
     }
 
@@ -554,6 +592,71 @@ public class TenantManagementService {
             
         } catch (SQLException e) {
             log.error("❌ Failed to cleanup tenant {}: {}", tenantId, e.getMessage());
+        }
+    }
+    
+    /**
+     * Manually create all tables for a tenant schema when Flyway doesn't execute migrations
+     */
+    private void manuallyCreateTables(String schemaName) {
+        log.info("🔧 Manually creating tables for schema: {}", schemaName);
+        
+        try (Connection connection = dataSource.getConnection()) {
+            // Set the schema context
+            connection.setSchema(schemaName);
+            log.debug("🔧 Schema context set to: {}", schemaName);
+            
+            // Read the migration file
+            InputStream migrationStream = getClass().getClassLoader()
+                    .getResourceAsStream("db/migration/V1__init_complete_schema.sql");
+            
+            if (migrationStream != null) {
+                String migrationSql = new String(migrationStream.readAllBytes(), StandardCharsets.UTF_8);
+                log.debug("📄 Migration file loaded: {} characters", migrationSql.length());
+                
+                // Split by semicolon and execute each statement
+                String[] statements = migrationSql.split(";");
+                
+                try (Statement stmt = connection.createStatement()) {
+                    int executedStatements = 0;
+                    int skippedStatements = 0;
+                    
+                    for (String statement : statements) {
+                        String trimmedStmt = statement.trim();
+                        if (!trimmedStmt.isEmpty() && 
+                            !trimmedStmt.startsWith("--") && 
+                            !trimmedStmt.toLowerCase().contains("contact_messages")) { // Skip contact_messages (public only)
+                            
+                            try {
+                                stmt.execute(trimmedStmt);
+                                executedStatements++;
+                                log.debug("✅ Executed: {}", trimmedStmt.substring(0, Math.min(50, trimmedStmt.length())) + "...");
+                            } catch (SQLException e) {
+                                if (e.getMessage().contains("already exists") || e.getMessage().contains("does not exist")) {
+                                    // Table already exists or dependency issue - log and continue
+                                    log.debug("⚠️ Statement skipped (table exists or dependency): {}", e.getMessage());
+                                    skippedStatements++;
+                                } else {
+                                    log.error("❌ Error executing statement: {}", e.getMessage());
+                                    log.debug("Statement: {}", trimmedStmt.substring(0, Math.min(100, trimmedStmt.length())));
+                                    throw e;
+                                }
+                            }
+                        }
+                    }
+                    log.info("✅ Manual migration completed for schema {}: {} statements executed, {} skipped", 
+                            schemaName, executedStatements, skippedStatements);
+                }
+                
+                migrationStream.close();
+            } else {
+                log.error("❌ Could not find migration file: V1__init_complete_schema.sql");
+                throw new RuntimeException("Migration file not found");
+            }
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to manually create tables for schema {}: {}", schemaName, e.getMessage(), e);
+            throw new RuntimeException("Manual table creation failed for schema: " + schemaName, e);
         }
     }
 }

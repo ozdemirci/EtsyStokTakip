@@ -4,7 +4,6 @@ import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.ValidationErrorDTO;
-import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;

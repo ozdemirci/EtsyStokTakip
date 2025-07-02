@@ -11,7 +11,6 @@ import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.repository.StockMovementRepository;
-import dev.oasis.stockify.service.StockNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

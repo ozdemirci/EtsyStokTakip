@@ -70,7 +70,7 @@ public class MultiTenantFlywayConfig implements CommandLineRunner {
      * Migrate a specific schema
      */
     
-    private void migrateSchema(DataSource dataSource, String schemaName) {
+    public void migrateSchema(DataSource dataSource, String schemaName) {
         try {
             log.info("🏗️ Migrating schema: {}", schemaName);
             

@@ -3,8 +3,6 @@ package dev.oasis.stockify.service;
 import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.repository.AppUserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,17 +12,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AppUserDetailsService implements UserDetailsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppUserDetailsService.class);
     private final AppUserRepository appUserRepository;
-
-    public AppUserDetailsService(AppUserRepository appUserRepository) {
-        this.appUserRepository = appUserRepository;
-    }
+    private final DataSource dataSource;   
 
     @Override
     @Transactional(readOnly = true)
@@ -47,7 +50,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
             // Eğer tenant context zaten ayarlanmışsa, onu kullan
             if (currentTenant != null && !currentTenant.isEmpty()) {
-                logger.debug("Using existing tenant context: {}", currentTenant);
+                log.debug("Using existing tenant context: {}", currentTenant);
                 tenantId = currentTenant;
             } else if (paramTenantId == null || paramTenantId.trim().isEmpty()) {
                 // Eğer tenant context ayarlanmamışsa ve form parametresi de yoksa hata ver
@@ -58,27 +61,17 @@ public class AppUserDetailsService implements UserDetailsService {
                 TenantContext.setCurrentTenant(tenantId);
             }
 
-            logger.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);            try {
-                AppUser appUser = null;
-                
-                // Check if username looks like an email
-                if (username.contains("@")) {
-                    // Try to find by email first
-                    appUser = appUserRepository.findByEmail(username).orElse(null);
-                    
-                    if (appUser == null) {
-                        // If not found by email, try by username as fallback
-                        appUser = appUserRepository.findByUsername(username).orElse(null);
-                    }
-                } else {
-                    // Try to find by username first
-                    appUser = appUserRepository.findByUsername(username).orElse(null);
-                    
-                    if (appUser == null) {
-                        // If not found by username, try by email as fallback
-                        appUser = appUserRepository.findByEmail(username).orElse(null);
-                    }
-                }
+            log.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);
+
+            // Check if tenant schema exists before attempting login
+            if (!tenantSchemaExists(tenantId)) {
+                throw new UsernameNotFoundException(
+                        String.format("Kurum ID bulunamadı: %s. Lütfen geçerli bir Kurum ID girin.", tenantId));
+            }
+
+            try {
+                // Only allow username-based login (not email)
+                AppUser appUser = appUserRepository.findByUsername(username).orElse(null);
                 
                 if (appUser == null) {
                     throw new UsernameNotFoundException(
@@ -87,26 +80,55 @@ public class AppUserDetailsService implements UserDetailsService {
 
                 // Check if user is active
                 if (appUser.getIsActive() == null || !appUser.getIsActive()) {
-                    logger.warn("Inactive user attempted to login: {} for tenant: {}", username, tenantId);
+                    log.warn("Inactive user attempted to login: {} for tenant: {}", username, tenantId);
                     throw new UsernameNotFoundException("Kullanıcı hesabı aktif değil");
                 }
 
-                logger.debug("User found in database: {} for tenant: {}", username, tenantId);                return User.withUsername(appUser.getUsername())
+                log.debug("User found in database: {} for tenant: {}", username, tenantId);
+                UserDetails userDetails = User.withUsername(appUser.getUsername())
                         .password(appUser.getPassword())
                         .roles(appUser.getRole().getCode())
                         .build();
 
+                // Başarı durumunda TenantContext'i temizle
+                TenantContext.clear();
+                return userDetails;
+
+            } catch (UsernameNotFoundException | AuthenticationServiceException e) {
+                log.error("Error during user authentication - Username: {}, Tenant: {}, Error: {}",
+                          username, tenantId, e.getMessage());
+                throw e; // Spesifik hatayı yeniden fırlat
             } catch (Exception e) {
-                logger.error("Error during user authentication - Username: {}, Tenant: {}, Error: {}",
-                           username, tenantId, e.getMessage());
-                throw new UsernameNotFoundException("Kullanıcı bilgileri doğrulanamadı");
+                log.error("Unexpected error during user authentication - Username: {}, Tenant: {}, Error: {}",
+                          username, tenantId, e.getMessage());
+                throw new RuntimeException("Beklenmeyen bir hata oluştu", e);
             }
 
         } catch (Exception e) {
-            logger.error("Authentication error: {}", e.getMessage());
+            log.error("Authentication error: {}", e.getMessage());
             // Hata durumunda TenantContext'i temizle
             TenantContext.clear();
             throw e;
         }
+    }
+
+    /**
+     * Check if tenant schema exists in database
+     */
+    private boolean tenantSchemaExists(String tenantId) {
+        try (Connection connection = dataSource.getConnection()) {
+            String sql = "SELECT EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name = ?)";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, tenantId.toLowerCase());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getBoolean(1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error checking tenant schema existence for {}: {}", tenantId, e.getMessage());
+        }
+        return false;
     }
 }

@@ -53,6 +53,15 @@ public class RegisterController {
         // Check for validation errors
         if (bindingResult.hasErrors()) {
             log.warn("❌ Validation errors in registration form");
+            // Log each validation error for debugging
+            bindingResult.getFieldErrors().forEach(error -> 
+                log.warn("  - Field '{}': {} (rejected value: '{}')", 
+                    error.getField(), error.getDefaultMessage(), error.getRejectedValue())
+            );
+            bindingResult.getGlobalErrors().forEach(error -> 
+                log.warn("  - Global error: {}", error.getDefaultMessage())
+            );
+            
             model.addAttribute("selectedPlan", registerRequest.getSelectedPlan());
             model.addAttribute("planFeatures", registrationService.getPlanFeatures(registerRequest.getSelectedPlan()));
             model.addAttribute("planPrice", registrationService.getPlanPrice(registerRequest.getSelectedPlan()));
