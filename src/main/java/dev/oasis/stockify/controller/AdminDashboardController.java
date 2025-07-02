@@ -6,6 +6,7 @@ import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.PlanType;
+import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.DashboardService;
 import dev.oasis.stockify.service.StockMovementService;
@@ -57,8 +58,8 @@ public class AdminDashboardController {
         } catch (Exception e) {
             log.warn("Could not get tenant info for: {}, error: {}", currentTenantId, e.getMessage());
         }
-          // Get dashboard metrics
-        DashboardMetricsDTO metrics = dashboardService.getDashboardMetrics();        // Get all users in current tenant
+       // Get dashboard metrics
+        DashboardMetricsDTO metrics = getMetrics();        
         List<UserResponseDTO> tenantUsers = appUserService.getAllUsers();
         log.debug("Found {} users for tenant: {}", tenantUsers.size(), currentTenantId);
         
@@ -91,10 +92,10 @@ public class AdminDashboardController {
         model.addAttribute("totalProducts", metrics.getTotalProducts());
         model.addAttribute("activeProducts", metrics.getActiveProducts());
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
-        model.addAttribute("outOfStockProducts", 0L); // TODO: Add to DashboardMetricsDTO
+        model.addAttribute("outOfStockProducts", metrics.getOutOfStockProducts()); 
         model.addAttribute("totalUsers", tenantUsers.size());
         model.addAttribute("adminUsers", tenantUsers.stream().mapToInt(u -> 
-            u.getRole() != null && "ADMIN".equals(u.getRole().toString()) ? 1 : 0).sum());
+            u.getRole() != null && Role.ADMIN.getDisplayName().equals(u.getRole().toString()) ? 1 : 0).sum());
         model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));
         
         // Add notification data

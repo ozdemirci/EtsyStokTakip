@@ -13,7 +13,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -31,14 +30,19 @@ public class DashboardService {
         // Initialize metrics with default values
         meterRegistry.gauge("sales.monthly", 0.0);
         meterRegistry.gauge("sales.daily", 0.0);
-    }    public DashboardMetricsDTO getDashboardMetrics() {
+    }   
+    
+    public DashboardMetricsDTO getDashboardMetrics() {
         String currentTenant = TenantContext.getCurrentTenant();
         log.debug("🏢 Getting dashboard metrics for tenant: {}", currentTenant);
         
         // Get tenant-specific counts
         long tenantUserCount = getTenantUserCount();
-        long productCount = getTenantProductCount();
+        long productCount = getTenantProductCount();        
+        Long criticalNotifications = notificationRepository.countCriticalNotifications();
         
+        
+          
         log.debug("📊 Dashboard metrics - Tenant: {}, Users: {}, Products: {}", 
                  currentTenant, tenantUserCount, productCount);
         
@@ -48,7 +52,9 @@ public class DashboardService {
                 .totalUsers(tenantUserCount)
                 .totalInventoryValue(calculateTotalInventoryValue())
                 .lowStockProducts(countLowStockProducts())
+                .outOfStockProducts(countOutOfStockProducts())
                 .activeNotifications(notificationRepository.count())
+                .criticalNotifications(criticalNotifications)
                 .monthlyRevenue(getMonthlyRevenue())
                 .dailyRevenue(getDailyRevenue())
                 .build();
@@ -96,7 +102,9 @@ public class DashboardService {
         log.debug("📦 Final product count for tenant: {} = {}", currentTenant, finalCount);
         
         return finalCount;
-    }private long getTenantUserCount() {
+    }
+    
+    private long getTenantUserCount() {
         String currentTenant = TenantContext.getCurrentTenant();
         log.debug("👥 Counting users for tenant: {}", currentTenant);
         
@@ -119,27 +127,38 @@ public class DashboardService {
         log.debug("👥 Final user count for tenant: {} = {}", currentTenant, finalCount);
         
         return finalCount;
-    }private double calculateTotalInventoryValue() {
+    }    private double calculateTotalInventoryValue() {
         String currentTenant = TenantContext.getCurrentTenant();
-        List<Product> products = productRepository.findAll();
-        log.debug("📦 Calculating inventory value for tenant: {} - Found {} products", 
-                 currentTenant, products.size());
+        log.debug("� Calculating total inventory value for tenant: {}", currentTenant);
         
-        return products.stream()
-                .map(product -> product.getPrice().multiply(BigDecimal.valueOf(product.getStockLevel())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .doubleValue();
+        // Use repository method to calculate inventory value directly in database for better performance
+        Double value = productRepository.calculateTotalInventoryValue();
+        double totalValue = value != null ? value : 0.0;
+        
+        log.debug("💰 Total inventory value for tenant: {} = {}", currentTenant, totalValue);
+        return totalValue;
     }
 
     private long countLowStockProducts() {
         String currentTenant = TenantContext.getCurrentTenant();
-        List<Product> products = productRepository.findAll();
-        log.debug("📦 Counting low stock products for tenant: {} - Total products: {}",
-                 currentTenant, products.size());
+        log.debug("📦 Counting low stock products for tenant: {}", currentTenant);
+        
+        // Use repository method to count low stock products directly in database for better performance
+        long count = productRepository.countLowStockProducts();
+        log.debug("📦 Found {} low stock products for tenant: {}", count, currentTenant);
+        
+        return count;
+    }
 
-        return products.stream()
-                .filter(product -> product.getStockLevel() < product.getLowStockThreshold())
-                .count();
+    private long countOutOfStockProducts() {
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("📦 Counting out of stock products for tenant: {}", currentTenant);
+        
+        // Use repository method to count out of stock products directly in database for better performance
+        long count = productRepository.countOutOfStockProducts();
+        log.debug("📦 Found {} out of stock products for tenant: {}", count, currentTenant);
+        
+        return count;
     }
 
     private long countActiveProducts() {

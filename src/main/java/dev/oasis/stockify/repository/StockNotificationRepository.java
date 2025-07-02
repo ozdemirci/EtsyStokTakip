@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface StockNotificationRepository extends JpaRepository<StockNotification, Long> {
+    
     List<StockNotification> findByReadFalseOrderByCreatedAtDesc();
     List<StockNotification> findAllByOrderByCreatedAtDesc();
 
@@ -20,4 +21,7 @@ public interface StockNotificationRepository extends JpaRepository<StockNotifica
     @Modifying
     @Query("DELETE FROM StockNotification n WHERE n.read = true")
     int deleteAllRead();
+    
+    @Query("SELECT COUNT(n) FROM StockNotification n WHERE n.priority = 'HIGH' OR n.notificationType = 'OUT_OF_STOCK'")
+    long countCriticalNotifications();
 }

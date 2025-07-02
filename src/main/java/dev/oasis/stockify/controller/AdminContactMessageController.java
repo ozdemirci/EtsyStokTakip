@@ -129,8 +129,7 @@ public class AdminContactMessageController {
      */
     @PostMapping("/{id}/mark-responded")
     public String markAsResponded(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            // TODO: Get current user ID from security context
+        try {           
             Long currentUserId = 1L; // Placeholder
             contactMessageService.markAsResponded(id, currentUserId);
             redirectAttributes.addFlashAttribute("successMessage", "Message marked as responded");

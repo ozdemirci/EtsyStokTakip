@@ -52,6 +52,10 @@ public class UserDashboardController {
         // Get notification data
         List<StockNotification> notifications = stockNotificationService.getAllNotifications();
         long unreadNotifications = notifications.stream().filter(n -> !n.isRead()).count();
+        long totalNotifications = notifications.size();
+        long criticalNotifications = notifications.stream()
+            .filter(n -> "HIGH".equals(n.getPriority()) || "OUT_OF_STOCK".equals(n.getNotificationType()))
+            .count();
 
         // Get stock movement data for user dashboard
         try {
@@ -80,7 +84,7 @@ public class UserDashboardController {
         model.addAttribute("totalProducts", metrics.getTotalProducts());
         model.addAttribute("activeProducts", metrics.getActiveProducts());
         model.addAttribute("lowStockProducts", metrics.getLowStockProducts());
-        model.addAttribute("outOfStockProducts", 0L); // TODO: Add to DashboardMetricsDTO
+        model.addAttribute("outOfStockProducts", metrics.getOutOfStockProducts()); 
         model.addAttribute("totalInventoryValue", String.format("%.2f", metrics.getTotalInventoryValue()));
         model.addAttribute("unreadNotifications", unreadNotifications);
 
@@ -89,6 +93,12 @@ public class UserDashboardController {
         model.addAttribute("currentTenant", currentTenant);
         model.addAttribute("currentTenantId", currentTenantId);
         model.addAttribute("currentUser", authentication.getName());
+
+        // Add notification data
+        model.addAttribute("totalNotifications", totalNotifications);
+        model.addAttribute("unreadNotifications", unreadNotifications);
+        model.addAttribute("criticalNotifications", criticalNotifications);
+        
 
         return "user/dashboard";
     }

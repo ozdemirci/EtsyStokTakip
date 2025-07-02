@@ -24,6 +24,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT COUNT(p) FROM Product p WHERE p.stockLevel <= p.lowStockThreshold")
     long countLowStockProducts();
     
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.stockLevel = 0")
+    long countOutOfStockProducts();
+    
     @Query("SELECT p FROM Product p WHERE p.isActive = true")
     List<Product> findActiveProducts();
 
@@ -34,5 +37,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     @Query("SELECT COUNT(p) FROM Product p WHERE LOWER(p.category) = LOWER(:category)")
     long countByCategoryIgnoreCase(@Param("category") String category);
-      
+    
+    @Query("SELECT COALESCE(SUM(p.price * p.stockLevel), 0) FROM Product p")
+    Double calculateTotalInventoryValue();
 }
