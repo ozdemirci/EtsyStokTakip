@@ -85,4 +85,40 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
         ORDER BY sm.createdAt DESC
     """)
     Page<StockMovement> searchMovements(@Param("search") String search, @Param("type") StockMovement.MovementType type, Pageable pageable);
+
+    /**
+     * Find stock movements by product ID and movement type within date range
+     */
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product WHERE sm.product.id = :productId AND sm.movementType = :movementType AND sm.createdAt BETWEEN :startDate AND :endDate ORDER BY sm.createdAt DESC")
+    List<StockMovement> findByProductIdAndMovementTypeAndCreatedAtBetween(
+            @Param("productId") Long productId,
+            @Param("movementType") StockMovement.MovementType movementType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Find stock movements by product ID within date range
+     */
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product WHERE sm.product.id = :productId AND sm.createdAt BETWEEN :startDate AND :endDate ORDER BY sm.createdAt DESC")
+    List<StockMovement> findByProductIdAndCreatedAtBetween(
+            @Param("productId") Long productId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Find stock movements by movement type within date range
+     */
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product WHERE sm.movementType = :movementType AND sm.createdAt BETWEEN :startDate AND :endDate ORDER BY sm.createdAt DESC")
+    List<StockMovement> findByMovementTypeAndCreatedAtBetween(
+            @Param("movementType") StockMovement.MovementType movementType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Find stock movements within date range
+     */
+    @Query("SELECT sm FROM StockMovement sm JOIN FETCH sm.product WHERE sm.createdAt BETWEEN :startDate AND :endDate ORDER BY sm.createdAt DESC")
+    List<StockMovement> findByCreatedAtBetween(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }

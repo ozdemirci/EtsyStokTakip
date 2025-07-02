@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for user stock movement operations (read-only)
@@ -198,7 +199,7 @@ public class UserStockMovementController {
     @ResponseBody
     public ResponseEntity<java.util.Map<String, Object>> validateCsv(@RequestParam("file") MultipartFile file) {
         try {
-            List<ValidationErrorDTO> errors = stockMovementService.validateCsv(file);
+            List<Map<String, Object>> errors = stockMovementService.validateCsvFile(file);
             return ResponseEntity.ok(java.util.Map.of(
                     "valid", errors.isEmpty(),
                     "errors", errors

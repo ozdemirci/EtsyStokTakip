@@ -1,10 +1,13 @@
 package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
+import dev.oasis.stockify.dto.StockAnalysisDTO;
+import dev.oasis.stockify.dto.StockAnalysisRequestDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.ValidationErrorDTO;
 import dev.oasis.stockify.model.StockMovement;
+import dev.oasis.stockify.service.StockAnalysisService;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.util.ControllerTenantUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +38,7 @@ import java.util.Map;
 public class StockMovementController {
 
     private final StockMovementService stockMovementService;
+    private final StockAnalysisService stockAnalysisService;
     private final ControllerTenantUtil tenantResolutionUtil;
 
      
@@ -226,6 +231,232 @@ public class StockMovementController {
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
                     "message", "Failed to process bulk movements: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Stock analysis endpoint
+     */
+    @GetMapping("/analysis")
+    @ResponseBody
+    public ResponseEntity<?> getStockAnalysis(
+            @RequestParam(required = false) Long productId,
+            @RequestParam(defaultValue = "30") Integer days,
+            @RequestParam(required = false) String movementType,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("📊 Getting stock analysis - ProductId: {}, Days: {}, MovementType: {}", productId, days, movementType);
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("📊 Using tenant: {}", tenantId);
+
+            StockAnalysisRequestDTO analysisRequest = StockAnalysisRequestDTO.builder()
+                    .productId(productId)
+                    .days(days)
+                    .movementType(movementType != null ? StockMovement.MovementType.valueOf(movementType) : null)
+                    .includeAdjustments(true)
+                    .includeDamaged(true)
+                    .includeExpired(true)
+                    .build();
+
+            StockAnalysisDTO analysis = stockAnalysisService.generateStockAnalysis(analysisRequest);
+            return ResponseEntity.ok(analysis);
+
+        } catch (Exception e) {
+            log.error("❌ Error generating stock analysis: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Failed to generate analysis: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Validate stock movement
+     */
+    @PostMapping("/validate")
+    @ResponseBody
+    public ResponseEntity<?> validateStockMovement(
+            @RequestBody StockMovementCreateDTO movementCreateDTO,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("✅ Validating stock movement for product: {}, quantity: {}, type: {}",
+                movementCreateDTO.getProductId(), movementCreateDTO.getQuantity(), movementCreateDTO.getMovementType());
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("✅ Using tenant: {}", tenantId);
+            
+            List<ValidationErrorDTO> errors = stockMovementService.validateStockMovementWithDTO(movementCreateDTO);
+            boolean isValid = errors.isEmpty();
+            
+            return ResponseEntity.ok(Map.of(
+                    "valid", isValid,
+                    "errors", errors.stream().map(ValidationErrorDTO::getMessage).toArray()
+            ));
+        } catch (Exception e) {
+            log.error("❌ Error validating stock movement: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "valid", false,
+                    "errors", new String[]{"Failed to validate stock movement: " + e.getMessage()}
+            ));
+        }
+    }
+
+    /**
+     * Bulk validate stock movements
+     */
+    @PostMapping("/bulk-validate")
+    @ResponseBody
+    public ResponseEntity<?> validateBulkStockMovements(
+            @RequestBody Map<String, List<StockMovementCreateDTO>> request,
+            HttpServletRequest httpRequest,
+            Authentication authentication) {
+
+        List<StockMovementCreateDTO> movements = request.get("movements");
+        log.info("✅ Validating {} bulk stock movements", movements.size());
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(httpRequest, authentication, true);
+            log.info("✅ Using tenant: {}", tenantId);
+            
+            List<Map<String, Object>> errors = new ArrayList<>();
+            boolean isValid = true;
+            
+            for (int i = 0; i < movements.size(); i++) {
+                List<ValidationErrorDTO> movementErrors = stockMovementService.validateStockMovementWithDTO(movements.get(i));
+                if (!movementErrors.isEmpty()) {
+                    isValid = false;
+                    for (ValidationErrorDTO error : movementErrors) {
+                        errors.add(Map.of(
+                                "index", i,
+                                "message", error.getMessage()
+                        ));
+                    }
+                }
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                    "valid", isValid,
+                    "errors", errors
+            ));
+        } catch (Exception e) {
+            log.error("❌ Error validating bulk stock movements: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "valid", false,
+                    "errors", List.of(Map.of(
+                            "index", -1,
+                            "message", "Failed to validate bulk movements: " + e.getMessage()
+                    ))
+            ));
+        }
+    }
+
+    /**
+     * Create bulk stock movements
+     */
+    @PostMapping("/bulk-create")
+    @ResponseBody
+    public ResponseEntity<?> createBulkStockMovements(
+            @RequestBody Map<String, List<StockMovementCreateDTO>> request,
+            HttpServletRequest httpRequest,
+            Authentication authentication) {
+
+        List<StockMovementCreateDTO> movements = request.get("movements");
+        log.info("➕ Creating {} bulk stock movements", movements.size());
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(httpRequest, authentication, true);
+            log.info("➕ Using tenant: {}", tenantId);
+            
+            List<StockMovementResponseDTO> results = new ArrayList<>();
+            for (StockMovementCreateDTO movement : movements) {
+                StockMovementResponseDTO result = stockMovementService.createStockMovement(movement);
+                results.add(result);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Successfully created " + results.size() + " stock movements",
+                    "movements", results
+            ));
+        } catch (Exception e) {
+            log.error("❌ Error creating bulk stock movements: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Failed to create bulk movements: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Validate CSV upload
+     */
+    @PostMapping("/validate-csv")
+    @ResponseBody
+    public ResponseEntity<?> validateCsvUpload(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("✅ Validating CSV upload - File: {}, Size: {}KB", 
+                file.getOriginalFilename(), file.getSize() / 1024);
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("✅ Using tenant: {}", tenantId);
+            
+            List<Map<String, Object>> errors = stockMovementService.validateCsvFile(file);
+            boolean isValid = errors.isEmpty();
+            
+            return ResponseEntity.ok(Map.of(
+                    "valid", isValid,
+                    "errors", errors
+            ));
+        } catch (Exception e) {
+            log.error("❌ Error validating CSV file: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "valid", false,
+                    "errors", List.of(Map.of(
+                            "index", -1,
+                            "message", "Failed to validate CSV file: " + e.getMessage()
+                    ))
+            ));
+        }
+    }
+
+    /**
+     * Upload CSV file
+     */
+    @PostMapping("/upload-csv")
+    @ResponseBody
+    public ResponseEntity<?> uploadCsvFile(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("📤 Processing CSV upload - File: {}, Size: {}KB",
+                file.getOriginalFilename(), file.getSize() / 1024);
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("📤 Using tenant: {}", tenantId);
+            
+            int processedCount = stockMovementService.importFromCsv(file);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Successfully processed " + processedCount + " stock movements from CSV"
+            ));
+        } catch (Exception e) {
+            log.error("❌ Error processing CSV upload: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Failed to process CSV upload: " + e.getMessage()
             ));
         }
     }

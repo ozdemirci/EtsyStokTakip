@@ -497,6 +497,186 @@
         </div>
     </div>
 
+    <!-- Product Analysis Section -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <main class="col-md-10 ms-sm-auto main-content">
+                <div class="p-4">
+                    <!-- Analysis Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h2 class="h3">
+                            <i class="bi bi-graph-up"></i> Product Stock Analysis & Prediction
+                        </h2>
+                    </div>
+
+                    <!-- Analysis Filters -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-funnel me-2"></i>Analysis Filters
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="analysisProductSelect" class="form-label">Select Product</label>
+                                    <select class="form-select" id="analysisProductSelect">
+                                        <option value="">All Products</option>
+                                        <!-- Products will be loaded via AJAX -->
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="timePeriodSelect" class="form-label">Time Period</label>
+                                    <select class="form-select" id="timePeriodSelect">
+                                        <option value="7">Last 7 Days</option>
+                                        <option value="14">Last 14 Days</option>
+                                        <option value="30" selected>Last 30 Days</option>
+                                        <option value="60">Last 60 Days</option>
+                                        <option value="90">Last 90 Days</option>
+                                        <option value="180">Last 6 Months</option>
+                                        <option value="365">Last Year</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="movementTypeFilter" class="form-label">Movement Type</label>
+                                    <select class="form-select" id="movementTypeFilter">
+                                        <option value="">All Movement Types</option>
+                                        <option value="IN">Stock In</option>
+                                        <option value="OUT">Stock Out</option>
+                                        <option value="ADJUSTMENT">Adjustment</option>
+                                        <option value="RETURN">Return</option>
+                                        <option value="TRANSFER">Transfer</option>
+                                        <option value="DAMAGED">Damaged</option>
+                                        <option value="EXPIRED">Expired</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary w-100" onclick="loadAnalysisData()">
+                                        <i class="bi bi-search me-2"></i>Analyze
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Results -->
+                    <div id="analysisResults" style="display: none;">
+                        <!-- Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <div class="display-6 mb-2" id="totalMovements">0</div>
+                                        <h6 class="card-title">Total Movements</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <div class="display-6 mb-2" id="totalIn">0</div>
+                                        <h6 class="card-title">Total Stock In</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <div class="display-6 mb-2" id="totalOut">0</div>
+                                        <h6 class="card-title">Total Stock Out</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <div class="display-6 mb-2" id="netChange">0</div>
+                                        <h6 class="card-title">Net Change</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stock Prediction -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-clock me-2"></i>Stock Depletion Prediction
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="stockPrediction">
+                                            <div class="text-center py-4">
+                                                <i class="bi bi-hourglass-split display-4 text-muted"></i>
+                                                <p class="text-muted mt-3">Select a product to see stock prediction</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-bar-chart me-2"></i>Usage Trends
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="usageTrends">
+                                            <div class="text-center py-4">
+                                                <i class="bi bi-graph-up display-4 text-muted"></i>
+                                                <p class="text-muted mt-3">Usage trends will appear here</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movement Details Table -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-table me-2"></i>Movement Details
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="analysisMovementsTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Product</th>
+                                                <th>Movement Type</th>
+                                                <th>Quantity</th>
+                                                <th>Running Total</th>
+                                                <th>Reference</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be populated via JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="analysisLoading" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Analyzing stock movements...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
     <script>
         // Create stock movement
         function createStockMovement() {
@@ -704,22 +884,240 @@
                 .catch(err => console.error('Failed to load products', err));
         }
 
+        // Load products for analysis dropdown
+        function loadProductsToAnalysisSelect() {
+            fetch('/admin/products/api')
+                .then(response => {
+                    if (!response.ok) throw new Error('Server error: ' + response.status);
+                    return response.json();
+                })
+                .then(products => {
+                    const select = document.getElementById('analysisProductSelect');
+                    // Keep the "All Products" option
+                    select.innerHTML = '<option value="">All Products</option>';
+                    products.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
+                        select.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Failed to load products for analysis', err));
+        }
+
+        // Load analysis data based on filters
+        function loadAnalysisData() {
+            const productId = document.getElementById('analysisProductSelect').value;
+            const timePeriod = document.getElementById('timePeriodSelect').value;
+            const movementType = document.getElementById('movementTypeFilter').value;
+
+            // Show loading indicator
+            document.getElementById('analysisLoading').style.display = 'block';
+            document.getElementById('analysisResults').style.display = 'none';
+
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (productId) params.append('productId', productId);
+            params.append('days', timePeriod);
+            if (movementType) params.append('movementType', movementType);
+
+            fetch(`/admin/stock-movements/analysis?${params.toString()}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Server error: ' + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    displayAnalysisResults(data);
+                })
+                .catch(error => {
+                    console.error('Error loading analysis data:', error);
+                    alert('Error loading analysis data: ' + error.message);
+                })
+                .finally(() => {
+                    document.getElementById('analysisLoading').style.display = 'none';
+                });
+        }
+
+        // Display analysis results
+        function displayAnalysisResults(data) {
+            // Update summary cards
+            document.getElementById('totalMovements').textContent = data.totalMovements || 0;
+            document.getElementById('totalIn').textContent = data.totalIn || 0;
+            document.getElementById('totalOut').textContent = data.totalOut || 0;
+            document.getElementById('netChange').textContent = (data.totalIn - data.totalOut) || 0;
+
+            // Update stock prediction
+            displayStockPrediction(data.prediction);
+
+            // Update usage trends
+            displayUsageTrends(data.trends);
+
+            // Update movements table
+            displayMovementsTable(data.movements);
+
+            // Show results
+            document.getElementById('analysisResults').style.display = 'block';
+        }
+
+        // Display stock prediction
+        function displayStockPrediction(prediction) {
+            const container = document.getElementById('stockPrediction');
+            
+            if (!prediction || !prediction.currentStock) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="bi bi-info-circle display-4 text-muted"></i>
+                        <p class="text-muted mt-3">No prediction data available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentStock = prediction.currentStock;
+            const avgDailyUsage = prediction.avgDailyUsage || 0;
+            const daysRemaining = avgDailyUsage > 0 ? Math.ceil(currentStock / avgDailyUsage) : Infinity;
+            
+            let statusClass = 'success';
+            let statusIcon = 'check-circle';
+            let statusText = 'Stock levels are healthy';
+            
+            if (daysRemaining <= 7) {
+                statusClass = 'danger';
+                statusIcon = 'exclamation-triangle';
+                statusText = 'Critical: Stock running low!';
+            } else if (daysRemaining <= 30) {
+                statusClass = 'warning';
+                statusIcon = 'exclamation-circle';
+                statusText = 'Warning: Stock needs attention';
+            }
+
+            const estimatedDepletionDate = new Date();
+            estimatedDepletionDate.setDate(estimatedDepletionDate.getDate() + daysRemaining);
+
+            container.innerHTML = `
+                <div class="alert alert-${statusClass} d-flex align-items-center" role="alert">
+                    <i class="bi bi-${statusIcon} me-2"></i>
+                    <div>
+                        <strong>${statusText}</strong>
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="border-end">
+                            <div class="h4 text-primary">${currentStock}</div>
+                            <small class="text-muted">Current Stock</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border-end">
+                            <div class="h4 text-info">${avgDailyUsage.toFixed(1)}</div>
+                            <small class="text-muted">Avg Daily Usage</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="h4 text-${statusClass}">${daysRemaining === Infinity ? '∞' : daysRemaining}</div>
+                        <small class="text-muted">Days Remaining</small>
+                    </div>
+                </div>
+                ${daysRemaining !== Infinity ? `
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <strong>Estimated Depletion Date:</strong><br>
+                        <span class="text-${statusClass}">${estimatedDepletionDate.toLocaleDateString('tr-TR')}</span>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Display usage trends
+        function displayUsageTrends(trends) {
+            const container = document.getElementById('usageTrends');
+            
+            if (!trends || trends.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="bi bi-graph-up display-4 text-muted"></i>
+                        <p class="text-muted mt-3">No trend data available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Simple trend visualization
+            let trendHtml = '<div class="mb-3"><strong>Daily Usage Trends:</strong></div>';
+            trends.forEach((trend, index) => {
+                const percentage = trends.length > 1 ? (trend.usage / Math.max(...trends.map(t => t.usage))) * 100 : 100;
+                trendHtml += `
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <small>${trend.date}</small>
+                            <small><strong>${trend.usage}</strong> units</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar" 
+                                 style="width: ${percentage}%" aria-valuenow="${percentage}" 
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = trendHtml;
+        }
+
+        // Display movements table
+        function displayMovementsTable(movements) {
+            const tbody = document.querySelector('#analysisMovementsTable tbody');
+            
+            if (!movements || movements.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="bi bi-inbox display-4 text-muted"></i>
+                            <div class="mt-2 text-muted">No movements found for the selected criteria</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let runningTotal = 0;
+            tbody.innerHTML = movements.map(movement => {
+                runningTotal += movement.quantity;
+                
+                const movementTypeClass = `movement-${movement.movementType.toLowerCase()}`;
+                const quantityClass = movement.quantity > 0 ? 'text-success' : 'text-danger';
+                
+                return `
+                    <tr>
+                        <td><small>${new Date(movement.createdAt).toLocaleDateString('tr-TR')}</small></td>
+                        <td>
+                            <div>
+                                <strong>${movement.productTitle}</strong><br>
+                                <small class="text-muted">${movement.productSku}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="movement-type-badge ${movementTypeClass}">
+                                ${movement.movementTypeDisplay}
+                            </span>
+                        </td>
+                        <td class="${quantityClass}">
+                            <strong>${movement.quantity > 0 ? '+' : ''}${movement.quantity}</strong>
+                        </td>
+                        <td><strong>${runningTotal}</strong></td>
+                        <td><small>${movement.referenceId || '-'}</small></td>
+                        <td><small>${movement.notes || '-'}</small></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Initialize analysis dropdown on page load
         document.addEventListener('DOMContentLoaded', function () {
             loadProductsToSelects();
             loadProductsToSingleSelect();
-
-            // Satır eklendiğinde yeni select'e de ürünleri ekle
-            window.addBulkRow = function () {
-                const table = document.getElementById('bulkMovementTable').getElementsByTagName('tbody')[0];
-                const newRow = table.rows[0].cloneNode(true);
-                Array.from(newRow.querySelectorAll('input, select')).forEach(el => el.value = '');
-                table.appendChild(newRow);
-                loadProductsToSelects(); // Yeni select için tekrar doldur
-            };
+            loadProductsToAnalysisSelect(); // Add this line
         });
-
-
-
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

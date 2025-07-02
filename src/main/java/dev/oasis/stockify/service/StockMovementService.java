@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -343,25 +344,60 @@ public class StockMovementService {
         return errors;
     }
 
-    public List<ValidationErrorDTO> validateCsv(MultipartFile file) throws IOException, com.opencsv.exceptions.CsvValidationException {
-        List<ValidationErrorDTO> errors = new ArrayList<>();
+    /**
+     * Validate stock movement and return ValidationErrorDTO list
+     */
+    public List<ValidationErrorDTO> validateStockMovementWithDTO(StockMovementCreateDTO dto) {
+        List<String> stringErrors = validateStockMovement(dto);
+        return stringErrors.stream()
+                .map(error -> new ValidationErrorDTO(0, error))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Validate CSV file for stock movements
+     */
+    public List<Map<String, Object>> validateCsvFile(MultipartFile file) {
+        List<Map<String, Object>> errors = new ArrayList<>();
+        
         try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
             String[] nextLine;
             int index = 0;
+            
+            // Skip header
             reader.readNext();
+            
             while ((nextLine = reader.readNext()) != null) {
-                StockMovementCreateDTO dto = new StockMovementCreateDTO();
-                dto.setProductId(Long.parseLong(nextLine[0]));
-                dto.setMovementType(StockMovement.MovementType.valueOf(nextLine[1]));
-                dto.setQuantity(Integer.parseInt(nextLine[2]));
-                dto.setReferenceId(nextLine.length > 3 ? nextLine[3] : null);
-                List<String> val = validateStockMovement(dto);
-                if (!val.isEmpty()) {
-                    errors.add(new ValidationErrorDTO(index, String.join("; ", val)));
+                try {
+                    StockMovementCreateDTO dto = new StockMovementCreateDTO();
+                    dto.setProductId(Long.parseLong(nextLine[0]));
+                    dto.setMovementType(StockMovement.MovementType.valueOf(nextLine[1]));
+                    dto.setQuantity(Integer.parseInt(nextLine[2]));
+                    dto.setReferenceId(nextLine.length > 3 ? nextLine[3] : null);
+                    dto.setNotes(nextLine.length > 4 ? nextLine[4] : null);
+                    
+                    List<String> validationErrors = validateStockMovement(dto);
+                    if (!validationErrors.isEmpty()) {
+                        errors.add(Map.of(
+                                "index", index,
+                                "message", String.join("; ", validationErrors)
+                        ));
+                    }
+                } catch (Exception e) {
+                    errors.add(Map.of(
+                            "index", index,
+                            "message", "Invalid data format: " + e.getMessage()
+                    ));
                 }
                 index++;
             }
+        } catch (Exception e) {
+            errors.add(Map.of(
+                    "index", -1,
+                    "message", "Failed to read CSV file: " + e.getMessage()
+            ));
         }
+        
         return errors;
     }
 
