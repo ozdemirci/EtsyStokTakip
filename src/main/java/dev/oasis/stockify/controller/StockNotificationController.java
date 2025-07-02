@@ -2,7 +2,7 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.StockNotificationService;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import lombok.RequiredArgsConstructor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +19,7 @@ import java.util.List;
 public class StockNotificationController {
 
     private final StockNotificationService stockNotificationService;
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
     
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {

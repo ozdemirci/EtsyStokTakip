@@ -17,9 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class RegistrationService {
-      private final TenantManagementService tenantManagementService;
+    
+    private final TenantManagementService tenantManagementService;
     private final AppUserService appUserService;
     private final SubscriptionService subscriptionService;
+
+    
       /**
      * Register a new user with company/tenant
      * 

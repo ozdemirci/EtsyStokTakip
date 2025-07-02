@@ -1,7 +1,7 @@
 package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.dto.RegistrationResultDTO;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class LoginController {    
     
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
 
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String tenantId, 

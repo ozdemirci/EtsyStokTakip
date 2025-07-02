@@ -12,10 +12,11 @@ import dev.oasis.stockify.service.ProductCategoryService;
 import dev.oasis.stockify.service.ProductImportExportService;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.model.AppUser;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 public class AdminProductController { 
@@ -51,19 +53,9 @@ public class AdminProductController {
     private final ProductCategoryService categoryService;
     private final ProductImportExportService importExportService;
     private final AppUserRepository appUserRepository;
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
 
-    public AdminProductController(ProductService productService, 
-                                 ProductCategoryService categoryService, 
-                                 ProductImportExportService importExportService,
-                                 AppUserRepository appUserRepository,
-                                 TenantResolutionUtil tenantResolutionUtil) {
-        this.productService = productService;
-        this.categoryService = categoryService;
-        this.importExportService = importExportService;
-        this.appUserRepository = appUserRepository;
-        this.tenantResolutionUtil = tenantResolutionUtil;
-    }
+    
     
     @ModelAttribute
     public void setupTenant(HttpServletRequest request) {

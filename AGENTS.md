@@ -7,8 +7,10 @@
 - Java 17 ve Maven kullanilir. Build islemlerinde `mvn` komutlarini tercih edin.
 -mümkün oldukça lombok kullanmaya çalış
 -tenants lowercase olarak tanımla ve çalıştır
--postgresql de stockify adında database olmalı.
+-stockify adında database olmalı.
 -uygulama başlatmak için "mvn clean compile spring-boot:run" komutunu kullan
+-powershell kullan curl kullanma
+
 
 
 

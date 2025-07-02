@@ -38,7 +38,6 @@ public class SuperAdminService {
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final ContactMessageRepository contactMessageRepository;
-    private final TenantConfigRepository tenantConfigRepository;
     private final AppUserService appUserService;
     private final DataSource dataSource;
     private final ServiceTenantUtil serviceTenantUtil;

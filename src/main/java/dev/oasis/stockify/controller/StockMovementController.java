@@ -6,8 +6,9 @@ import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.ValidationErrorDTO;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.service.StockMovementService;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,18 +27,16 @@ import java.util.Map;
  * Controller for stock movement operations
  */
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/admin/stock-movements")
 @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
 @Slf4j
 public class StockMovementController {
 
     private final StockMovementService stockMovementService;
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
 
-    public StockMovementController(StockMovementService stockMovementService, TenantResolutionUtil tenantResolutionUtil) {
-        this.stockMovementService = stockMovementService;
-        this.tenantResolutionUtil = tenantResolutionUtil;
-    }
+     
 
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {

@@ -15,6 +15,7 @@ import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.TenantConfigService;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.service.StockNotificationService;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +44,7 @@ public class AdminDashboardController {
     private final StockNotificationService stockNotificationService;
     private final SubscriptionService subscriptionService;
     private final TenantConfigService tenantConfigService;
-    private final dev.oasis.stockify.util.TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
     
 
     @GetMapping

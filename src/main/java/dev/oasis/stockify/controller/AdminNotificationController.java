@@ -2,7 +2,8 @@ package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.StockNotificationService;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,15 +26,13 @@ import java.util.Map;
 @RequestMapping("/admin/notifications")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @Slf4j
+@RequiredArgsConstructor
 public class AdminNotificationController {
     
     private final StockNotificationService stockNotificationService;
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
 
-    public AdminNotificationController(StockNotificationService stockNotificationService, TenantResolutionUtil tenantResolutionUtil) {
-        this.stockNotificationService = stockNotificationService;
-        this.tenantResolutionUtil = tenantResolutionUtil;
-    }
+    
     
     @ModelAttribute
     public void setupTenant(HttpServletRequest request) {

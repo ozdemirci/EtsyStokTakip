@@ -29,7 +29,7 @@ public class TenantResolutionUtilTest {
     private Authentication authentication;
 
     @InjectMocks
-    private TenantResolutionUtil tenantResolutionUtil;
+    private ControllerTenantUtil tenantResolutionUtil;
 
     @BeforeEach
     void setUp() {

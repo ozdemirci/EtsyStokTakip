@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
-public class TenantResolutionUtil {
+public class ControllerTenantUtil {
 
     // Standard header name for tenant ID
     private static final String TENANT_HEADER = "X-TenantId";

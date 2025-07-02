@@ -4,7 +4,7 @@ import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
 import dev.oasis.stockify.service.ProductService;
 import dev.oasis.stockify.service.ProductCategoryService;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class UserProductController {
 
     private final ProductService productService;
     private final ProductCategoryService categoryService;
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
 
     /**
      * Ensure tenant context is set for each request

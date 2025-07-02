@@ -9,6 +9,7 @@ import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.util.ServiceTenantUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,11 +19,10 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service for managing product operations
- */
+
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -30,17 +30,7 @@ public class ProductService {
     private final StockMovementService stockMovementService;
     private final ServiceTenantUtil serviceTenantUtil;
 
-    public ProductService(ProductRepository productRepository,
-                         ProductMapper productMapper,
-                         StockNotificationService stockNotificationService,
-                         StockMovementService stockMovementService,
-                         ServiceTenantUtil serviceTenantUtil) {
-        this.productRepository = productRepository;
-        this.productMapper = productMapper;
-        this.stockNotificationService = stockNotificationService;
-        this.stockMovementService = stockMovementService;
-        this.serviceTenantUtil = serviceTenantUtil;
-    }    
+        
     
     /**
      * Retrieves all products from the database

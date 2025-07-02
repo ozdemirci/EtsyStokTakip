@@ -8,7 +8,7 @@ import dev.oasis.stockify.service.DashboardService;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.StockNotificationService;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,7 +32,7 @@ public class UserDashboardController {
     private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
     private final StockNotificationService stockNotificationService;
-    private final TenantResolutionUtil tenantResolutionUtil;
+    private final ControllerTenantUtil tenantResolutionUtil;
 
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {

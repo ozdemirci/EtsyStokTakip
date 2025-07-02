@@ -4,7 +4,7 @@ import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.service.AppUserService;
-import dev.oasis.stockify.util.TenantResolutionUtil;
+import dev.oasis.stockify.util.ControllerTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,7 +34,7 @@ import java.util.List;
 public class AdminUserController {
     
     private final AppUserService appUserService;
-    private final TenantResolutionUtil tenantResolutionUtil;    
+    private final ControllerTenantUtil tenantResolutionUtil;    
 
     /**
      * Ensure tenant context is set for all requests in this controller

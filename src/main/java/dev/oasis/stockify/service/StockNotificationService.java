@@ -3,33 +3,30 @@ package dev.oasis.stockify.service;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.repository.StockNotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class StockNotificationService {
-    private static final Logger logger = LoggerFactory.getLogger(StockNotificationService.class);
+    
     private final StockNotificationRepository notificationRepository;
     private final Optional<EmailService> emailService;
 
-    public StockNotificationService(StockNotificationRepository notificationRepository,
-                                  @Autowired(required = false) EmailService emailService) {
-        this.notificationRepository = notificationRepository;
-        this.emailService = Optional.ofNullable(emailService);
-        logger.info("StockNotificationService initialized. Email service enabled: {}", this.emailService.isPresent());
-    }
+   
 
     @Transactional
     public void checkAndCreateLowStockNotification(Product product) {
         if (product.isLowStock()) {
             boolean exists = notificationRepository.existsByProductAndReadFalse(product);
             if (exists) {
-                logger.debug("Low stock notification already exists for product: {}", product.getTitle());
+                log.debug("Low stock notification already exists for product: {}", product.getTitle());
                 return;
             }
 
@@ -39,14 +36,14 @@ public class StockNotificationService {
                     product.getTitle(), product.getStockLevel(), product.getLowStockThreshold()));
             notification.setRead(false);
             notificationRepository.save(notification);
-            logger.info("Created low stock notification for product: {}", product.getTitle());
+            log.info("Created low stock notification for product: {}", product.getTitle());
 
             // Send email notification if service is available
             emailService.ifPresent(service -> {
                 try {
                     service.sendLowStockNotification(product);
                 } catch (Exception e) {
-                    logger.error("Failed to send email notification", e);
+                    log.error("Failed to send email notification", e);
                 }
             });
         }
@@ -71,14 +68,14 @@ public class StockNotificationService {
     @Transactional
     public int markAllAsRead() {
         int count = notificationRepository.markAllAsRead();
-        logger.info("Marked {} notifications as read", count);
+        log.info("Marked {} notifications as read", count);
         return count;
     }
 
     @Transactional
     public int deleteAllRead() {
         int count = notificationRepository.deleteAllRead();
-        logger.info("Deleted {} read notifications", count);
+        log.info("Deleted {} read notifications", count);
         return count;
     }
 
@@ -86,10 +83,10 @@ public class StockNotificationService {
     public boolean deleteNotification(Long notificationId) {
         try {
             notificationRepository.deleteById(notificationId);
-            logger.info("Deleted notification with ID: {}", notificationId);
+            log.info("Deleted notification with ID: {}", notificationId);
             return true;
         } catch (Exception e) {
-            logger.error("Failed to delete notification with ID: {}", notificationId, e);
+            log.error("Failed to delete notification with ID: {}", notificationId, e);
             return false;
         }
     }
