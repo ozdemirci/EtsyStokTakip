@@ -1,8 +1,8 @@
 package dev.oasis.stockify.controller;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.StockNotification;
 import dev.oasis.stockify.service.StockNotificationService;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,12 +28,21 @@ import java.util.Map;
 public class UserNotificationController {
 
     private final StockNotificationService stockNotificationService;
+    private final TenantResolutionUtil tenantResolutionUtil;
 
-    public UserNotificationController(StockNotificationService stockNotificationService) {
+    public UserNotificationController(StockNotificationService stockNotificationService, TenantResolutionUtil tenantResolutionUtil) {
         this.stockNotificationService = stockNotificationService;
-    }    @GetMapping
+        this.tenantResolutionUtil = tenantResolutionUtil;
+    }
+    
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
+
+    @GetMapping
     public String notifications(HttpServletRequest request, Model model, Authentication authentication) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("🔔 User accessing notifications for tenant: {}", tenantId);
         
         List<StockNotification> notifications = stockNotificationService.getAllNotifications();
@@ -59,8 +69,9 @@ public class UserNotificationController {
 
     @PostMapping("/mark-all-read")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> markAllAsRead() {
-        log.info("📧 markAllAsRead endpoint called by user");
+    public ResponseEntity<Map<String, Object>> markAllAsRead(HttpServletRequest request, Authentication authentication) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+        log.info("📧 markAllAsRead endpoint called by user for tenant: {}", tenantId);
         try {
             int count = stockNotificationService.markAllAsRead();
             Map<String, Object> response = new HashMap<>();
@@ -147,19 +158,5 @@ public class UserNotificationController {
         response.put("timestamp", java.time.LocalDateTime.now().toString());
         log.info("User notification test endpoint called");
         return ResponseEntity.ok(response);
-    }
-
-    private String getCurrentTenantId(HttpServletRequest request) {
-        String tenantId = TenantContext.getCurrentTenant();
-        if (tenantId != null && !tenantId.trim().isEmpty()) {
-            return tenantId.toLowerCase();
-        }
-        
-        tenantId = (String) request.getSession().getAttribute("tenantId");
-        if (tenantId != null && !tenantId.trim().isEmpty()) {
-            return tenantId.toLowerCase();
-        }
-        
-        return "public";
     }
 }

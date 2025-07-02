@@ -1,5 +1,6 @@
 package dev.oasis.stockify.service;
 
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class TenantConfigService {
 
     private final DataSource dataSource;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     /**
      * Get tenant configuration value by key
@@ -123,7 +125,7 @@ public class TenantConfigService {
      */
     private String getCurrentTenantFromContext() {
         try {
-            return dev.oasis.stockify.config.tenant.TenantContext.getCurrentTenant();
+            return serviceTenantUtil.getCurrentTenant();
         } catch (Exception e) {
             log.warn("Could not get tenant from context: {}", e.getMessage());
             return "unknown";

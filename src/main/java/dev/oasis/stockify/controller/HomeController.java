@@ -3,10 +3,12 @@ package dev.oasis.stockify.controller;
 import dev.oasis.stockify.dto.ContactMessageDTO;
 import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.service.ContactMessageService;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,9 +23,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class HomeController {
 
     private final ContactMessageService contactMessageService;
+    private final TenantResolutionUtil tenantResolutionUtil;
+    
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(HttpServletRequest request, Authentication authentication, Model model) {
+        // Tenant ID çözümleme - şu anda kullanılmıyor ancak gelecekte gerekebilir
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, false);
+        model.addAttribute("currentTenantId", tenantId);
         return "index";
     }
     

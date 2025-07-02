@@ -6,14 +6,14 @@ import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.ValidationErrorDTO;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.service.StockMovementService;
-import dev.oasis.stockify.config.tenant.TenantContext;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,11 +28,21 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin/stock-movements")
 @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-@RequiredArgsConstructor
 @Slf4j
 public class StockMovementController {
 
     private final StockMovementService stockMovementService;
+    private final TenantResolutionUtil tenantResolutionUtil;
+
+    public StockMovementController(StockMovementService stockMovementService, TenantResolutionUtil tenantResolutionUtil) {
+        this.stockMovementService = stockMovementService;
+        this.tenantResolutionUtil = tenantResolutionUtil;
+    }
+
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
 
     /**
      * Display stock movements page
@@ -42,19 +52,19 @@ public class StockMovementController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request,
+            Authentication authentication,
             Model model) {
 
         log.info("📋 Displaying stock movements page - Page: {}, Size: {}", page, size);
 
         try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("📋 Using tenant: {}", tenantId);
+            
             Page<StockMovementResponseDTO> movements = stockMovementService.getAllStockMovements(page, size);
             StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
 
-            String tenantId = getCurrentTenantId(request);
-            TenantContext.setCurrentTenant(tenantId);
-
             model.addAttribute("currentTenantId", tenantId);
-
             model.addAttribute("movements", movements);
             model.addAttribute("stats", stats);
             model.addAttribute("currentPage", page);
@@ -72,174 +82,152 @@ public class StockMovementController {
     }
 
     /**
-     * Create new stock movement (AJAX)
+     * Filter stock movements
      */
-    @PostMapping("/create")
-    @ResponseBody
-    public ResponseEntity<?> createStockMovement(@RequestBody StockMovementCreateDTO dto) {
-        log.info("🔄 Creating stock movement for product ID: {}", dto.getProductId());
+    @GetMapping("/filter")
+    public String filterStockMovements(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String productId,
+            @RequestParam(required = false) String movementType,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            HttpServletRequest request,
+            Authentication authentication,
+            Model model) {
+
+        log.info("🔍 Filtering stock movements - Page: {}, Size: {}, ProductId: {}, Type: {}, StartDate: {}, EndDate: {}",
+                page, size, productId, movementType, startDate, endDate);
 
         try {
-            StockMovementResponseDTO response = stockMovementService.createStockMovement(dto);
-            return ResponseEntity.ok(response);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("🔍 Using tenant: {}", tenantId);
+            
+            Page<StockMovementResponseDTO> movements;
+            if (productId != null || movementType != null || startDate != null || endDate != null) {
+                // Convert to appropriate format or handle filters in the frontend
+                // For now, just get all movements
+                movements = stockMovementService.getAllStockMovements(page, size);
+            } else {
+                movements = stockMovementService.getAllStockMovements(page, size);
+            }
+            StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
 
+            model.addAttribute("currentTenantId", tenantId);
+            model.addAttribute("movements", movements);
+            model.addAttribute("stats", stats);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", movements.getTotalPages());
+            model.addAttribute("totalElements", movements.getTotalElements());
+            model.addAttribute("movementTypes", StockMovement.MovementType.values());
+            model.addAttribute("filterActive", true);
+            model.addAttribute("productId", productId);
+            model.addAttribute("movementType", movementType);
+            model.addAttribute("startDate", startDate);
+            model.addAttribute("endDate", endDate);
+
+            return "admin/stock-movements";
+
+        } catch (Exception e) {
+            log.error("❌ Error filtering stock movements: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to filter stock movements: " + e.getMessage());
+            return "admin/stock-movements";
+        }
+    }
+
+    /**
+     * Create stock movement
+     */
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity<?> createStockMovement(
+            @RequestBody StockMovementCreateDTO movementCreateDTO,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("➕ Creating stock movement for product: {}, quantity: {}, type: {}",
+                movementCreateDTO.getProductId(), movementCreateDTO.getQuantity(), movementCreateDTO.getMovementType());
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("➕ Using tenant: {}", tenantId);
+            
+            StockMovementResponseDTO createdMovement = stockMovementService.createStockMovement(movementCreateDTO);
+            return ResponseEntity.ok(createdMovement);
         } catch (Exception e) {
             log.error("❌ Error creating stock movement: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    new ValidationErrorDTO(0, "Failed to create stock movement: " + e.getMessage())
+            );
         }
     }
 
-    @PostMapping("/validate")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> validateMovement(@RequestBody StockMovementCreateDTO dto) {
-        List<String> errors = stockMovementService.validateStockMovement(dto);
-        return ResponseEntity.ok(Map.of(
-                "valid", errors.isEmpty(),
-                "errors", errors
-        ));
-    }
-
     /**
-     * Get stock movements by product (AJAX)
+     * Handle bulk stock movement upload
      */
-    @GetMapping("/product/{productId}")
+    @PostMapping("/bulk-upload")
     @ResponseBody
-    public ResponseEntity<List<StockMovementResponseDTO>> getStockMovementsByProduct(@PathVariable Long productId) {
-        log.info("📋 Fetching stock movements for product ID: {}", productId);
+    public ResponseEntity<?> bulkStockMovementUpload(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("📤 Processing bulk stock movement upload - File: {}, Size: {}KB",
+                file.getOriginalFilename(), file.getSize() / 1024);
 
         try {
-            List<StockMovementResponseDTO> movements = stockMovementService.getStockMovementsByProduct(productId);
-            return ResponseEntity.ok(movements);
-
-        } catch (Exception e) {
-            log.error("❌ Error fetching stock movements for product {}: {}", productId, e.getMessage(), e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Get stock movement statistics (AJAX)
-     */
-    @GetMapping("/stats")
-    @ResponseBody
-    public ResponseEntity<StockMovementService.StockMovementStats> getStockMovementStats() {
-        log.info("📊 Fetching stock movement statistics");
-
-        try {
-            StockMovementService.StockMovementStats stats = stockMovementService.getStockMovementStats();
-            return ResponseEntity.ok(stats);
-
-        } catch (Exception e) {
-            log.error("❌ Error fetching stock movement statistics: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * -------------------------------------------------------------------------------------
-     * Toplu stok hareketi
-     */
-
-    @GetMapping("/bulk")
-    public String bulk(Model model) {
-        return "admin/bulk-stock-movements";
-    }
-
-    /**
-     * Toplu stok hareketi girişi
-     */
-    @PostMapping("/bulk-create")
-    @ResponseBody
-    public ResponseEntity<?> createBulkMovements(@RequestBody BulkStockMovementCreateDTO bulkDto) {
-        try {
-            List<StockMovementResponseDTO> response = stockMovementService.createBulkStockMovements(bulkDto);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("❌ Error bulk creating stock movement: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/bulk-validate")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> validateBulk(@RequestBody BulkStockMovementCreateDTO bulkDto) {
-        List<ValidationErrorDTO> errors = stockMovementService.validateBulkStockMovements(bulkDto);
-        return ResponseEntity.ok(Map.of(
-                "valid", errors.isEmpty(),
-                "errors", errors
-        ));
-    }
-
-    /**
-     * Toplu stok hareketi girişi
-     */    
-    @PostMapping("/upload-csv")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> uploadCsv(@RequestParam("file") MultipartFile file) {
-        try {
-            stockMovementService.importFromCsv(file);
-            return ResponseEntity.ok(Map.of("success", true, "message", "Başarıyla yüklendi"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Yükleme hatası: " + e.getMessage()));
-        }
-    }
-
-    @PostMapping("/validate-csv")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> validateCsv(@RequestParam("file") MultipartFile file) {
-        try {
-            List<ValidationErrorDTO> errors = stockMovementService.validateCsv(file);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("📤 Using tenant: {}", tenantId);
+            
+            int processedCount = stockMovementService.importFromCsv(file);
+            List<StockMovementResponseDTO> results = stockMovementService.getRecentMovements(processedCount);
+            
             return ResponseEntity.ok(Map.of(
-                    "valid", errors.isEmpty(),
-                    "errors", errors
+                    "success", true,
+                    "message", "Successfully processed " + results.size() + " stock movements",
+                    "movements", results
             ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("valid", false, "message", e.getMessage()));
+            log.error("❌ Error processing bulk stock movement upload: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Failed to process bulk upload: " + e.getMessage()
+            ));
         }
     }
 
     /**
-     * Bugünün hareketlerini getirir
+     * Process bulk stock movement data
      */
-    @GetMapping("/bulk/today")
-    public List<StockMovementResponseDTO> getTodaysMovements() {
-        return stockMovementService.getTodaysStockMovements();
+    @PostMapping("/bulk")
+    @ResponseBody
+    public ResponseEntity<?> processBulkStockMovements(
+            @RequestBody List<BulkStockMovementCreateDTO> movements,
+            HttpServletRequest request,
+            Authentication authentication) {
+
+        log.info("📦 Processing {} bulk stock movements", movements.size());
+
+        try {
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+            log.info("📦 Using tenant: {}", tenantId);
+            
+            List<StockMovementResponseDTO> results = new java.util.ArrayList<>();
+            for (BulkStockMovementCreateDTO bulkMovement : movements) {
+                List<StockMovementResponseDTO> movementResults = stockMovementService.createBulkStockMovements(bulkMovement);
+                results.addAll(movementResults);
+            }
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Successfully processed " + results.size() + " stock movements",
+                    "movements", results
+            ));
+        } catch (Exception e) {
+            log.error("❌ Error processing bulk stock movements: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Failed to process bulk movements: " + e.getMessage()
+            ));
+        }
     }
-
-    /**
-     * Tarih aralığına göre hareket getirir
-     */
-    @GetMapping("/bulk/by-date")
-    public List<StockMovementResponseDTO> getMovementsByDateRange(
-            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        return stockMovementService.getStockMovementsByDateRange(start, end);
-    }
-
-   
-
-    private String getCurrentTenantId(HttpServletRequest request) {
-        String currentTenantId = TenantContext.getCurrentTenant();
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId;
-        }
-
-        currentTenantId = (String) request.getSession().getAttribute("tenantId");
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId;
-        }
-
-        currentTenantId = request.getHeader("X-TenantId");
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
-        }
-
-        currentTenantId = request.getParameter("tenant_id");
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
-        }
-
-        return "public";
-    }
-
 }

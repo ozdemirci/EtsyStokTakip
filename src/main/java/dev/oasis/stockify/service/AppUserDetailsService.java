@@ -1,8 +1,8 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.repository.AppUserRepository;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,7 +27,8 @@ import java.sql.SQLException;
 public class AppUserDetailsService implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
-    private final DataSource dataSource;   
+    private final DataSource dataSource;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,7 +44,7 @@ public class AppUserDetailsService implements UserDetailsService {
             String paramTenantId = request.getParameter("tenant_id");
 
             // Mevcut tenant context'i kontrol et
-            String currentTenant = TenantContext.getCurrentTenant();
+            String currentTenant = serviceTenantUtil.getCurrentTenant();
 
             // Final tenant ID'yi belirle
             final String tenantId;
@@ -58,7 +59,7 @@ public class AppUserDetailsService implements UserDetailsService {
             } else {
                 // Tenant ID'yi küçük harfe çevir ve context'e ayarla
                 tenantId = paramTenantId.toLowerCase();
-                TenantContext.setCurrentTenant(tenantId);
+                serviceTenantUtil.setCurrentTenant(tenantId);
             }
 
             log.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);
@@ -91,7 +92,7 @@ public class AppUserDetailsService implements UserDetailsService {
                         .build();
 
                 // Başarı durumunda TenantContext'i temizle
-                TenantContext.clear();
+                serviceTenantUtil.clearCurrentTenant();
                 return userDetails;
 
             } catch (UsernameNotFoundException | AuthenticationServiceException e) {
@@ -107,7 +108,7 @@ public class AppUserDetailsService implements UserDetailsService {
         } catch (Exception e) {
             log.error("Authentication error: {}", e.getMessage());
             // Hata durumunda TenantContext'i temizle
-            TenantContext.clear();
+            serviceTenantUtil.clearCurrentTenant();
             throw e;
         }
     }

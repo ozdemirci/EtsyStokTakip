@@ -1,6 +1,5 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.BulkStockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
@@ -11,6 +10,7 @@ import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.repository.StockMovementRepository;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -45,13 +45,14 @@ public class StockMovementService {
     private final ProductRepository productRepository;
     private final AppUserRepository appUserRepository;
     private final StockNotificationService stockNotificationService;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     /**
      * Create a new stock movement
      */
     @Transactional
     public StockMovementResponseDTO createStockMovement(StockMovementCreateDTO dto) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.info("🔄 Creating stock movement for product ID: {} in tenant: {}", dto.getProductId(), currentTenant);
 
         Product product = productRepository.findById(dto.getProductId())
@@ -108,7 +109,7 @@ public class StockMovementService {
      * Get all stock movements with pagination
      */
     public Page<StockMovementResponseDTO> getAllStockMovements(int page, int size) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📋 Fetching stock movements for tenant: {} - Page: {}, Size: {}", currentTenant, page, size);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -123,7 +124,7 @@ public class StockMovementService {
                                                             String sortDir,
                                                             String search,
                                                             StockMovement.MovementType type) {
-        String tenant = TenantContext.getCurrentTenant();
+        String tenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📋 Fetching stock movements for tenant: {} page {} size {} sortBy {} sortDir {} search '{}' type {}",
                 tenant, page, size, sortBy, sortDir, search, type);
 
@@ -148,7 +149,7 @@ public class StockMovementService {
      * Get stock movements by product ID
      */
     public List<StockMovementResponseDTO> getStockMovementsByProduct(Long productId) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📋 Fetching stock movements for product ID: {} in tenant: {}", productId, currentTenant);
 
         List<StockMovement> movements = stockMovementRepository.findByProductId(productId);
@@ -161,7 +162,7 @@ public class StockMovementService {
      * Get recent stock movements for dashboard
      */
     public List<StockMovementResponseDTO> getRecentMovements(int limit) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📋 Fetching recent {} stock movements for tenant: {}", limit, currentTenant);
 
         Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -176,7 +177,7 @@ public class StockMovementService {
      * Get stock movements by date range
      */
     public List<StockMovementResponseDTO> getStockMovementsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📋 Fetching stock movements between {} and {} for tenant: {}", startDate, endDate, currentTenant);
 
         List<StockMovement> movements = stockMovementRepository.findByDateRange(startDate, endDate);
@@ -189,7 +190,7 @@ public class StockMovementService {
      * Get stock movement statistics
      */
     public StockMovementStats getStockMovementStats() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📊 Calculating stock movement statistics for tenant: {}", currentTenant);
 
         long totalMovements = stockMovementRepository.countTotal();

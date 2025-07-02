@@ -1,6 +1,5 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.dto.QuickRestockResponseDTO;
@@ -9,6 +8,7 @@ import dev.oasis.stockify.mapper.ProductMapper;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.StockMovement;
 import dev.oasis.stockify.repository.ProductRepository;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,15 +28,18 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final StockNotificationService stockNotificationService;
     private final StockMovementService stockMovementService;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     public ProductService(ProductRepository productRepository,
                          ProductMapper productMapper,
                          StockNotificationService stockNotificationService,
-                         StockMovementService stockMovementService) {
+                         StockMovementService stockMovementService,
+                         ServiceTenantUtil serviceTenantUtil) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.stockNotificationService = stockNotificationService;
         this.stockMovementService = stockMovementService;
+        this.serviceTenantUtil = serviceTenantUtil;
     }    
     
     /**
@@ -44,7 +47,7 @@ public class ProductService {
      * @return a list of all products
      */
     public List<ProductResponseDTO> getAllProducts() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         List<Product> products = productRepository.findAll();
         log.debug("📦 Getting all products for tenant: {} - Found {} products", 
                  currentTenant, products.size());
@@ -91,14 +94,16 @@ public class ProductService {
      */
     public boolean isSkuExists(String sku) {
         return productRepository.findBySku(sku).isPresent();
-    }    /**
+    }    
+    
+    /**
      * Saves a product to the database
      * @param productCreateDTO the product data to save
      * @return the saved product data
      */
     @Transactional
     public ProductResponseDTO saveProduct(ProductCreateDTO productCreateDTO) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.info("🔧 ProductService.saveProduct starting for tenant: {}", currentTenant);
         log.debug("📝 Product data: {}", productCreateDTO);
         
@@ -216,7 +221,7 @@ public class ProductService {
      */
     @Transactional
     public QuickRestockResponseDTO quickRestock(Long productId, Integer quantity, String operation) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.info("🔄 Quick restock for product ID: {} with quantity: {} operation: {} for tenant: {}", 
                 productId, quantity, operation, currentTenant);
         

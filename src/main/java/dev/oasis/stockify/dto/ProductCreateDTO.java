@@ -1,5 +1,6 @@
 package dev.oasis.stockify.dto;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -39,7 +40,7 @@ public class ProductCreateDTO {
     private String category;
 
     @NotNull(message = "Fiyat boş olamaz")
-    @Min(value = 0, message = "Fiyat negatif olamaz")
+    @DecimalMin("0.0")
     private BigDecimal price;  
 
     @Min(value = 0, message = "Stok negatif olamaz")

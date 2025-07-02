@@ -1,14 +1,16 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.Role;
+import dev.oasis.stockify.model.TenantConfig;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ContactMessageRepository;
 import dev.oasis.stockify.repository.ProductRepository;
+import dev.oasis.stockify.repository.TenantConfigRepository;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,8 +38,10 @@ public class SuperAdminService {
     private final AppUserRepository appUserRepository;
     private final ProductRepository productRepository;
     private final ContactMessageRepository contactMessageRepository;
+    private final TenantConfigRepository tenantConfigRepository;
     private final AppUserService appUserService;
     private final DataSource dataSource;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     @Value("${spring.flyway.locations}")
     private String[] migrationLocations;
@@ -115,26 +119,26 @@ public class SuperAdminService {
         Map<String, List<AppUser>> tenantUsers = new HashMap<>();
         for (String tenant : getAllTenants()) {
             try {
-                TenantContext.setCurrentTenant(tenant);
-                // SuperAdmin can see both active and inactive users
-                List<AppUser> users = appUserRepository.findAll();
+                List<AppUser> users = serviceTenantUtil.executeInTenant(tenant, () -> {
+                    // SuperAdmin can see both active and inactive users
+                    List<AppUser> fetchedUsers = appUserRepository.findAll();
+                    
+                    // Filter out SUPER_ADMIN users from non-public tenants
+                    if (!"public".equals(tenant)) {
+                        return fetchedUsers.stream()
+                                .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
+                                .collect(Collectors.toList());
+                    } else {
+                        log.debug("📊 Tenant '{}' (public): Showing all {} users including SUPER_ADMIN (active and inactive)", tenant, fetchedUsers.size());
+                        return fetchedUsers;
+                    }
+                });
                 
-                // Filter out SUPER_ADMIN users from non-public tenants
-                if (!"public".equals(tenant)) {
-                    users = users.stream()
-                            .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
-                            .collect(Collectors.toList());
-                    log.debug("📊 Tenant '{}': Filtered out SUPER_ADMIN users, showing {} users (active and inactive)", tenant, users.size());
-                } else {
-                    log.debug("📊 Tenant '{}' (public): Showing all {} users including SUPER_ADMIN (active and inactive)", tenant, users.size());
-                }
-                
+                log.debug("📊 Tenant '{}': Fetched {} users (active and inactive)", tenant, users.size());
                 tenantUsers.put(tenant, users);
             } catch (Exception e) {
                 log.warn("⚠️ Failed to fetch users for tenant '{}': {}", tenant, e.getMessage());
                 tenantUsers.put(tenant, new ArrayList<>());
-            } finally {
-                TenantContext.clear();
             }
         }
         
@@ -153,15 +157,12 @@ public class SuperAdminService {
         
         for (String tenant : getAllTenants()) {
             try {
-                TenantContext.setCurrentTenant(tenant);
-                List<Product> products = productRepository.findAll();
+                List<Product> products = serviceTenantUtil.executeInTenant(tenant, () -> productRepository.findAll());
                 tenantProducts.put(tenant, products);
                 log.debug("📊 Tenant '{}': Found {} products", tenant, products.size());
             } catch (Exception e) {
                 log.warn("⚠️ Failed to fetch products for tenant '{}': {}", tenant, e.getMessage());
                 tenantProducts.put(tenant, new ArrayList<>());
-            } finally {
-                TenantContext.clear();
             }
         }
         
@@ -177,15 +178,14 @@ public class SuperAdminService {
         log.info("👤 Super Admin: Creating user '{}' in tenant '{}'", userDto.getUsername(), targetTenant);
         
         try {
-            TenantContext.setCurrentTenant(targetTenant);
-            AppUser createdUser = appUserService.createUser(userDto);
-            log.info("✅ Successfully created user '{}' in tenant '{}'", createdUser.getUsername(), targetTenant);
-            return createdUser;
+            return serviceTenantUtil.executeInTenant(targetTenant, () -> {
+                AppUser createdUser = appUserService.createUser(userDto);
+                log.info("✅ Successfully created user '{}' in tenant '{}'", createdUser.getUsername(), targetTenant);
+                return createdUser;
+            });
         } catch (Exception e) {
             log.error("❌ Failed to create user '{}' in tenant '{}': {}", userDto.getUsername(), targetTenant, e.getMessage());
             throw new RuntimeException("Failed to create user in tenant " + targetTenant, e);
-        } finally {
-            TenantContext.clear();
         }
     }
 
@@ -197,27 +197,26 @@ public class SuperAdminService {
         log.info("🗑️ Super Admin: Deleting user '{}' from tenant '{}'", userId, targetTenant);
         
         try {
-            TenantContext.setCurrentTenant(targetTenant);
-            
-            Optional<AppUser> userOptional = appUserRepository.findById(userId);
-            if (userOptional.isPresent()) {
-                AppUser user = userOptional.get();
-                
-                // Prevent deleting SUPER_ADMIN users
-                if (Role.SUPER_ADMIN.equals(user.getRole())) {
-                    throw new IllegalArgumentException("Cannot delete SUPER_ADMIN users");
+            serviceTenantUtil.executeInTenant(targetTenant, () -> {
+                Optional<AppUser> userOptional = appUserRepository.findById(userId);
+                if (userOptional.isPresent()) {
+                    AppUser user = userOptional.get();
+                    
+                    // Prevent deleting SUPER_ADMIN users
+                    if (Role.SUPER_ADMIN.equals(user.getRole())) {
+                        throw new IllegalArgumentException("Cannot delete SUPER_ADMIN users");
+                    }
+                    
+                    appUserRepository.deleteById(userId);
+                    log.info("✅ Successfully deleted user '{}' from tenant '{}'", user.getUsername(), targetTenant);
+                } else {
+                    throw new IllegalArgumentException("User not found with ID: " + userId);
                 }
-                
-                appUserRepository.deleteById(userId);
-                log.info("✅ Successfully deleted user '{}' from tenant '{}'", user.getUsername(), targetTenant);
-            } else {
-                throw new IllegalArgumentException("User not found with ID: " + userId);
-            }
+                return null;
+            });
         } catch (Exception e) {
             log.error("❌ Failed to delete user '{}' from tenant '{}': {}", userId, targetTenant, e.getMessage());
             throw new RuntimeException("Failed to delete user from tenant " + targetTenant, e);
-        } finally {
-            TenantContext.clear();
         }
     }
 
@@ -230,7 +229,7 @@ public class SuperAdminService {
         }
         
         log.info("🔄 Super Admin: Switching to tenant context '{}'", targetTenant);
-        TenantContext.setCurrentTenant(targetTenant);
+        serviceTenantUtil.setCurrentTenant(targetTenant);
     }
 
     /**
@@ -245,53 +244,53 @@ public class SuperAdminService {
         
         for (String tenant : getAllTenants()) {
             try {
-                TenantContext.setCurrentTenant(tenant);
-                
-                Map<String, Object> stats = new HashMap<>();
-                
-                // Calculate user count - only show SUPER_ADMIN for public tenant
-                long userCount;
-                long activeUserCount;
-                
-                if ("public".equals(tenant)) {
-                    // For public tenant, include all users including SUPER_ADMIN
-                    userCount = appUserRepository.count();
-                    activeUserCount = appUserRepository.countByIsActive(true);
-                    log.debug("📊 Tenant '{}' (public): All user count {} (including SUPER_ADMIN)", tenant, userCount);
-                } else {
-                    // For other tenants, exclude SUPER_ADMIN users from count
-                    List<AppUser> users = appUserRepository.findAll();
-                    userCount = users.stream()
-                            .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
-                            .count();
-                    activeUserCount = users.stream()
-                            .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()) && Boolean.TRUE.equals(user.getIsActive()))
-                            .count();
-                    log.debug("📊 Tenant '{}': Filtered user count {} (excluding SUPER_ADMIN)", tenant, userCount);
-                }
-                
-                stats.put("userCount", userCount);
-                stats.put("productCount", productRepository.count());
-                stats.put("activeUserCount", activeUserCount);
-                stats.put("totalStockValue", calculateTotalStockValue());
-                stats.put("lowStockProductCount", productRepository.countLowStockProducts());
-                
-                // Add contact message statistics
-                long totalContactMessages = contactMessageRepository.count();
-                long unreadContactMessages = contactMessageRepository.countByIsReadFalse();
-                stats.put("totalContactMessages", totalContactMessages);
-                stats.put("unreadContactMessages", unreadContactMessages);
+                Map<String, Object> stats = serviceTenantUtil.executeInTenant(tenant, () -> {
+                    Map<String, Object> tenantData = new HashMap<>();
+                    
+                    // Calculate user count - only show SUPER_ADMIN for public tenant
+                    long userCount;
+                    long activeUserCount;
+                    
+                    if ("public".equals(tenant)) {
+                        // For public tenant, include all users including SUPER_ADMIN
+                        userCount = appUserRepository.count();
+                        activeUserCount = appUserRepository.countByIsActive(true);
+                        log.debug("📊 Tenant '{}' (public): All user count {} (including SUPER_ADMIN)", tenant, userCount);
+                    } else {
+                        // For other tenants, exclude SUPER_ADMIN users from count
+                        List<AppUser> users = appUserRepository.findAll();
+                        userCount = users.stream()
+                                .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
+                                .count();
+                        activeUserCount = users.stream()
+                                .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()) && Boolean.TRUE.equals(user.getIsActive()))
+                                .count();
+                        log.debug("📊 Tenant '{}': Filtered user count {} (excluding SUPER_ADMIN)", tenant, userCount);
+                    }
+                    
+                    tenantData.put("userCount", userCount);
+                    tenantData.put("activeUserCount", activeUserCount);
+                    tenantData.put("productCount", productRepository.count());
+                    tenantData.put("totalStockValue", calculateTotalStockValue());
+                    tenantData.put("lowStockProductCount", productRepository.countLowStockProducts());
+                    
+                    // Add contact message statistics
+                    long totalContactMessages = contactMessageRepository.count();
+                    long unreadContactMessages = contactMessageRepository.countByIsReadFalse();
+                    tenantData.put("totalContactMessages", totalContactMessages);
+                    tenantData.put("unreadContactMessages", unreadContactMessages);
+                    
+                    return tenantData;
+                });
                 
                 tenantStats.put(tenant, stats);
-                log.debug("📈 Tenant '{}' stats: {} users, {} products", tenant, userCount, stats.get("productCount"));
+                log.debug("📈 Tenant '{}' stats: {} users, {} products", tenant, stats.get("userCount"), stats.get("productCount"));
                 
             } catch (Exception e) {
                 log.warn("⚠️ Failed to calculate stats for tenant '{}': {}", tenant, e.getMessage());
                 Map<String, Object> errorStats = new HashMap<>();
                 errorStats.put("error", "Failed to calculate statistics");
                 tenantStats.put(tenant, errorStats);
-            } finally {
-                TenantContext.clear();
             }
         }
         
@@ -310,19 +309,17 @@ public class SuperAdminService {
         
         for (String tenant : getAllTenants()) {
             try {
-                TenantContext.setCurrentTenant(tenant);
-                
-                List<AppUser> allUsers = appUserRepository.findAll();
-                Map<Role, List<AppUser>> usersByRole = allUsers.stream()
-                    .collect(Collectors.groupingBy(AppUser::getRole));
+                Map<Role, List<AppUser>> usersByRole = serviceTenantUtil.executeInTenant(tenant, () -> {
+                    List<AppUser> allUsers = appUserRepository.findAll();
+                    return allUsers.stream()
+                        .collect(Collectors.groupingBy(AppUser::getRole));
+                });
                 
                 result.put(tenant, usersByRole);
                 
             } catch (Exception e) {
                 log.warn("⚠️ Failed to fetch users by role for tenant '{}': {}", tenant, e.getMessage());
                 result.put(tenant, new HashMap<>());
-            } finally {
-                TenantContext.clear();
             }
         }
         
@@ -338,27 +335,27 @@ public class SuperAdminService {
                 isActive ? "Activating" : "Deactivating", userId, targetTenant);
         
         try {
-            TenantContext.setCurrentTenant(targetTenant);
-            
-            AppUser user = appUserRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-            
-            // Prevent deactivating SUPER_ADMIN users
-            if (Role.SUPER_ADMIN.equals(user.getRole()) && !isActive) {
-                throw new IllegalArgumentException("Cannot deactivate SUPER_ADMIN users");
-            }
-            
-            user.setIsActive(isActive);
-            appUserRepository.save(user);
+            serviceTenantUtil.executeInTenant(targetTenant, () -> {
+                AppUser user = appUserRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+                
+                // Prevent deactivating SUPER_ADMIN users
+                if (Role.SUPER_ADMIN.equals(user.getRole()) && !isActive) {
+                    throw new IllegalArgumentException("Cannot deactivate SUPER_ADMIN users");
+                }
+                
+                user.setIsActive(isActive);
+                appUserRepository.save(user);
+                
+                return null;
+            });
             
             log.info("✅ Successfully {} user '{}' in tenant '{}'", 
-                    isActive ? "activated" : "deactivated", user.getUsername(), targetTenant);
+                    isActive ? "activated" : "deactivated", userId, targetTenant);
             
         } catch (Exception e) {
             log.error("❌ Failed to toggle status for user '{}' in tenant '{}': {}", userId, targetTenant, e.getMessage());
             throw new RuntimeException("Failed to toggle user status in tenant " + targetTenant, e);
-        } finally {
-            TenantContext.clear();
         }
     }
 
@@ -367,6 +364,20 @@ public class SuperAdminService {
      */
     public Set<String> getAvailableTenants() {
         return getAllTenants();
+    }
+
+    /**
+     * Calculate total stock value for current tenant
+     */
+    private BigDecimal calculateTotalStockValue() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+            .map(product -> {
+                BigDecimal price = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+                Integer quantity = product.getStockLevel() != null ? product.getStockLevel() : 0;
+                return price.multiply(new BigDecimal(quantity));
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
@@ -380,239 +391,68 @@ public class SuperAdminService {
         
         for (String tenant : getAllTenants()) {
             try {
-                TenantContext.setCurrentTenant(tenant);
-                List<ContactMessage> messages = contactMessageRepository.findAllByOrderByCreatedAtDesc();
+                List<ContactMessage> messages = serviceTenantUtil.executeInTenant(tenant, () -> 
+                    contactMessageRepository.findAllByOrderByCreatedAtDesc()
+                );
                 tenantContactMessages.put(tenant, messages);
-                log.debug("📊 Tenant '{}': Found {} contact messages", tenant, messages.size());
             } catch (Exception e) {
                 log.warn("⚠️ Failed to fetch contact messages for tenant '{}': {}", tenant, e.getMessage());
                 tenantContactMessages.put(tenant, new ArrayList<>());
-            } finally {
-                TenantContext.clear();
             }
         }
         
-        log.info("✅ Successfully retrieved contact messages from {} tenants", tenantContactMessages.size());
         return tenantContactMessages;
     }
 
     /**
-     * Get contact message statistics across all tenants (SUPER_ADMIN only)
-     */
-    @Transactional(readOnly = true)
-    public Map<String, Object> getContactMessageStatistics() {
-        log.info("📊 Super Admin: Generating contact message statistics");
-        
-        Map<String, Object> stats = new HashMap<>();
-        long totalMessages = 0;
-        long unreadMessages = 0;
-        long respondedMessages = 0;
-        
-        for (String tenant : getAllTenants()) {
-            try {
-                TenantContext.setCurrentTenant(tenant);
-                
-                long tenantTotal = contactMessageRepository.count();
-                long tenantUnread = contactMessageRepository.countByIsReadFalse();
-                long tenantResponded = contactMessageRepository.countByRespondedTrue();
-                
-                totalMessages += tenantTotal;
-                unreadMessages += tenantUnread;
-                respondedMessages += tenantResponded;
-                
-                log.debug("📊 Tenant '{}': {} total, {} unread, {} responded", 
-                         tenant, tenantTotal, tenantUnread, tenantResponded);
-                
-            } catch (Exception e) {
-                log.warn("⚠️ Failed to fetch contact message stats for tenant '{}': {}", tenant, e.getMessage());
-            } finally {
-                TenantContext.clear();
-            }
-        }
-        
-        stats.put("totalMessages", totalMessages);
-        stats.put("unreadMessages", unreadMessages);
-        stats.put("respondedMessages", respondedMessages);
-        stats.put("pendingMessages", totalMessages - respondedMessages);
-        
-        log.info("✅ Contact message statistics: {} total, {} unread, {} responded", 
-                totalMessages, unreadMessages, respondedMessages);
-        return stats;
-    }
-
-    /**
-     * Mark contact message as read across tenants (SUPER_ADMIN only)
+     * Mark a contact message as read in a specific tenant (SUPER_ADMIN only)
      */
     @Transactional
-    public void markContactMessageAsRead(String targetTenant, Long messageId) {
-        log.info("📧 Super Admin: Marking contact message '{}' as read in tenant '{}'", messageId, targetTenant);
+    public void markContactMessageAsRead(String targetTenant, Long messageId, boolean isRead) {
+        log.info("📧 Super Admin: Marking contact message {} as {} in tenant '{}'", 
+                messageId, isRead ? "read" : "unread", targetTenant);
         
         try {
-            TenantContext.setCurrentTenant(targetTenant);
-            
-            ContactMessage message = contactMessageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("Contact message not found with ID: " + messageId));
-            
-            message.setIsRead(true);
-            contactMessageRepository.save(message);
-            
-            log.info("✅ Successfully marked contact message '{}' as read in tenant '{}'", messageId, targetTenant);
-            
+            serviceTenantUtil.executeInTenant(targetTenant, () -> {
+                ContactMessage message = contactMessageRepository.findById(messageId)
+                    .orElseThrow(() -> new IllegalArgumentException("Contact message not found with ID: " + messageId));
+                
+                message.setIsRead(isRead);
+                contactMessageRepository.save(message);
+                
+                log.info("✅ Successfully marked contact message {} as {} in tenant '{}'", 
+                        messageId, isRead ? "read" : "unread", targetTenant);
+                return null;
+            });
         } catch (Exception e) {
-            log.error("❌ Failed to mark contact message '{}' as read in tenant '{}': {}", 
-                     messageId, targetTenant, e.getMessage());
+            log.error("❌ Failed to mark contact message as read in tenant '{}': {}", targetTenant, e.getMessage());
             throw new RuntimeException("Failed to mark contact message as read in tenant " + targetTenant, e);
-        } finally {
-            TenantContext.clear();
         }
     }
 
     /**
-     * Update contact message response across tenants (SUPER_ADMIN only)
+     * Delete a contact message from a specific tenant (SUPER_ADMIN only)
      */
     @Transactional
-    public void updateContactMessageResponse(String targetTenant, Long messageId, String response) {
-        log.info("💬 Super Admin: Updating response for contact message '{}' in tenant '{}'", messageId, targetTenant);
+    public void deleteContactMessage(String targetTenant, Long messageId) {
+        log.info("🗑️ Super Admin: Deleting contact message {} from tenant '{}'", messageId, targetTenant);
         
         try {
-            TenantContext.setCurrentTenant(targetTenant);
-            
-            ContactMessage message = contactMessageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("Contact message not found with ID: " + messageId));
-            
-            // Use the markAsResponded method instead of setResponse
-            message.markAsResponded(null); // Super admin user ID could be passed here if needed
-            message.setIsRead(true);
-            contactMessageRepository.save(message);
-            
-            log.info("✅ Successfully updated response for contact message '{}' in tenant '{}'", messageId, targetTenant);
-            
+            serviceTenantUtil.executeInTenant(targetTenant, () -> {
+                contactMessageRepository.deleteById(messageId);
+                log.info("✅ Successfully deleted contact message {} from tenant '{}'", messageId, targetTenant);
+                return null;
+            });
         } catch (Exception e) {
-            log.error("❌ Failed to update response for contact message '{}' in tenant '{}': {}", 
-                     messageId, targetTenant, e.getMessage());
-            throw new RuntimeException("Failed to update contact message response in tenant " + targetTenant, e);
-        } finally {
-            TenantContext.clear();
+            log.error("❌ Failed to delete contact message from tenant '{}': {}", targetTenant, e.getMessage());
+            throw new RuntimeException("Failed to delete contact message from tenant " + targetTenant, e);
         }
     }
 
     /**
-     * Helper method to calculate total stock value for a tenant
-     */
-    private double calculateTotalStockValue() {
-        try {
-            return productRepository.findAll().stream()
-                .mapToDouble(product -> {
-                    BigDecimal price = product.getPrice();
-                    Integer stock = product.getStockLevel();
-                    
-                    double priceValue = price != null ? price.doubleValue() : 0.0;
-                    int stockValue = stock != null ? stock : 0;
-                    
-                    return priceValue * stockValue;
-                })
-                .sum();
-        } catch (Exception e) {
-            log.warn("⚠️ Failed to calculate total stock value: {}", e.getMessage());
-            return 0.0;
-        }
-    }
-
-    /**
-     * Clear tenant context - should be called after operations
+     * Clear tenant context (SUPER_ADMIN only)
      */
     public void clearTenantContext() {
-        dev.oasis.stockify.config.tenant.TenantContext.clear();
-    }
-
-    /**
-     * Get subscription plans for all tenants (SUPER_ADMIN only)
-     */
-    public Map<String, String> getAllTenantSubscriptionPlans() {
-        log.info("🔍 Super Admin: Fetching subscription plans for all tenants");
-        
-        Map<String, String> tenantPlans = new HashMap<>();
-        
-        for (String tenant : getAllTenants()) {
-            try {
-                String plan = getTenantSubscriptionPlan(tenant);
-                tenantPlans.put(tenant, plan);
-                log.debug("📊 Tenant '{}': Subscription plan = {}", tenant, plan);
-            } catch (Exception e) {
-                log.warn("⚠️ Failed to fetch subscription plan for tenant '{}': {}", tenant, e.getMessage());
-                tenantPlans.put(tenant, "TRIAL"); // Default to TRIAL if error
-            }
-        }
-        
-        log.info("✅ Successfully retrieved subscription plans from {} tenants", tenantPlans.size());
-        return tenantPlans;
-    }
-
-    /**
-     * Get subscription plan for a specific tenant
-     */
-    private String getTenantSubscriptionPlan(String tenant) {
-        try (Connection connection = dataSource.getConnection()) {
-            String sql = "SELECT config_value FROM " + tenant + ".tenant_config WHERE config_key = 'subscription_plan'";
-            try (PreparedStatement stmt = connection.prepareStatement(sql);
-                 ResultSet rs = stmt.executeQuery()) {
-                
-                if (rs.next()) {
-                    return rs.getString("config_value");
-                }
-                return "TRIAL"; // Default plan
-            }
-        } catch (SQLException e) {
-            log.error("❌ Failed to get subscription plan for tenant '{}': {}", tenant, e.getMessage());
-            return "TRIAL"; // Default plan
-        }
-    }
-
-    /**
-     * Update subscription plan for a specific tenant (SUPER_ADMIN only)
-     */
-    public void updateTenantSubscriptionPlan(String tenant, String newPlan) {
-        log.info("🔄 Super Admin: Updating subscription plan for tenant '{}' to '{}'", tenant, newPlan);
-        
-        try (Connection connection = dataSource.getConnection()) {
-            
-            // First check if record exists
-            String checkSql = "SELECT id FROM " + tenant + ".tenant_config WHERE config_key = 'subscription_plan'";
-            boolean recordExists = false;
-            
-            try (PreparedStatement checkStmt = connection.prepareStatement(checkSql);
-                 ResultSet rs = checkStmt.executeQuery()) {
-                recordExists = rs.next();
-            }
-            
-            if (recordExists) {
-                // Update existing record
-                String updateSql = "UPDATE " + tenant + ".tenant_config SET config_value = ?, updated_at = CURRENT_TIMESTAMP WHERE config_key = 'subscription_plan'";
-                try (PreparedStatement stmt = connection.prepareStatement(updateSql)) {
-                    stmt.setString(1, newPlan);
-                    int updated = stmt.executeUpdate();
-                    if (updated > 0) {
-                        log.info("✅ Updated subscription plan for tenant '{}': {} rows affected", tenant, updated);
-                    }
-                }
-            } else {
-                // Insert new record
-                String insertSql = "INSERT INTO " + tenant + ".tenant_config (config_key, config_value, config_type, description, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
-                try (PreparedStatement stmt = connection.prepareStatement(insertSql)) {
-                    stmt.setString(1, "subscription_plan");
-                    stmt.setString(2, newPlan);
-                    stmt.setString(3, "STRING");
-                    stmt.setString(4, "Tenant subscription plan");
-                    int inserted = stmt.executeUpdate();
-                    if (inserted > 0) {
-                        log.info("✅ Inserted subscription plan config for tenant '{}': {} rows affected", tenant, inserted);
-                    }
-                }
-            }
-            
-        } catch (SQLException e) {
-            log.error("❌ Failed to update subscription plan for tenant '{}': {}", tenant, e.getMessage());
-            throw new RuntimeException("Failed to update subscription plan for tenant " + tenant, e);
-        }
+        serviceTenantUtil.clearCurrentTenant();
     }
 }

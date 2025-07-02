@@ -1,13 +1,13 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
-import dev.oasis.stockify.dto.DashboardStats;
+import dev.oasis.stockify.dto.DashboardStatsDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.repository.StockNotificationRepository;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ public class DashboardService {
     private final StockNotificationRepository notificationRepository;
     private final StockMovementService stockMovementService;
     private final MeterRegistry meterRegistry;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     @PostConstruct
     public void initMetrics() {
@@ -33,7 +34,7 @@ public class DashboardService {
     }   
     
     public DashboardMetricsDTO getDashboardMetrics() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("🏢 Getting dashboard metrics for tenant: {}", currentTenant);
         
         // Get tenant-specific counts
@@ -64,7 +65,7 @@ public class DashboardService {
      * Get recent stock movements for dashboard
      */
     public List<StockMovementResponseDTO> getRecentStockMovements() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📋 Fetching recent stock movements for tenant: {}", currentTenant);
         
         return stockMovementService.getRecentMovements(10); // Last 10 movements
@@ -74,13 +75,14 @@ public class DashboardService {
      * Get stock movement statistics for dashboard
      */
     public StockMovementService.StockMovementStats getStockMovementStats() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📊 Fetching stock movement statistics for tenant: {}", currentTenant);
         
         return stockMovementService.getStockMovementStats();
     }
-      private long getTenantProductCount() {
-        String currentTenant = TenantContext.getCurrentTenant();
+    
+    private long getTenantProductCount() {
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📦 Counting products for tenant: {}", currentTenant);
         
         if (currentTenant == null || currentTenant.isEmpty()) {
@@ -105,7 +107,7 @@ public class DashboardService {
     }
     
     private long getTenantUserCount() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("👥 Counting users for tenant: {}", currentTenant);
         
         if (currentTenant == null || currentTenant.isEmpty()) {
@@ -128,7 +130,7 @@ public class DashboardService {
         
         return finalCount;
     }    private double calculateTotalInventoryValue() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("� Calculating total inventory value for tenant: {}", currentTenant);
         
         // Use repository method to calculate inventory value directly in database for better performance
@@ -140,7 +142,7 @@ public class DashboardService {
     }
 
     private long countLowStockProducts() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📦 Counting low stock products for tenant: {}", currentTenant);
         
         // Use repository method to count low stock products directly in database for better performance
@@ -151,7 +153,7 @@ public class DashboardService {
     }
 
     private long countOutOfStockProducts() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📦 Counting out of stock products for tenant: {}", currentTenant);
         
         // Use repository method to count out of stock products directly in database for better performance
@@ -162,7 +164,7 @@ public class DashboardService {
     }
 
     private long countActiveProducts() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         long count = productRepository.countByIsActive(true);
         log.debug("🔁 Counting active products for tenant: {} = {}", currentTenant, count);
         return count;
@@ -190,7 +192,7 @@ public class DashboardService {
         meterRegistry.gauge("sales.monthly", monthlyAmount);
     }
 
-    public DashboardStats getDashboardStats() {
+    public DashboardStatsDTO getDashboardStats() {
         List<Product> products = productRepository.findAll();
 
         long totalProducts = products.size();
@@ -202,6 +204,6 @@ public class DashboardService {
                 .filter(Product::isLowStock)
                 .count();
 
-        return new DashboardStats(totalProducts, totalStock, lowStockCount);
+        return new DashboardStatsDTO(totalProducts, totalStock, lowStockCount);
     }
 }

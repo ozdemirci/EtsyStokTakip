@@ -1,10 +1,10 @@
 package dev.oasis.stockify.controller;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
 import dev.oasis.stockify.service.ProductService;
 import dev.oasis.stockify.service.ProductCategoryService;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,63 +40,14 @@ public class UserProductController {
 
     private final ProductService productService;
     private final ProductCategoryService categoryService;
+    private final TenantResolutionUtil tenantResolutionUtil;
 
     /**
      * Ensure tenant context is set for each request
      */
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);
-        TenantContext.setCurrentTenant(tenantId);
-        log.debug("Set tenant context to: {}", tenantId);
-    }
-
-    /**
-     * Get current tenant ID from various sources
-     */
-    private String getCurrentTenantId(HttpServletRequest request) {
-        // 1) Try context
-        String tenantId = TenantContext.getCurrentTenant();
-        log.debug("1. Tenant from context: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            return tenantId.toLowerCase();
-        }
-
-        // 2) Try session without creating a new one
-        var session = request.getSession(false);
-        if (session != null) {
-            tenantId = (String) session.getAttribute("tenantId");
-            log.debug("2. Tenant from session: '{}'", tenantId);
-            if (tenantId != null && !tenantId.isBlank()) {
-                tenantId = tenantId.toLowerCase();
-                TenantContext.setCurrentTenant(tenantId);
-                return tenantId;
-            }
-        }
-
-        // 3) Try header (support both header names)
-        tenantId = request.getHeader("X-TenantId");
-        if (tenantId == null || tenantId.isBlank()) {
-            tenantId = request.getHeader("X-Tenant-ID");
-        }
-        log.debug("3. Tenant from header: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            tenantId = tenantId.toLowerCase();
-            TenantContext.setCurrentTenant(tenantId);
-            return tenantId;
-        }
-
-        // 4) Try request parameter
-        tenantId = request.getParameter("tenant_id");
-        log.debug("4. Tenant from parameter: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            tenantId = tenantId.toLowerCase();
-            TenantContext.setCurrentTenant(tenantId);
-            return tenantId;
-        }
-
-        log.warn("⚠️ Could not determine tenant ID, using default 'public'");
-        return "public";
+        tenantResolutionUtil.setupTenantContext(request);
     }
 
     /**
@@ -147,7 +98,7 @@ public class UserProductController {
             Model model,
             Authentication authentication) {
         
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("📦 User viewing products for tenant: {}", tenantId);
 
         // Validate and sanitize sortBy parameter for security
@@ -213,8 +164,8 @@ public class UserProductController {
      * Redirect to products page with low-stock tab active
      */
     @GetMapping("/low-stock")
-    public String getLowStockProducts(HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+    public String getLowStockProducts(HttpServletRequest request, Authentication authentication, RedirectAttributes redirectAttributes) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("⚠️ Redirecting to products page with low-stock tab for tenant: {}", tenantId);
         
         // Add parameter to indicate low-stock tab should be active
@@ -227,8 +178,8 @@ public class UserProductController {
      */
     @GetMapping(value = "/low-stock-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);
+    public List<ProductResponseDTO> getLowStockProductsData(HttpServletRequest request, Authentication authentication) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("📊 Getting low stock products data for tenant: {}", tenantId);
         
         try {
@@ -252,8 +203,9 @@ public class UserProductController {
     @GetMapping("/{id}")
     public String viewProduct(@PathVariable Long id,
                              HttpServletRequest request,
+                             Authentication authentication,
                              Model model) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("👁️ User viewing product {} for tenant: {}", id, tenantId);
         try {
             Optional<ProductResponseDTO> productOpt = productService.getProductById(id);
@@ -295,9 +247,9 @@ public class UserProductController {
      */
     @GetMapping("/api")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> getAllProductsForApi(HttpServletRequest request) {
+    public ResponseEntity<List<Map<String, Object>>> getAllProductsForApi(HttpServletRequest request, Authentication authentication) {
         try {
-            String tenantId = getCurrentTenantId(request);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
             log.info("🔗 [API] Getting all products for AJAX for tenant: {}", tenantId);
 
             List<ProductResponseDTO> products = productService.getAllProducts();

@@ -43,12 +43,13 @@ public class AdminDashboardController {
     private final StockNotificationService stockNotificationService;
     private final SubscriptionService subscriptionService;
     private final TenantConfigService tenantConfigService;
+    private final dev.oasis.stockify.util.TenantResolutionUtil tenantResolutionUtil;
     
 
     @GetMapping
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
-        // Get current tenant info
-        String currentTenantId = getCurrentTenantId(request, authentication);
+        // Get current tenant info using the centralized utility with fail-fast for sensitive admin operations
+        String currentTenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         
         log.debug("Dashboard - Current tenant ID: {}", currentTenantId);
         
@@ -158,7 +159,7 @@ public class AdminDashboardController {
     @ResponseBody
     public Map<String, Object> getCurrentSubscriptionPlan() {
         try {
-            // Get current tenant ID for debugging
+            // Get current tenant ID using the tenant context
             String currentTenantId = TenantContext.getCurrentTenant();
             log.info("🔍 API: Getting subscription plan for tenant: {}", currentTenantId);
             
@@ -208,42 +209,7 @@ public class AdminDashboardController {
      */
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {
-        String currentTenantId = getCurrentTenantId(request, null);
-        TenantContext.setCurrentTenant(currentTenantId);
-        log.debug("Set tenant context to: {}", currentTenantId);
-    }
-      private String getCurrentTenantId(HttpServletRequest request, Authentication authentication) {
-        // First, try to get from current tenant context
-        String currentTenantId = TenantContext.getCurrentTenant();
-        log.debug("1. From TenantContext: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId;
-        }
-        
-        // Try to get from session (stored during login)
-        currentTenantId = (String) request.getSession().getAttribute("tenantId");
-        log.debug("2. From session: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId;
-        }
-        
-        // Try to get from header
-        currentTenantId = request.getHeader("X-TenantId");
-        log.debug("3. From header: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
-        }
-        
-        // Try to get from parameter
-        currentTenantId = request.getParameter("tenant_id");
-        log.debug("4. From parameter: '{}'", currentTenantId);
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
-        }
-        
-        // Default to public tenant for testing
-        log.warn("⚠️ Could not determine tenant ID from any source, using default 'public'");
-        return "public";
+        tenantResolutionUtil.setupTenantContext(request);
     }
     
     /**

@@ -1,11 +1,11 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.mapper.UserMapper;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.repository.AppUserRepository;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +28,7 @@ public class AppUserService {
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final ServiceTenantUtil serviceTenantUtil;
      
     
     /**
@@ -37,7 +38,7 @@ public class AppUserService {
      * @return true if username exists, false otherwise
      */    
     public boolean existsByUsername(String username) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("👥 Checking if username '{}' exists for tenant: {}", username, currentTenant);
         
         // First try tenant-aware check
@@ -59,7 +60,7 @@ public class AppUserService {
      * @return true if email exists, false otherwise
      */
     public boolean existsByEmail(String email) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📧 Checking if email '{}' exists for tenant: {}", email, currentTenant);
         
         // Check if email exists across all tenants or in current tenant
@@ -120,7 +121,7 @@ public class AppUserService {
      * @return a list of all active users for the current tenant
      */
     public List<UserResponseDTO> getAllUsers() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("👥 Getting all active users for tenant: {}", currentTenant);
         
         List<AppUser> users = appUserRepository.findAllActiveUsers();
@@ -140,7 +141,7 @@ public class AppUserService {
      * @return a page of active users
      */
     public Page<UserResponseDTO> getUsersPage(Pageable pageable) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("👥 Getting active users page for tenant: {}, pageable: {}", currentTenant, pageable);
         
         Page<AppUser> userPage = appUserRepository.findAllActiveUsers(pageable);
@@ -162,7 +163,7 @@ public class AppUserService {
      * @return a page of matching active users
      */
     public Page<UserResponseDTO> searchUsers(String search, Pageable pageable) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("🔍 Searching active users with term '{}' for tenant: {}, pageable: {}", search, currentTenant, pageable);
         
         // Use repository-level search to filter at database level for better performance
@@ -282,7 +283,7 @@ public class AppUserService {
      * Count active users in current tenant
      */
     public long countActiveUsers() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         if (currentTenant != null && !currentTenant.isEmpty()) {
             return appUserRepository.countByPrimaryTenantAndIsActive(currentTenant, true);
         }

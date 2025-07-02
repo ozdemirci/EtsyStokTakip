@@ -1,6 +1,5 @@
 package dev.oasis.stockify.controller;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.ProductResponseDTO;
 import dev.oasis.stockify.dto.ProductCategoryResponseDTO;
@@ -12,11 +11,10 @@ import dev.oasis.stockify.service.ProductService;
 import dev.oasis.stockify.service.ProductCategoryService;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.model.AppUser;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -46,52 +45,33 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-@RequiredArgsConstructor
 public class AdminProductController { 
     
-      private final ProductService productService;
-      private final ProductCategoryService categoryService;
-      private final AppUserRepository appUserRepository;
+    private final ProductService productService;
+    private final ProductCategoryService categoryService;
+    private final AppUserRepository appUserRepository;
+    private final TenantResolutionUtil tenantResolutionUtil;
 
+    public AdminProductController(ProductService productService, 
+                                 ProductCategoryService categoryService, 
+                                 AppUserRepository appUserRepository,
+                                 TenantResolutionUtil tenantResolutionUtil) {
+        this.productService = productService;
+        this.categoryService = categoryService;
+        this.appUserRepository = appUserRepository;
+        this.tenantResolutionUtil = tenantResolutionUtil;
+    }
     
-
-    /**
-     * Get current tenant ID from various sources
-     */
-    private String getCurrentTenantId(HttpServletRequest request) {
-        // Try header first
-        String tenantId = request.getHeader("X-Tenant-ID");
-        log.debug("🏢 Tenant from header: {}", tenantId);
-
-        // Try session if header is empty
-        if (tenantId == null || tenantId.trim().isEmpty()) {
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                tenantId = (String) session.getAttribute("tenantId");
-                log.debug("🏢 Tenant from session: {}", tenantId);
-            }
-        }
-
-        // Try TenantContext as fallback
-        if (tenantId == null || tenantId.trim().isEmpty()) {
-            tenantId = TenantContext.getCurrentTenant();
-            log.debug("🏢 Tenant from context: {}", tenantId);
-        }        // Don't default to "public" - this breaks tenant isolation!
-        if (tenantId == null || tenantId.trim().isEmpty()) {
-            log.error("❌ CRITICAL: No tenant found in request! This violates tenant isolation.");
-            throw new IllegalStateException("Tenant ID is required for admin operations. Session may have expired.");
-        }
-
-        log.info("🎯 Using tenant ID: {}", tenantId);
-        return tenantId;
-    }    
+    @ModelAttribute
+    public void setupTenant(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
     
     /**
      * Display paginated and searchable list of products
      */
     @GetMapping
     public String listProducts(
-            
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -99,10 +79,11 @@ public class AdminProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String tab,
             HttpServletRequest request,
+            Authentication authentication,
             Model model) {
-          try {
+        try {
             log.info("🚀 Step 1: listProducts method started");
-            String tenantId = getCurrentTenantId(request);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
             log.info("📦 Step 2: Listing products for tenant: {}", tenantId);
 
             // Create sort object
@@ -170,9 +151,10 @@ public class AdminProductController {
 
     /**
      * Show form for adding a new product
-     */    @GetMapping("/add")
-    public String showAddProductForm(HttpServletRequest request, Model model) {
-        String tenantId = getCurrentTenantId(request);
+     */    
+    @GetMapping("/add")
+    public String showAddProductForm(HttpServletRequest request, Authentication authentication, Model model) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("➕ Showing add product form for tenant: {}", tenantId);
         
         model.addAttribute("product", new ProductCreateDTO());
@@ -187,11 +169,12 @@ public class AdminProductController {
     @PostMapping
     public String createProduct(@ModelAttribute ProductCreateDTO productCreateDTO,
                                HttpServletRequest request,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes,
                                Principal principal) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("💾 Creating product for tenant: {}", tenantId);
-          try {
+        try {
             // Set created_by information from authenticated user
             if (principal != null) {
                 Optional<AppUser> currentUser = appUserRepository.findByUsername(principal.getName());
@@ -225,10 +208,12 @@ public class AdminProductController {
     @GetMapping("/{id}/edit")
     public String showEditProductForm(@PathVariable Long id,
                                      HttpServletRequest request,
+                                     Authentication authentication,
                                      Model model,
                                      RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
-        log.info("✏️ Showing edit form for product ID: {} for tenant: {}", id, tenantId);          try {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+        log.info("✏️ Showing edit form for product ID: {} for tenant: {}", id, tenantId);          
+        try {
             Optional<ProductResponseDTO> productOpt = productService.getProductById(id);
             if (productOpt.isPresent()) {
                 ProductResponseDTO product = productOpt.get();
@@ -255,9 +240,10 @@ public class AdminProductController {
     public String updateProduct(@PathVariable Long id,
                                @ModelAttribute ProductCreateDTO productCreateDTO,
                                HttpServletRequest request,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes,
                                Principal principal) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("🔄 Updating product ID: {} for tenant: {}", id, tenantId);
         
         try {
@@ -292,8 +278,9 @@ public class AdminProductController {
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable Long id,
                                HttpServletRequest request,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("🗑️ Deleting product ID: {} for tenant: {}", id, tenantId);
         
         try {
@@ -341,15 +328,17 @@ public class AdminProductController {
     @PostMapping("/import")
     public String importProducts(@RequestParam("file") MultipartFile file,
                                 HttpServletRequest request,
+                                Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("📤 Importing products from file: {} for tenant: {}", 
             file.getOriginalFilename(), tenantId);
         
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Please select a file to import.");
             return "redirect:/admin/products";
-        }        try {
+        }        
+        try {
             // TODO: Implement import functionality
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Import functionality not yet implemented.");
@@ -372,12 +361,14 @@ public class AdminProductController {
      */
     @GetMapping("/export")
     public void exportProducts(HttpServletRequest request,
+                              Authentication authentication,
                               HttpServletResponse response) throws IOException {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("📤 Exporting products to CSV for tenant: {}", tenantId);
         
         response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=products_" + tenantId + ".csv");        try {
+        response.setHeader("Content-Disposition", "attachment; filename=products_" + tenantId + ".csv");        
+        try {
             List<ProductResponseDTO> products = productService.getAllProducts();
             
             // TODO: Implement export functionality
@@ -396,8 +387,8 @@ public class AdminProductController {
      * Redirect to products page with low-stock tab active
      */
     @GetMapping("/low-stock")
-    public String getLowStockProducts(HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+    public String getLowStockProducts(HttpServletRequest request, Authentication authentication, RedirectAttributes redirectAttributes) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("⚠️ Redirecting to products page with low-stock tab for tenant: {}", tenantId);
         
         // Add parameter to indicate low-stock tab should be active
@@ -410,12 +401,12 @@ public class AdminProductController {
      */
     @GetMapping("/low-stock-data")
     @ResponseBody
-    public ResponseEntity<List<ProductResponseDTO>> getLowStockProductsData(HttpServletRequest request) {
+    public ResponseEntity<List<ProductResponseDTO>> getLowStockProductsData(HttpServletRequest request, Authentication authentication) {
         log.info("🔍 AJAX Call: getLowStockProductsData started");
         
         try {
             log.debug("📋 Step 1: Getting current tenant ID");
-            String tenantId = getCurrentTenantId(request);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
             log.info("📊 Step 2: Getting low stock products data for tenant: {}", tenantId);
             
             log.debug("📦 Step 3: Calling productService.getAllProducts()");
@@ -455,8 +446,9 @@ public class AdminProductController {
     @PostMapping("/categories")
     public String createCategory(@ModelAttribute ProductCategoryCreateDTO categoryCreateDTO,
                                HttpServletRequest request,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("💾 Creating category for tenant: {}", tenantId);
 
         try {
@@ -479,9 +471,11 @@ public class AdminProductController {
      */    
     @GetMapping("/categories/{id}")
     @ResponseBody
-    public ResponseEntity<ProductCategoryResponseDTO> getCategoryDetails(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<ProductCategoryResponseDTO> getCategoryDetails(@PathVariable Long id, 
+                                                                       HttpServletRequest request, 
+                                                                       Authentication authentication) {
         try {
-            String tenantId = getCurrentTenantId(request);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
             log.info("📝 Getting category details for ID: {} for tenant: {}", id, tenantId);
             
             Optional<ProductCategoryResponseDTO> category = categoryService.getCategoryById(id);
@@ -504,8 +498,9 @@ public class AdminProductController {
     public String updateCategory(@PathVariable Long id,
                                @ModelAttribute ProductCategoryCreateDTO categoryUpdateDTO,
                                HttpServletRequest request,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("📝 Updating category ID: {} for tenant: {}", id, tenantId);
 
         try {
@@ -528,8 +523,9 @@ public class AdminProductController {
     @PostMapping("/categories/{id}/delete")
     public String deleteCategory(@PathVariable Long id,
                                HttpServletRequest request,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes) {
-        String tenantId = getCurrentTenantId(request);
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("🗑️ Deleting category ID: {} for tenant: {}", id, tenantId);
 
         try {
@@ -550,9 +546,9 @@ public class AdminProductController {
      */
     @GetMapping("/categories/list")
     @ResponseBody
-    public ResponseEntity<List<ProductCategoryResponseDTO>> getCategoriesList(HttpServletRequest request) {
+    public ResponseEntity<List<ProductCategoryResponseDTO>> getCategoriesList(HttpServletRequest request, Authentication authentication) {
         try {
-            String tenantId = getCurrentTenantId(request);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
             log.info("📋 Getting categories list for tenant: {}", tenantId);
             
             List<ProductCategoryResponseDTO> categories = categoryService.getAllCategories();
@@ -571,8 +567,9 @@ public class AdminProductController {
     @PostMapping("/quick-restock")
     @ResponseBody
     public ResponseEntity<?> quickRestock(@RequestBody @Valid QuickRestockRequestDTO request, 
-                                        HttpServletRequest httpRequest) {
-        String tenantId = getCurrentTenantId(httpRequest);
+                                        HttpServletRequest httpRequest,
+                                        Authentication authentication) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(httpRequest, authentication, true);
         log.info("🔄 Quick restock request for product ID: {} with quantity: {} operation: {} for tenant: {}", 
                 request.getProductId(), request.getQuantity(), request.getOperation(), tenantId);
 
@@ -618,9 +615,9 @@ public class AdminProductController {
      */
     @GetMapping("/api")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> getAllProductsForApi(HttpServletRequest request) {
+    public ResponseEntity<List<Map<String, Object>>> getAllProductsForApi(HttpServletRequest request, Authentication authentication) {
         try {
-            String tenantId = getCurrentTenantId(request);
+            String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
             log.info("🔗 [API] Getting all products for AJAX for tenant: {}", tenantId);
 
             List<ProductResponseDTO> products = productService.getAllProducts();
@@ -641,10 +638,4 @@ public class AdminProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of());
         }
     }
-
-
-
-
-
-    
 }

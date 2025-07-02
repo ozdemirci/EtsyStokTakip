@@ -1,18 +1,20 @@
 package dev.oasis.stockify.controller;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.ProductCategory;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ProductRepository;
 import dev.oasis.stockify.repository.ProductCategoryRepository;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -37,13 +39,19 @@ public class MultiTenantDemoController {
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final DataSource dataSource;
+    private final TenantResolutionUtil tenantResolutionUtil;
+
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
 
     /**
      * Get current tenant information
      */
     @GetMapping("/current-tenant")
-    public ResponseEntity<Map<String, Object>> getCurrentTenant() {
-        String currentTenant = TenantContext.getCurrentTenant();
+    public ResponseEntity<Map<String, Object>> getCurrentTenant(HttpServletRequest request, Authentication authentication) {
+        String currentTenant = tenantResolutionUtil.resolveTenantId(request, authentication, false);
         Map<String, Object> response = new HashMap<>();
         
         response.put("currentTenant", currentTenant != null ? currentTenant : "NONE");
@@ -61,8 +69,8 @@ public class MultiTenantDemoController {
         log.info("🔍 Getting data for tenant: {}", tenantId);
         
         try {
-            // Set tenant context
-            TenantContext.setCurrentTenant(tenantId);
+            // Set tenant context using the provided tenantId directly
+            tenantResolutionUtil.setCurrentTenant(tenantId);
             
             // Get tenant-specific data
             List<AppUser> users = appUserRepository.findAll();
@@ -98,7 +106,7 @@ public class MultiTenantDemoController {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", "Failed to get tenant data: " + e.getMessage()));
         } finally {
-            TenantContext.clear();
+            tenantResolutionUtil.clearCurrentTenant();
         }
     }
 
@@ -162,20 +170,21 @@ public class MultiTenantDemoController {
      * Debug endpoint to retrieve categories for the current tenant
      */
     @GetMapping("/tenant/categories")
-    public ResponseEntity<Map<String, Object>> getTenantCategories() {
-        String tenantId = TenantContext.getCurrentTenant();
+    public ResponseEntity<Map<String, Object>> getTenantCategories(HttpServletRequest request, Authentication authentication) {
+        String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.info("🔍 Debugging categories for tenant: {}", tenantId);
         
         try {
             // Set tenant context
-            TenantContext.setCurrentTenant(tenantId);
+            tenantResolutionUtil.setCurrentTenant(tenantId);
             
             // Get all categories for the tenant
             List<ProductCategory> categories = productCategoryRepository.findAll();
             
             Map<String, Object> response = new HashMap<>();
             response.put("tenantId", tenantId);
-            response.put("categoryCount", categories.size());            response.put("categories", categories.stream()
+            response.put("categoryCount", categories.size());            
+            response.put("categories", categories.stream()
                 .map(c -> Map.of(
                     "id", c.getId(),
                     "name", c.getName(),
@@ -193,7 +202,7 @@ public class MultiTenantDemoController {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", "Failed to retrieve categories: " + e.getMessage()));
         } finally {
-            TenantContext.clear();
+            tenantResolutionUtil.clearCurrentTenant();
         }
     }
 

@@ -1,6 +1,6 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,12 @@ import java.util.Locale;
 public class TenantValidationService {
 
     private final DataSource dataSource;
+    private final ServiceTenantUtil serviceTenantUtil;
 
     /**
      * Validate if current user has access to the current tenant
      */    public boolean validateTenantAccess(String username) {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         
         if (currentTenant == null || currentTenant.isEmpty() || "public".equalsIgnoreCase(currentTenant)) {
             return true; // Allow access to public tenant

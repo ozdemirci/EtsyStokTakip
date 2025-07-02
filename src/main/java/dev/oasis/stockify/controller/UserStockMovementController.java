@@ -5,7 +5,8 @@ import dev.oasis.stockify.dto.StockMovementCreateDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.ValidationErrorDTO;
 import dev.oasis.stockify.service.StockMovementService;
-import dev.oasis.stockify.config.tenant.TenantContext;
+
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,12 +33,11 @@ import java.util.List;
 public class UserStockMovementController {
 
     private final StockMovementService stockMovementService;
+    private final TenantResolutionUtil tenantResolutionUtil;
 
     @ModelAttribute
     public void setupTenantContext(HttpServletRequest request) {
-        String tenantId = getCurrentTenantId(request);
-        TenantContext.setCurrentTenant(tenantId);
-        log.debug("Set tenant context to: {}", tenantId);
+        tenantResolutionUtil.setupTenantContext(request);
     }
 
     /**
@@ -62,7 +62,7 @@ public class UserStockMovementController {
             model.addAttribute("totalPages", movements.getTotalPages());
             model.addAttribute("totalElements", movements.getTotalElements());
             model.addAttribute("numberOfElements", movements.getNumberOfElements());
-            model.addAttribute("currentTenantId", getCurrentTenantId(request));
+            model.addAttribute("currentTenantId", tenantResolutionUtil.resolveTenantId(request, authentication, true));
             model.addAttribute("currentUser", authentication.getName());
             
             // Add filter parameters to model
@@ -82,7 +82,7 @@ public class UserStockMovementController {
             model.addAttribute("totalPages", 0);
             model.addAttribute("totalElements", 0);
             model.addAttribute("numberOfElements", 0);
-            model.addAttribute("currentTenantId", getCurrentTenantId(request));
+            model.addAttribute("currentTenantId", tenantResolutionUtil.resolveTenantId(request, authentication, true));
             model.addAttribute("currentUser", authentication != null ? authentication.getName() : "Unknown");
             
             // Add filter parameters to model even on error
@@ -224,27 +224,6 @@ public class UserStockMovementController {
 
      
 
-    private String getCurrentTenantId(HttpServletRequest request) {
-        String currentTenantId = TenantContext.getCurrentTenant();
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId;
-        }
 
-        currentTenantId = (String) request.getSession().getAttribute("tenantId");
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId;
-        }
 
-        currentTenantId = request.getHeader("X-TenantId");
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
-        }
-
-        currentTenantId = request.getParameter("tenant_id");
-        if (currentTenantId != null && !currentTenantId.isEmpty()) {
-            return currentTenantId.toLowerCase();
-        }
-
-        return "public";
-    }
 }

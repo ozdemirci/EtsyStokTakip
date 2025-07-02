@@ -1,6 +1,5 @@
 package dev.oasis.stockify.controller;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.DashboardMetricsDTO;
 import dev.oasis.stockify.dto.StockMovementResponseDTO;
 import dev.oasis.stockify.dto.TenantDTO;
@@ -9,6 +8,7 @@ import dev.oasis.stockify.service.DashboardService;
 import dev.oasis.stockify.service.StockMovementService;
 import dev.oasis.stockify.service.TenantManagementService;
 import dev.oasis.stockify.service.StockNotificationService;
+import dev.oasis.stockify.util.TenantResolutionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,11 +32,17 @@ public class UserDashboardController {
     private final DashboardService dashboardService;
     private final TenantManagementService tenantManagementService;
     private final StockNotificationService stockNotificationService;
+    private final TenantResolutionUtil tenantResolutionUtil;
+
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
 
     @GetMapping
     public String showDashboard(Model model, HttpServletRequest request, Authentication authentication) {
         // Get current tenant info
-        String currentTenantId = getCurrentTenantId(request);
+        String currentTenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
         log.debug("User Dashboard - Current tenant ID: {}", currentTenantId);
 
         TenantDTO currentTenant = null;
@@ -99,54 +105,6 @@ public class UserDashboardController {
         model.addAttribute("unreadNotifications", unreadNotifications);
         model.addAttribute("criticalNotifications", criticalNotifications);
         
-
         return "user/dashboard";
-    }
-
-    /**
-     * Ensure tenant context is set for all requests in this controller
-     */
-    @ModelAttribute
-    public void setupTenantContext(HttpServletRequest request) {
-        String currentTenantId = getCurrentTenantId(request);
-        TenantContext.setCurrentTenant(currentTenantId);
-        log.debug("Set tenant context to: {}", currentTenantId);
-    }
-
-    private String getCurrentTenantId(HttpServletRequest request) {
-        // 1) Check current context
-        String tenantId = TenantContext.getCurrentTenant();
-        log.debug("1. From context: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            return tenantId.toLowerCase();
-        }
-
-        // 2) Check session
-        tenantId = (String) request.getSession().getAttribute("tenantId");
-        log.debug("2. From session: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            return tenantId.toLowerCase();
-        }
-
-        // 3) Check header (support both header names)
-        tenantId = request.getHeader("X-TenantId");
-        if (tenantId == null || tenantId.isBlank()) {
-            tenantId = request.getHeader("X-Tenant-ID");
-        }
-        log.debug("3. From header: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            return tenantId.toLowerCase();
-        }
-
-        // 4) Check request parameter
-        tenantId = request.getParameter("tenant_id");
-        log.debug("4. From parameter: '{}'", tenantId);
-        if (tenantId != null && !tenantId.isBlank()) {
-            return tenantId.toLowerCase();
-        }
-
-        // Fallback
-        log.warn("⚠️ Could not determine tenant ID from any source, using default 'public'");
-        return "public";
     }
 }

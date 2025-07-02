@@ -1,7 +1,7 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.model.PlanType;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,7 @@ public class SubscriptionService {
     
     private final DataSource dataSource;
     private final AppUserService appUserService;
+    private final ServiceTenantUtil serviceTenantUtil;
     
     /**
      * Set subscription plan for tenant
@@ -61,7 +62,7 @@ public class SubscriptionService {
      * Check if tenant can create more users
      */
     public boolean canCreateUser() {
-        String tenantId = TenantContext.getCurrentTenant();
+        String tenantId = serviceTenantUtil.getCurrentTenant();
         if (tenantId == null) {
             return false;
         }
@@ -91,7 +92,7 @@ public class SubscriptionService {
      * Check if tenant can create more products
      */
     public boolean canCreateProduct() {
-        String tenantId = TenantContext.getCurrentTenant();
+        String tenantId = serviceTenantUtil.getCurrentTenant();
         if (tenantId == null) {
             return false;
         }
@@ -121,7 +122,7 @@ public class SubscriptionService {
      * Check if tenant trial has expired
      */
     public boolean isTrialExpired() {
-        String tenantId = TenantContext.getCurrentTenant();
+        String tenantId = serviceTenantUtil.getCurrentTenant();
         if (tenantId == null) {
             return true;
         }
@@ -209,7 +210,7 @@ public class SubscriptionService {
     }
     
     private String getTenantConfig(String key, String defaultValue) {
-        String tenantId = TenantContext.getCurrentTenant();
+        String tenantId = serviceTenantUtil.getCurrentTenant();
         if (tenantId == null) {
             return defaultValue;
         }
@@ -234,7 +235,7 @@ public class SubscriptionService {
     }
     
     private long countProducts() {
-        String tenantId = TenantContext.getCurrentTenant();
+        String tenantId = serviceTenantUtil.getCurrentTenant();
         if (tenantId == null) {
             return 0;
         }

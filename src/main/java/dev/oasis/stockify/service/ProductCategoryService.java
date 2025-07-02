@@ -8,7 +8,7 @@ import dev.oasis.stockify.mapper.ProductCategoryMapper;
 import dev.oasis.stockify.model.ProductCategory;
 import dev.oasis.stockify.repository.ProductCategoryRepository;
 import dev.oasis.stockify.repository.ProductRepository;
-import dev.oasis.stockify.config.tenant.TenantContext;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,11 +29,13 @@ public class ProductCategoryService {
     private final ProductCategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductCategoryMapper categoryMapper;
-      /**
+    private final ServiceTenantUtil serviceTenantUtil;
+    
+    /**
      * Get all active categories for dropdowns
      */
     public List<ProductCategoryResponseDTO> getAllActiveCategories() {
-        String currentTenant = TenantContext.getCurrentTenant();
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
         log.debug("📂 Fetching all active categories for tenant: {}", currentTenant);
         
         if (currentTenant == null || currentTenant.isEmpty()) {

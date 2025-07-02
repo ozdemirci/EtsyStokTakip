@@ -1,7 +1,9 @@
 package dev.oasis.stockify.controller;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.RegistrationResultDTO;
+import dev.oasis.stockify.util.TenantResolutionUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,11 +12,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @Slf4j
+@RequiredArgsConstructor
 public class LoginController {    
     
+    private final TenantResolutionUtil tenantResolutionUtil;
+
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String tenantId, 
                        @RequestParam(required = false) String registered,
+                       HttpServletRequest request,
                        Model model) {
         
         // Check if we have a registration result from flash attributes
@@ -27,7 +33,7 @@ public class LoginController {
         }
         
         if (effectiveTenantId != null && !effectiveTenantId.isEmpty()) {
-            TenantContext.setCurrentTenant(effectiveTenantId.toLowerCase());
+            tenantResolutionUtil.setCurrentTenant(effectiveTenantId.toLowerCase());
             model.addAttribute("tenantId", effectiveTenantId);
         }
         
@@ -51,7 +57,7 @@ public class LoginController {
     @GetMapping("/access-denied")
     public String accessDenied(Model model) {
         model.addAttribute("errorMessage", "Erişim reddedildi. Bu sayfaya erişim yetkiniz bulunmamaktadır.");
-        model.addAttribute("currentTenant", TenantContext.getCurrentTenant());
+        model.addAttribute("currentTenant", tenantResolutionUtil.getCurrentTenant());
         return "access-denied";
     }
 }

@@ -3,6 +3,8 @@ package dev.oasis.stockify.controller;
 import dev.oasis.stockify.dto.RegisterRequestDTO;
 import dev.oasis.stockify.dto.RegistrationResultDTO;
 import dev.oasis.stockify.service.RegistrationService;
+import dev.oasis.stockify.util.TenantResolutionUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class RegisterController {
 
     private final RegistrationService registrationService;
+    private final TenantResolutionUtil tenantResolutionUtil;
+    
+    @ModelAttribute
+    public void setupTenantContext(HttpServletRequest request) {
+        tenantResolutionUtil.setupTenantContext(request);
+    }
 
     /**
      * Show registration form

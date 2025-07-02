@@ -1,12 +1,12 @@
 package dev.oasis.stockify.service;
 
-import dev.oasis.stockify.config.tenant.TenantContext;
 import dev.oasis.stockify.dto.TenantCreateDTO;
 import dev.oasis.stockify.dto.TenantDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.exception.TenantAlreadyExistsException;
 import dev.oasis.stockify.exception.TenantNotFoundException;
 import dev.oasis.stockify.model.Role;
+import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
@@ -43,6 +43,7 @@ public class TenantManagementService {
 
     private final DataSource dataSource;
     private final AppUserService appUserService;
+    private final ServiceTenantUtil serviceTenantUtil;
     
     @Value("${spring.flyway.locations}")
     private String[] migrationLocations;
@@ -67,7 +68,7 @@ public class TenantManagementService {
             createTenantSchema(tenantId);
             
             // Set tenant context for data operations
-            TenantContext.setCurrentTenant(tenantId);
+            serviceTenantUtil.setCurrentTenant(tenantId);
             
             // Create tenant configuration
             setupTenantConfiguration(tenantId, createDTO);
@@ -91,7 +92,7 @@ public class TenantManagementService {
             cleanupFailedTenant(tenantId);
             throw new RuntimeException("Failed to create tenant: " + e.getMessage(), e);
         } finally {
-            TenantContext.clear();
+            serviceTenantUtil.clearCurrentTenant();
         }
     }
 
@@ -143,14 +144,14 @@ public class TenantManagementService {
         log.info("🔒 Deactivating tenant: {}", tenantId);
         
         try {
-            TenantContext.setCurrentTenant(tenantId);
+            serviceTenantUtil.setCurrentTenant(tenantId);
             updateTenantStatus(tenantId, "INACTIVE");
             log.info("✅ Successfully deactivated tenant: {}", tenantId);
         } catch (SQLException e) {
             log.error("❌ Failed to deactivate tenant: {}", e.getMessage());
             throw new RuntimeException("Failed to deactivate tenant: " + tenantId, e);
         } finally {
-            TenantContext.clear();
+            serviceTenantUtil.clearCurrentTenant();
         }
     }
 
@@ -162,14 +163,14 @@ public class TenantManagementService {
         log.info("🔓 Activating tenant: {}", tenantId);
         
         try {
-            TenantContext.setCurrentTenant(tenantId);
+            serviceTenantUtil.setCurrentTenant(tenantId);
             updateTenantStatus(tenantId, "ACTIVE");
             log.info("✅ Successfully activated tenant: {}", tenantId);
         } catch (SQLException e) {
             log.error("❌ Failed to activate tenant: {}", e.getMessage());
             throw new RuntimeException("Failed to activate tenant: " + tenantId, e);
         } finally {
-            TenantContext.clear();
+            serviceTenantUtil.clearCurrentTenant();
         }
     }
 
