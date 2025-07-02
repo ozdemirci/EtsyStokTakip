@@ -8,7 +8,7 @@
 -mümkün oldukça lombok kullanmaya çalış
 -tenants lowercase olarak tanımla ve çalıştır
 -postgresql de stockify adında database olmalı.
--uygulama başlatmak için mvn spring-boot:run komutunu kullan
+-uygulama başlatmak için "mvn clean compile spring-boot:run" komutunu kullan
 
 
 

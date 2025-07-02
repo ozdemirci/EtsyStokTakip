@@ -9,6 +9,7 @@ import dev.oasis.stockify.dto.QuickRestockResponseDTO;
 import dev.oasis.stockify.exception.FileOperationException;
 import dev.oasis.stockify.service.ProductService;
 import dev.oasis.stockify.service.ProductCategoryService;
+import dev.oasis.stockify.service.ProductImportExportService;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.util.TenantResolutionUtil;
@@ -26,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -49,15 +49,18 @@ public class AdminProductController {
     
     private final ProductService productService;
     private final ProductCategoryService categoryService;
+    private final ProductImportExportService importExportService;
     private final AppUserRepository appUserRepository;
     private final TenantResolutionUtil tenantResolutionUtil;
 
     public AdminProductController(ProductService productService, 
                                  ProductCategoryService categoryService, 
+                                 ProductImportExportService importExportService,
                                  AppUserRepository appUserRepository,
                                  TenantResolutionUtil tenantResolutionUtil) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.importExportService = importExportService;
         this.appUserRepository = appUserRepository;
         this.tenantResolutionUtil = tenantResolutionUtil;
     }
@@ -298,31 +301,6 @@ public class AdminProductController {
     }
 
     /**
-     * Download CSV template for product import
-     */
-    @GetMapping("/template")
-    public void downloadTemplate(HttpServletResponse response) throws IOException {
-        log.info("📥 Downloading product import template");
-        
-        response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=product_import_template.csv");
-
-        try (InputStream templateStream = getClass().getClassLoader()
-                .getResourceAsStream("static/templates/product_import_template.csv")) {
-            
-            if (templateStream == null) {
-                throw new FileOperationException("Template file not found");
-            }
-            
-            StreamUtils.copy(templateStream, response.getOutputStream());
-            log.info("✅ Template downloaded successfully");
-        } catch (IOException e) {
-            log.error("❌ Failed to download template", e);
-            throw new FileOperationException("Failed to download template: " + e.getMessage());
-        }
-    }
-
-    /**
      * Handle CSV file import
      */
     @PostMapping("/import")
@@ -339,14 +317,26 @@ public class AdminProductController {
             return "redirect:/admin/products";
         }        
         try {
-            // TODO: Implement import functionality
+            List<ProductResponseDTO> importedProducts;
+            
+            // Determine file type and import accordingly
+            String filename = file.getOriginalFilename();
+            if (filename != null && filename.toLowerCase().endsWith(".csv")) {
+                importedProducts = importExportService.importProductsFromCsv(file);
+            } else if (filename != null && (filename.toLowerCase().endsWith(".xlsx") || filename.toLowerCase().endsWith(".xls"))) {
+                importedProducts = importExportService.importProductsFromExcel(file);
+            } else {
+                throw new FileOperationException("Unsupported file format. Only CSV and Excel files are supported.");
+            }
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Successfully imported " + importedProducts.size() + " products!");
+            log.info("✅ Successfully imported {} products for tenant: {}", 
+                importedProducts.size(), tenantId);
+        } catch (FileOperationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", 
-                "Import functionality not yet implemented.");
-            // List<ProductResponseDTO> importedProducts = productImportExportService.importFromCsv(file);
-            // redirectAttributes.addFlashAttribute("successMessage", 
-            //     "Successfully imported " + importedProducts.size() + " products!");
-            // log.info("✅ Successfully imported {} products for tenant: {}", 
-            //     importedProducts.size(), tenantId);
+                "Failed to import products: " + e.getMessage());
+            log.error("❌ Failed to import products for tenant: {}: {}", tenantId, e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Failed to import products: " + e.getMessage());
@@ -360,26 +350,60 @@ public class AdminProductController {
      * Export products to CSV
      */
     @GetMapping("/export")
-    public void exportProducts(HttpServletRequest request,
+    public void exportProducts(@RequestParam(defaultValue = "csv") String format,
+                              HttpServletRequest request,
                               Authentication authentication,
                               HttpServletResponse response) throws IOException {
         String tenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
-        log.info("📤 Exporting products to CSV for tenant: {}", tenantId);
+        log.info("📤 Exporting products to {} for tenant: {}", format.toUpperCase(), tenantId);
         
-        response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=products_" + tenantId + ".csv");        
         try {
             List<ProductResponseDTO> products = productService.getAllProducts();
             
-            // TODO: Implement export functionality
-            response.getWriter().write("Export functionality not yet implemented");
+            if ("excel".equalsIgnoreCase(format)) {
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=products_" + tenantId + ".xlsx");
+                importExportService.exportProductsToExcel(response.getOutputStream(), products);
+            } else {
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=products_" + tenantId + ".csv");
+                importExportService.exportProductsToCsv(response.getWriter(), products);
+            }
             
-            // productImportExportService.exportToCsv(products, response.getWriter());
-            log.info("✅ Export requested for {} products for tenant: {}", 
+            log.info("✅ Successfully exported {} products for tenant: {}", 
                 products.size(), tenantId);
         } catch (Exception e) {
             log.error("❌ Failed to export products for tenant: {}", tenantId, e);
             throw new FileOperationException("Failed to export products: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Download template files
+     */
+    @GetMapping("/template")
+    public void downloadTemplate(@RequestParam(defaultValue = "csv") String format,
+                                HttpServletResponse response) throws IOException {
+        log.info("📄 Downloading {} template", format.toUpperCase());
+        
+        try {
+            if ("excel".equalsIgnoreCase(format)) {
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=product_import_template.xlsx");
+                importExportService.generateExcelTemplate(response.getOutputStream());
+            } else {
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=product_import_template.csv");
+                response.getWriter().write("Name,Description,SKU,Price,Quantity,Category\n");
+                response.getWriter().write("Sample Product,Sample product description,SKU001,99.99,100,Electronics\n");
+                response.getWriter().write("Sample Product 2,Another product description,SKU002,49.99,50,Home & Garden\n");
+                response.getWriter().flush();
+            }
+            
+            log.info("✅ Successfully generated {} template", format.toUpperCase());
+        } catch (Exception e) {
+            log.error("❌ Failed to generate template: {}", e.getMessage(), e);
+            throw new FileOperationException("Failed to generate template: " + e.getMessage());
         }
     }    
     

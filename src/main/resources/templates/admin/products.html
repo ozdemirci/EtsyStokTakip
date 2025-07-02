@@ -157,16 +157,36 @@
                             <a href="/admin/products/add" class="btn btn-success">
                                 <i class="bi bi-plus-circle"></i> Add Product
                             </a>
-                            <a href="/admin/products/template" class="btn btn-outline-secondary">
-                                <i class="bi bi-download"></i> Template
-                            </a>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="bi bi-download"></i> Template
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/admin/products/template?format=csv">
+                                        <i class="bi bi-file-earmark-text"></i> CSV Template
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="/admin/products/template?format=excel">
+                                        <i class="bi bi-file-earmark-spreadsheet"></i> Excel Template
+                                    </a></li>
+                                </ul>
+                            </div>
                             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                 data-bs-target="#importModal">
                                 <i class="bi bi-upload"></i> Import
                             </button>
-                            <a href="/admin/products/export" class="btn btn-outline-info">
-                                <i class="bi bi-file-earmark-spreadsheet"></i> Export
-                            </a>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="bi bi-file-earmark-spreadsheet"></i> Export
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/admin/products/export?format=csv">
+                                        <i class="bi bi-file-earmark-text"></i> Export as CSV
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="/admin/products/export?format=excel">
+                                        <i class="bi bi-file-earmark-spreadsheet"></i> Export as Excel
+                                    </a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div> <!-- Product Tabs -->
@@ -532,12 +552,25 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="importFile" class="form-label">CSV File</label>
-                            <input type="file" class="form-control" id="importFile" name="file" accept=".csv" required>
+                            <label for="importFile" class="form-label">Choose File (CSV or Excel)</label>
+                            <input type="file" class="form-control" id="importFile" name="file" 
+                                   accept=".csv,.xlsx,.xls" required>
                             <div class="form-text">
-                                Please select a CSV file to import.
-                                <a href="/admin/products/template">Download template</a> for proper format.
+                                <p class="mb-2">Supported formats: CSV (.csv), Excel (.xlsx, .xls)</p>
+                                <p class="mb-1">Download templates:</p>
+                                <div class="btn-group-sm">
+                                    <a href="/admin/products/template?format=csv" class="btn btn-outline-secondary btn-sm me-2">
+                                        <i class="bi bi-file-earmark-text"></i> CSV Template
+                                    </a>
+                                    <a href="/admin/products/template?format=excel" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-file-earmark-spreadsheet"></i> Excel Template
+                                    </a>
+                                </div>
                             </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Required columns:</strong> Name, Description, SKU, Price, Quantity, Category
                         </div>
                     </div>
                     <div class="modal-footer">
