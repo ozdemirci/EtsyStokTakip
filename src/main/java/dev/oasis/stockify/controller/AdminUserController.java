@@ -83,6 +83,11 @@ public class AdminUserController {
         // Get all roles for filtering (excluding SUPER_ADMIN for regular admins)
         List<Role> availableRoles = List.of(Role.ADMIN, Role.USER);
         
+        // Get user statistics
+        long activeUsersCount = appUserService.countActiveUsers();
+        long adminUsersCount = appUserService.countAdminUsers();
+        long regularUsersCount = appUserService.countRegularUsers();
+        
         // Add model attributes
         model.addAttribute("users", userPage);
         model.addAttribute("currentPage", page);
@@ -94,6 +99,11 @@ public class AdminUserController {
         model.addAttribute("search", search);
         model.addAttribute("availableRoles", availableRoles);
         model.addAttribute("currentTenantId", currentTenantId);
+        
+        // Add user statistics
+        model.addAttribute("activeUsersCount", activeUsersCount);
+        model.addAttribute("adminUsersCount", adminUsersCount);
+        model.addAttribute("regularUsersCount", regularUsersCount);
         
         return "admin/users";
     }

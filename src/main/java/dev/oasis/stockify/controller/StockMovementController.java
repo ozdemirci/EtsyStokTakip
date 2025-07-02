@@ -142,7 +142,7 @@ public class StockMovementController {
     /**
      * Create stock movement
      */
-    @PostMapping
+    @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<?> createStockMovement(
             @RequestBody StockMovementCreateDTO movementCreateDTO,

@@ -4,6 +4,7 @@ import dev.oasis.stockify.dto.UserCreateDTO;
 import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.mapper.UserMapper;
 import dev.oasis.stockify.model.AppUser;
+import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
@@ -288,5 +289,78 @@ public class AppUserService {
             return appUserRepository.countByPrimaryTenantAndIsActive(currentTenant, true);
         }
         return appUserRepository.countByIsActive(true);
+    }
+
+    /**
+     * Count users by role in current tenant
+     */
+    public long countUsersByRole(Role role) {
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
+        if (currentTenant != null && !currentTenant.isEmpty()) {
+            return appUserRepository.countByPrimaryTenantAndRole(currentTenant, role);
+        }
+        return appUserRepository.countByRole(role);
+    }
+
+    /**
+     * Count admin users in current tenant
+     */
+    public long countAdminUsers() {
+        return countUsersByRole(Role.ADMIN);
+    }
+
+    /**
+     * Count regular users in current tenant
+     */
+    public long countRegularUsers() {
+        return countUsersByRole(Role.USER);
+    }
+
+    /**
+     * Get user statistics for current tenant
+     */
+    public UserStats getUserStats() {
+        String currentTenant = serviceTenantUtil.getCurrentTenant();
+        
+        long totalUsers;
+        long activeUsers;
+        long adminUsers;
+        long regularUsers;
+        
+        if (currentTenant != null && !currentTenant.isEmpty()) {
+            totalUsers = appUserRepository.countByPrimaryTenant(currentTenant);
+            activeUsers = appUserRepository.countByPrimaryTenantAndIsActive(currentTenant, true);
+            adminUsers = appUserRepository.countByPrimaryTenantAndRole(currentTenant, Role.ADMIN);
+            regularUsers = appUserRepository.countByPrimaryTenantAndRole(currentTenant, Role.USER);
+        } else {
+            totalUsers = appUserRepository.count();
+            activeUsers = appUserRepository.countByIsActive(true);
+            adminUsers = appUserRepository.countByRole(Role.ADMIN);
+            regularUsers = appUserRepository.countByRole(Role.USER);
+        }
+        
+        return new UserStats(totalUsers, activeUsers, adminUsers, regularUsers);
+    }
+
+    /**
+     * Inner class for user statistics
+     */
+    public static class UserStats {
+        private final long totalUsers;
+        private final long activeUsers;
+        private final long adminUsers;
+        private final long regularUsers;
+        
+        public UserStats(long totalUsers, long activeUsers, long adminUsers, long regularUsers) {
+            this.totalUsers = totalUsers;
+            this.activeUsers = activeUsers;
+            this.adminUsers = adminUsers;
+            this.regularUsers = regularUsers;
+        }
+        
+        public long getTotalUsers() { return totalUsers; }
+        public long getActiveUsers() { return activeUsers; }
+        public long getAdminUsers() { return adminUsers; }
+        public long getRegularUsers() { return regularUsers; }
     }
 }

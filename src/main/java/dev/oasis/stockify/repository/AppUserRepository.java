@@ -69,4 +69,10 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     
     @Query("SELECT u FROM AppUser u WHERE u.isActive = true AND u.username LIKE %:search%")
     Page<AppUser> searchActiveUsers(@Param("search") String search, Pageable pageable);
+    
+    // Count methods for user statistics
+    long countByRole(Role role);
+    
+    @Query("SELECT COUNT(u) FROM AppUser u WHERE u.primaryTenant = :tenantId AND u.role = :role")
+    long countByPrimaryTenantAndRole(@Param("tenantId") String tenantId, @Param("role") Role role);
 }
