@@ -6,11 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
+import org.springframework.lang.NonNull;
 
 public interface StockNotificationRepository extends JpaRepository<StockNotification, Long> {
     
     List<StockNotification> findByReadFalseOrderByCreatedAtDesc();
     List<StockNotification> findAllByOrderByCreatedAtDesc();
+    
+    @NonNull
+    List<StockNotification> findAll();
 
     boolean existsByProductAndReadFalse(Product product);
     
