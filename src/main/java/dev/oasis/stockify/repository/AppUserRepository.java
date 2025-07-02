@@ -51,8 +51,7 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     
     @Query("SELECT COUNT(u) FROM AppUser u WHERE u.primaryTenant = :tenantId AND u.isActive = :isActive")
     long countByPrimaryTenantAndIsActive(@Param("tenantId") String tenantId, @Param("isActive") Boolean isActive);
-
-    // New methods to get only active users
+    
     @Query("SELECT u FROM AppUser u WHERE u.isActive = true")
     List<AppUser> findAllActiveUsers();
     
@@ -65,9 +64,9 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     @Query("SELECT u FROM AppUser u WHERE u.isActive = true AND u.primaryTenant = :tenantId")
     Page<AppUser> findActiveUsersByPrimaryTenant(@Param("tenantId") String tenantId, Pageable pageable);
     
-    @Query("SELECT u FROM AppUser u WHERE u.isActive = true AND (u.username LIKE %:search% OR u.email LIKE %:search%)")
+    @Query("SELECT u FROM AppUser u WHERE u.isActive = true AND u.username LIKE %:search%")
     List<AppUser> searchActiveUsers(@Param("search") String search);
     
-    @Query("SELECT u FROM AppUser u WHERE u.isActive = true AND (u.username LIKE %:search% OR u.email LIKE %:search%)")
+    @Query("SELECT u FROM AppUser u WHERE u.isActive = true AND u.username LIKE %:search%")
     Page<AppUser> searchActiveUsers(@Param("search") String search, Pageable pageable);
 }

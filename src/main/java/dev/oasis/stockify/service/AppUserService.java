@@ -6,6 +6,7 @@ import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.mapper.UserMapper;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.repository.AppUserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,23 +22,20 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AppUserService {
+
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-
-    public AppUserService(AppUserRepository appUserRepository,
-                          PasswordEncoder passwordEncoder,
-                          UserMapper userMapper) {
-        this.appUserRepository = appUserRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.userMapper = userMapper;
-    }    /**
+     
+    
+    /**
      * Check if username exists in current tenant
      *
      * @param username the username to check
      * @return true if username exists, false otherwise
-     */
+     */    
     public boolean existsByUsername(String username) {
         String currentTenant = TenantContext.getCurrentTenant();
         log.debug("👥 Checking if username '{}' exists for tenant: {}", username, currentTenant);
@@ -93,7 +91,9 @@ public class AppUserService {
         appUser.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         AppUser savedUser = appUserRepository.save(appUser);
         return userMapper.toDto(savedUser);
-    }    /**
+    }    
+    
+    /**
      * Creates a user and returns the entity (for super admin operations)
      *
      * @param userCreateDTO the user data to create
@@ -112,7 +112,9 @@ public class AppUserService {
         AppUser appUser = userMapper.toEntity(userCreateDTO);
         appUser.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
         return appUserRepository.save(appUser);
-    }/**
+    }
+    
+    /**
      * Retrieves all active users from the database for the current tenant
      *
      * @return a list of all active users for the current tenant
@@ -129,7 +131,9 @@ public class AppUserService {
         return users.stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
-    }    /**
+    }    
+    
+    /**
      * Retrieves a page of active users from the database
      *
      * @param pageable pagination information
@@ -148,7 +152,9 @@ public class AppUserService {
         
         log.debug("👥 Converted {} users to DTOs", userDtos.size());
         return new PageImpl<>(userDtos, pageable, userPage.getTotalElements());
-    }    /**
+    }    
+    
+    /**
      * Search active users by username or email
      *
      * @param search the search term
@@ -156,22 +162,19 @@ public class AppUserService {
      * @return a page of matching active users
      */
     public Page<UserResponseDTO> searchUsers(String search, Pageable pageable) {
-        List<AppUser> allActiveUsers = appUserRepository.findAllActiveUsers();
-        List<AppUser> filteredUsers = allActiveUsers.stream()
-                .filter(user -> user.getUsername().toLowerCase().contains(search.toLowerCase()) ||
-                               (user.getEmail() != null && user.getEmail().toLowerCase().contains(search.toLowerCase())))
-                .collect(Collectors.toList());
+        String currentTenant = TenantContext.getCurrentTenant();
+        log.debug("🔍 Searching active users with term '{}' for tenant: {}, pageable: {}", search, currentTenant, pageable);
         
-        // Manual pagination
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), filteredUsers.size());
-        List<AppUser> pageContent = filteredUsers.subList(start, end);
+        // Use repository-level search to filter at database level for better performance
+        Page<AppUser> userPage = appUserRepository.searchActiveUsers(search, pageable);
+        log.debug("🔍 Found {} matching active users in database for tenant: {}", userPage.getTotalElements(), currentTenant);
         
-        List<UserResponseDTO> userDtos = pageContent.stream()
+        List<UserResponseDTO> userDtos = userPage.getContent().stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
         
-        return new PageImpl<>(userDtos, pageable, filteredUsers.size());
+        log.debug("🔍 Converted {} users to DTOs", userDtos.size());
+        return new PageImpl<>(userDtos, pageable, userPage.getTotalElements());
     }
 
     /**
@@ -184,7 +187,9 @@ public class AppUserService {
         AppUser user = appUserRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + id));
         return userMapper.toDto(user);
-    }    /**
+    }    
+    
+    /**
      * Update an existing user
      *
      * @param id the user ID to update

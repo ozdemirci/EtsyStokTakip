@@ -46,7 +46,9 @@ public class AdminUserController {
 
     /**
      * Main users management page with comprehensive tenant user information
-     */    @GetMapping
+     */    
+    
+    @GetMapping
     public String listUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size,
