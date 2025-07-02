@@ -5,6 +5,7 @@ import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.service.AppUserService;
 import dev.oasis.stockify.util.TenantResolutionUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,15 +30,11 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @Slf4j
+@RequiredArgsConstructor
 public class AdminUserController {
     
     private final AppUserService appUserService;
-    private final TenantResolutionUtil tenantResolutionUtil;
-
-    public AdminUserController(AppUserService appUserService, TenantResolutionUtil tenantResolutionUtil) {
-        this.appUserService = appUserService;
-        this.tenantResolutionUtil = tenantResolutionUtil;
-    }
+    private final TenantResolutionUtil tenantResolutionUtil;    
 
     /**
      * Ensure tenant context is set for all requests in this controller
@@ -62,7 +59,7 @@ public class AdminUserController {
             Authentication authentication) {
         
         // Get current tenant info
-        String currentTenantId = tenantResolutionUtil.resolveTenantId(request, authentication, true);
+        String currentTenantId = tenantResolutionUtil.resolveTenantId(request, authentication, false);
         
         // Create pageable with sorting
         Sort sort = sortDir.equalsIgnoreCase("desc") 
@@ -71,7 +68,7 @@ public class AdminUserController {
         Pageable pageable = PageRequest.of(page, size, sort);
         
         // Get users page
-        Page<UserResponseDTO> userPage;
+        Page<UserResponseDTO> userPage = Page.empty();
         if (search.isEmpty()) {
             userPage = appUserService.getUsersPage(pageable);
         } else {
@@ -94,11 +91,9 @@ public class AdminUserController {
         model.addAttribute("pageSize", size);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
-        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
         model.addAttribute("search", search);
         model.addAttribute("availableRoles", availableRoles);
         model.addAttribute("currentTenantId", currentTenantId);
-        model.addAttribute("tenantId", currentTenantId);
         
         return "admin/users";
     }
@@ -115,7 +110,6 @@ public class AdminUserController {
         
         model.addAttribute("user", new UserCreateDTO());
         model.addAttribute("currentTenantId", currentTenantId);
-        model.addAttribute("tenantId", currentTenantId);
         model.addAttribute("availableRoles", List.of(Role.ADMIN, Role.USER));
         model.addAttribute("formAction", "/admin/users");
         return "admin/user-form";
@@ -138,7 +132,6 @@ public class AdminUserController {
         if (bindingResult.hasErrors()) {
             log.warn("❌ Validation errors while creating user: {}", bindingResult.getAllErrors());
             model.addAttribute("currentTenantId", currentTenantId);
-            model.addAttribute("tenantId", currentTenantId);
             model.addAttribute("availableRoles", List.of(Role.ADMIN, Role.USER));
             model.addAttribute("formAction", "/admin/users");
             return "admin/user-form";
@@ -161,7 +154,6 @@ public class AdminUserController {
             if (e.getMessage().contains("already exists")) {
                 bindingResult.rejectValue("username", "duplicate", "Username already exists");
                 model.addAttribute("currentTenantId", currentTenantId);
-                model.addAttribute("tenantId", currentTenantId);
                 model.addAttribute("availableRoles", List.of(Role.ADMIN, Role.USER));
                 model.addAttribute("formAction", "/admin/users");
                 return "admin/user-form";
@@ -197,7 +189,6 @@ public class AdminUserController {
             model.addAttribute("user", userEditDTO);
             model.addAttribute("userId", id);
             model.addAttribute("currentTenantId", currentTenantId);
-            model.addAttribute("tenantId", currentTenantId);
             model.addAttribute("availableRoles", List.of(Role.ADMIN, Role.USER));
             model.addAttribute("formAction", "/admin/users/" + id);
             model.addAttribute("isEditMode", true);
@@ -231,7 +222,6 @@ public class AdminUserController {
             log.warn("❌ Validation errors while updating user: {}", bindingResult.getAllErrors());
             model.addAttribute("userId", id);
             model.addAttribute("currentTenantId", currentTenantId);
-            model.addAttribute("tenantId", currentTenantId);
             model.addAttribute("availableRoles", List.of(Role.ADMIN, Role.USER));
             model.addAttribute("formAction", "/admin/users/" + id);
             model.addAttribute("isEditMode", true);

@@ -389,7 +389,7 @@
                 
                 // Update modal content
                 deleteUserNameElement.textContent = username || 'Unknown User';
-                deleteForm.action = `/admin/users/delete/${userId}`;
+                deleteForm.action = `/admin/users/${userId}/delete`;
             });
         });
     </script>
