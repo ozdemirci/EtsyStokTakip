@@ -5,15 +5,12 @@ import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.Role;
-import dev.oasis.stockify.model.TenantConfig;
 import dev.oasis.stockify.repository.AppUserRepository;
 import dev.oasis.stockify.repository.ContactMessageRepository;
 import dev.oasis.stockify.repository.ProductRepository;
-import dev.oasis.stockify.repository.TenantConfigRepository;
 import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,9 +38,6 @@ public class SuperAdminService {
     private final AppUserService appUserService;
     private final DataSource dataSource;
     private final ServiceTenantUtil serviceTenantUtil;
-
-    @Value("${spring.flyway.locations}")
-    private String[] migrationLocations;
     
     /**
      * Get all tenant schemas from database - includes dynamically created tenants
@@ -90,16 +84,7 @@ public class SuperAdminService {
             
         } catch (SQLException e) {
             log.error("❌ Failed to get tenant schemas from database: {}", e.getMessage());
-            // Fallback to migration locations if database query fails
-            for (String location : migrationLocations) {
-                String[] parts = location.split("/");
-                if (parts.length > 0) {
-                    String tenantName = parts[parts.length - 1];
-                    if (!tenantName.isEmpty() && !tenantName.equals("migration")) {
-                        tenants.add(tenantName);
-                    }
-                }
-            }
+            // Fallback to default tenants if database query fails
             tenants.add("public");
         }
         

@@ -18,19 +18,19 @@ import dev.oasis.stockify.util.ServiceTenantUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 @Slf4j
-@Configuration
-@Order(2) // Run after MultiTenantFlywayConfig (1)
+@Configuration  // Re-enabled for data loading
 @RequiredArgsConstructor
+@Order(2)
 public class DataLoader implements CommandLineRunner {
 
     private final AppUserService appUserService;
@@ -42,8 +42,8 @@ public class DataLoader implements CommandLineRunner {
     private final StockNotificationRepository stockNotificationRepository;
     private final StockMovementRepository stockMovementRepository;
 
-    @Value("${spring.flyway.schemas}")
-    private final String[] TENANT_IDS;
+    // List of tenant schemas to initialize
+    private final List<String> TENANT_IDS = Arrays.asList("public", "com", "rezonans");
 
     @Override
     public void run(String... args) {

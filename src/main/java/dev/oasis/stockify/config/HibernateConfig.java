@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
-@Configuration
+@Configuration  // Re-enabled for multi-tenancy
 public class HibernateConfig implements HibernatePropertiesCustomizer {
 
     private static final Logger log = LoggerFactory.getLogger(HibernateConfig.class);

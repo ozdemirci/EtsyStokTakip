@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
  * PostgreSQL Multi-tenant Configuration
  * Ensures proper setup of all multi-tenancy components
  */
-@Configuration
+@Configuration  // Re-enabled for multi-tenancy
 @Slf4j
 public class PostgreSQLMultiTenantConfiguration {
 
