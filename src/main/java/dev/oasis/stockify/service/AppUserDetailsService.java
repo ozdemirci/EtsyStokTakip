@@ -62,30 +62,36 @@ public class AppUserDetailsService implements UserDetailsService {
                 serviceTenantUtil.setCurrentTenant(tenantId);
             }
 
-            log.debug("Login attempt - Username: {}, Tenant: {}", username, tenantId);
+            log.info("🔐 Login attempt - Username: {}, Tenant: {}", username, tenantId);
 
             // Check if tenant schema exists before attempting login
             if (!tenantSchemaExists(tenantId)) {
+                log.error("❌ Tenant schema does not exist: {}", tenantId);
                 throw new UsernameNotFoundException(
                         String.format("Kurum ID bulunamadı: %s. Lütfen geçerli bir Kurum ID girin.", tenantId));
             }
+            log.info("✅ Tenant schema exists: {}", tenantId);
 
             try {
                 // Only allow username-based login (not email)
+                log.info("🔍 Searching for user: {} in tenant: {}", username, tenantId);
                 AppUser appUser = appUserRepository.findByUsername(username).orElse(null);
                 
                 if (appUser == null) {
+                    log.error("❌ User not found: {} in tenant: {}", username, tenantId);
                     throw new UsernameNotFoundException(
                             String.format("Kullanıcı bulunamadı: %s (Tenant: %s)", username, tenantId));
                 }
+                log.info("✅ User found: {} in tenant: {}", username, tenantId);
 
                 // Check if user is active
                 if (appUser.getIsActive() == null || !appUser.getIsActive()) {
-                    log.warn("Inactive user attempted to login: {} for tenant: {}", username, tenantId);
+                    log.warn("❌ Inactive user attempted to login: {} for tenant: {}", username, tenantId);
                     throw new UsernameNotFoundException("Kullanıcı hesabı aktif değil");
                 }
+                log.info("✅ User is active: {} in tenant: {}", username, tenantId);
 
-                log.debug("User found in database: {} for tenant: {}", username, tenantId);
+                log.info("✅ Creating UserDetails for: {} in tenant: {}", username, tenantId);
                 UserDetails userDetails = User.withUsername(appUser.getUsername())
                         .password(appUser.getPassword())
                         .roles(appUser.getRole().getCode())

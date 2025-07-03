@@ -98,8 +98,6 @@ public class DataLoader implements CommandLineRunner {
         } catch (Exception e) {
             log.error("❌ Failed to initialize tenant '{}': {}", tenantId, e.getMessage(), e);
             throw new RuntimeException("Failed to initialize tenant: " + tenantId, e);
-        } finally {
-            serviceTenantUtil.clearCurrentTenant();
         }
     }
 
@@ -114,10 +112,7 @@ public class DataLoader implements CommandLineRunner {
             log.info("✅ Successfully set plan '{}' for tenant: '{}'", defaultPlan.getDisplayName(), tenantId);
         } catch (Exception e) {
             log.warn("⚠️ Could not set plan for tenant '{}': {}", tenantId, e.getMessage());
-        } finally {
-            serviceTenantUtil.clearCurrentTenant();
         }
-
     }
 
     private boolean isAlreadyInitialized(String tenantId) {
@@ -138,8 +133,6 @@ public class DataLoader implements CommandLineRunner {
         } catch (Exception e) {
             log.debug("Could not check tenant '{}' initialization: {}", tenantId, e.getMessage());
             return false;
-        }finally {
-            serviceTenantUtil.clearCurrentTenant();
         }
     }
 
@@ -157,9 +150,6 @@ public class DataLoader implements CommandLineRunner {
 
         appUserService.saveUser(dto);
         log.info("✅ Created SuperAdmin with access to all tenants");
-      
-        serviceTenantUtil.clearCurrentTenant();
-         
     }
 
     private void createSampleUsers(String tenantId) {
