@@ -19,6 +19,8 @@ public class TenantAwareAuthenticationSuccessHandler extends SimpleUrlAuthentica
                                       HttpServletResponse response,
                                       Authentication authentication) throws IOException, ServletException {
         String tenantId = request.getParameter("tenant_id");
+        String username = authentication.getName();
+        logger.info("🎉 AUTHENTICATION SUCCESS - Username: {}, tenant_id parameter: '{}'", username, tenantId);
         logger.debug("Login attempt - received tenant_id parameter: '{}'", tenantId);
         
         if (tenantId != null && !tenantId.trim().isEmpty()) {
