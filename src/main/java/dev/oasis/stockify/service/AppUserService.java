@@ -90,7 +90,10 @@ public class AppUserService {
         }
 
         AppUser appUser = userMapper.toEntity(userCreateDTO);
-        appUser.setPassword(passwordEncoder.encode(userCreateDTO.getPassword()));
+        String rawPassword = userCreateDTO.getPassword();
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+        appUser.setPassword(encodedPassword);
+        log.info("🔐 Creating user: {} with encoded password for tenant context", userCreateDTO.getUsername());
         AppUser savedUser = appUserRepository.save(appUser);
         return userMapper.toDto(savedUser);
     }    

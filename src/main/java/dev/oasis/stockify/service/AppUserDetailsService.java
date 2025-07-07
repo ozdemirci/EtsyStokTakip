@@ -97,8 +97,13 @@ public class AppUserDetailsService implements UserDetailsService {
                         .roles(appUser.getRole().getCode())
                         .build();
 
-                // Başarı durumunda TenantContext'i temizle
-                serviceTenantUtil.clearCurrentTenant();
+                log.info("🔑 UserDetails created - Username: {}, Password hash: {}, Roles: {}", 
+                        userDetails.getUsername(), 
+                        userDetails.getPassword().substring(0, Math.min(10, userDetails.getPassword().length())) + "...",
+                        userDetails.getAuthorities());
+
+                // DON'T clear tenant context here - let Spring Security handle authentication first
+                // serviceTenantUtil.clearCurrentTenant();
                 return userDetails;
 
             } catch (UsernameNotFoundException | AuthenticationServiceException e) {

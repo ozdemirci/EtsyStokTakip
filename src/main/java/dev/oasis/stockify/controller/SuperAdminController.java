@@ -1,6 +1,7 @@
 package dev.oasis.stockify.controller;
 
 import dev.oasis.stockify.dto.UserCreateDTO;
+import dev.oasis.stockify.dto.UserResponseDTO;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.model.Product;
@@ -44,10 +45,18 @@ public class SuperAdminController {
             // Get available tenants
             Set<String> availableTenants = superAdminService.getAvailableTenants();
             
-            //TODO: getContactMessageStatistics
-            // Get contact message statistics
-            Map<String, Object> contactStats=null ; 
-            //superAdminService.getContactMessageStatistics();
+            // Get contact message statistics - providing default values if null
+            Map<String, Object> contactStats = null; 
+            // TODO: Implement superAdminService.getContactMessageStatistics();
+            
+            // Provide default values for contactStats to prevent null pointer exceptions
+            if (contactStats == null) {
+                contactStats = new HashMap<>();
+                contactStats.put("totalMessages", 0);
+                contactStats.put("unreadMessages", 0);
+                contactStats.put("readMessages", 0);
+                contactStats.put("respondedMessages", 0);
+            }
             
             model.addAttribute("tenantStats", tenantStats);
             model.addAttribute("availableTenants", availableTenants);
@@ -69,8 +78,11 @@ public class SuperAdminController {
      */
     @GetMapping("/users")
     public String allUsers(Model model, Principal principal) {
-        log.info("👥 Super Admin '{}' accessing all users", principal.getName());        try {
-            Map<String, List<AppUser>> tenantUsers = superAdminService.getAllUsersAcrossAllTenants();
+        log.info("👥 Super Admin '{}' accessing all users", principal.getName());
+        
+        try {
+            // Use DTO method to get users with proper template-compatible properties
+            Map<String, List<UserResponseDTO>> tenantUsers = superAdminService.getAllUsersAcrossAllTenantsAsDTO();
             
             model.addAttribute("tenantUsers", tenantUsers);
             model.addAttribute("availableTenants", superAdminService.getAvailableTenants());

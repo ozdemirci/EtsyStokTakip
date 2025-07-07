@@ -33,6 +33,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(appUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
+        log.info("🔒 DaoAuthenticationProvider configured with PasswordEncoder: {}", passwordEncoder.getClass().getSimpleName());
         return provider;
     }
 
@@ -43,9 +44,12 @@ public class SecurityConfig {
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.info("🔒 Configuring Security Filter Chain...");        http
+        log.info("🔒 Configuring Security Filter Chain...");
+        
+        http
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
+            .authenticationProvider(authenticationProvider()) // AuthenticationProvider'ı açıkça belirt
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth                // Public endpoints
                 .requestMatchers("/", "/register", "/register/**", "/login*", "/css/**", "/js/**", "/images/**", "/error", "/trial-expired", "/actuator/**", "/favicon.ico").permitAll()
@@ -61,6 +65,13 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .successHandler(successHandler)
+                .failureHandler((request, response, exception) -> {
+                    log.error("❌ LOGIN FAILED - Username: {}, Tenant: {}, Error: {}", 
+                             request.getParameter("username"), 
+                             request.getParameter("tenant_id"), 
+                             exception.getMessage());
+                    response.sendRedirect("/login?error=true");
+                })
                 .permitAll()
             )
             .logout(logout -> logout

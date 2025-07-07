@@ -1,6 +1,8 @@
 package dev.oasis.stockify.service;
 
 import dev.oasis.stockify.dto.UserCreateDTO;
+import dev.oasis.stockify.dto.UserResponseDTO;
+import dev.oasis.stockify.mapper.UserMapper;
 import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.ContactMessage;
 import dev.oasis.stockify.model.Product;
@@ -38,6 +40,7 @@ public class SuperAdminService {
     private final AppUserService appUserService;
     private final DataSource dataSource;
     private final ServiceTenantUtil serviceTenantUtil;
+    private final UserMapper userMapper;
     
     /**
      * Get all tenant schemas from database - includes dynamically created tenants
@@ -97,6 +100,51 @@ public class SuperAdminService {
      * Note: SUPER_ADMIN users are only shown for the 'public' tenant
      */
     @Transactional(readOnly = true)
+    /**
+     * Get all users across all tenants (returns DTOs for templates)
+     */
+    public Map<String, List<UserResponseDTO>> getAllUsersAcrossAllTenantsAsDTO() {
+        log.info("🔍 Super Admin: Fetching all users (active and inactive) across all tenants as DTOs");
+        
+        Map<String, List<UserResponseDTO>> tenantUsers = new HashMap<>();
+        for (String tenant : getAllTenants()) {
+            try {
+                List<UserResponseDTO> users = serviceTenantUtil.executeInTenant(tenant, () -> {
+                    // SuperAdmin can see both active and inactive users
+                    List<AppUser> fetchedUsers = appUserRepository.findAll();
+                    
+                    // Filter out SUPER_ADMIN users from non-public tenants
+                    List<AppUser> filteredUsers;
+                    if (!"public".equals(tenant)) {
+                        filteredUsers = fetchedUsers.stream()
+                                .filter(user -> !Role.SUPER_ADMIN.equals(user.getRole()))
+                                .collect(Collectors.toList());
+                    } else {
+                        log.debug("📊 Tenant '{}' (public): Showing all {} users including SUPER_ADMIN (active and inactive)", tenant, fetchedUsers.size());
+                        filteredUsers = fetchedUsers;
+                    }
+                    
+                    // Convert to DTOs
+                    return filteredUsers.stream()
+                            .map(userMapper::toDto)
+                            .collect(Collectors.toList());
+                });
+                
+                log.debug("📊 Tenant '{}': Fetched {} users (active and inactive) as DTOs", tenant, users.size());
+                tenantUsers.put(tenant, users);
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to fetch users for tenant '{}': {}", tenant, e.getMessage());
+                tenantUsers.put(tenant, new ArrayList<>());
+            }
+        }
+        
+        log.info("✅ Successfully retrieved users from {} tenants as DTOs (SUPER_ADMIN only in public, including inactive users)", tenantUsers.size());
+        return tenantUsers;
+    }
+
+    /**
+     * Get all users across all tenants (returns entities for internal use)
+     */
     public Map<String, List<AppUser>> getAllUsersAcrossAllTenants() {
         log.info("🔍 Super Admin: Fetching all users (active and inactive) across all tenants");
         
