@@ -44,7 +44,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
-                .setClaims(claims)
+                .addClaims(claims)  // Use addClaims instead of setClaims to preserve subject
                 .setIssuer(jwtIssuer)
                 .setAudience(jwtAudience)
                 .setIssuedAt(new Date())
@@ -54,44 +54,64 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return claims.getSubject();
+            return claims.getSubject();
+        } catch (Exception e) {
+            log.error("Error extracting username from token: {}", e.getMessage());
+            return null;
+        }
     }
 
     public String getTenantIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return claims.get("tenant_id", String.class);
+            return claims.get("tenant_id", String.class);
+        } catch (Exception e) {
+            log.error("Error extracting tenant ID from token: {}", e.getMessage());
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
     public java.util.List<String> getRolesFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return (java.util.List<String>) claims.get("roles");
+            return (java.util.List<String>) claims.get("roles");
+        } catch (Exception e) {
+            log.error("Error extracting roles from token: {}", e.getMessage());
+            return new java.util.ArrayList<>();
+        }
     }
 
     public Date getExpirationDateFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return claims.getExpiration();
+            return claims.getExpiration();
+        } catch (Exception e) {
+            log.error("Error extracting expiration date from token: {}", e.getMessage());
+            return null;
+        }
     }
 
     public boolean validateToken(String token) {
@@ -116,7 +136,22 @@ public class JwtTokenProvider {
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(jwtSecret);
+        } catch (Exception e) {
+            log.warn("JWT secret is not base64 encoded, using raw bytes");
+            keyBytes = jwtSecret.getBytes();
+        }
+        
+        // Ensure the key is at least 512 bits (64 bytes) for HS512
+        if (keyBytes.length < 64) {
+            // Pad the key to 64 bytes for HS512
+            byte[] paddedKey = new byte[64];
+            System.arraycopy(keyBytes, 0, paddedKey, 0, keyBytes.length);
+            keyBytes = paddedKey;
+        }
+        
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

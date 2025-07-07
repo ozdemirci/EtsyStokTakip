@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "jwt.secret=testSecretKey12345678901234567890123456789012345678901234567890",
+    "jwt.secret=dGhpcyBpcyBhIHNlY3VyZSBrZXkgZm9yIEpXVCB0b2tlbiBnZW5lcmF0aW9uIGFuZCB2YWxpZGF0aW9uIHdpdGggSFM1MTIgYWxnb3JpdGht",
     "jwt.expiration=3600",
     "jwt.issuer=test-issuer",
     "jwt.audience=test-audience"
@@ -42,13 +42,16 @@ class JwtTokenProviderTest {
         
         // When
         String token = jwtTokenProvider.generateToken(authentication, tenantId);
+        System.out.println("Generated token: " + token);
         
         // Then
         assertNotNull(token);
         assertTrue(jwtTokenProvider.validateToken(token));
         
         // Verify token contents
-        assertEquals("testuser", jwtTokenProvider.getUsernameFromToken(token));
+        String extractedUsername = jwtTokenProvider.getUsernameFromToken(token);
+        System.out.println("Extracted username: " + extractedUsername);
+        assertEquals("testuser", extractedUsername);
         assertEquals(tenantId, jwtTokenProvider.getTenantIdFromToken(token));
         
         List<String> roles = jwtTokenProvider.getRolesFromToken(token);
