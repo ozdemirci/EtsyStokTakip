@@ -225,9 +225,17 @@ Or use the tenant-aware URLs:
 
 ### Authentication Endpoints
 ```
-POST /login          - User login
-POST /logout         - User logout
-POST /register       - User registration
+POST /login          - User login (Web UI)
+POST /logout         - User logout (Web UI)
+POST /register       - User registration (Web UI)
+```
+
+### JWT API Endpoints
+```
+POST /api/auth/login         - JWT Authentication
+POST /api/auth/refresh       - JWT Token Refresh
+GET  /api/user/profile       - User Profile (JWT)
+GET  /api/user/dashboard     - User Dashboard (JWT)
 ```
 
 ### Admin Endpoints
@@ -246,6 +254,31 @@ GET  /admin/products/api       - Get products (JSON)
 POST /admin/stock-movements/create     - Create stock movement
 GET  /admin/stock-movements/analysis   - Stock analysis
 POST /admin/stock-movements/validate   - Validate movement
+```
+
+### JWT API Usage Examples
+
+#### 1. Login to get JWT token
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "password",
+    "tenantId": "tenant1"
+  }'
+```
+
+#### 2. Use JWT token for API calls
+```bash
+curl -X GET http://localhost:8080/api/user/profile \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### 3. Refresh JWT token
+```bash
+curl -X POST http://localhost:8080/api/auth/refresh \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Stock Movement Analysis
@@ -304,16 +337,68 @@ POST /superadmin/tenants/create
 ## 🔐 Security
 
 ### Authentication
-- **Spring Security** with form-based authentication
+- **Spring Security** with form-based authentication for web UI
+- **JWT Token Authentication** for API endpoints
 - **Password encoding** with BCrypt
-- **Session management** with CSRF protection
+- **Session management** with CSRF protection for web UI
+- **Stateless authentication** for API endpoints
 - **Tenant-aware** user resolution
+
+### API Authentication
+#### JWT Token Endpoints
+- **POST /api/auth/login** - Authenticate and receive JWT token
+- **POST /api/auth/refresh** - Refresh an existing JWT token
+
+#### Getting a JWT Token
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "password",
+    "tenantId": "tenant1"
+  }'
+```
+
+#### Response
+```json
+{
+  "token": "eyJhbGciOiJIUzUxMiJ9...",
+  "type": "Bearer",
+  "username": "admin",
+  "tenantId": "tenant1",
+  "roles": ["ROLE_ADMIN"],
+  "expiresIn": 3600
+}
+```
+
+#### Using JWT Token
+```bash
+curl -X GET http://localhost:8080/api/user/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9..."
+```
 
 ### Authorization
 - **Role-based access control** (RBAC)
 - **Method-level security** with `@PreAuthorize`
 - **Tenant isolation** enforcement
 - **Cross-tenant** access for Super Admin
+- **API endpoints** protected by JWT tokens with tenant context
+
+### Security Configuration
+- **Dual Security Chains**: Separate configurations for web UI and API
+- **Web UI**: Form-based authentication with sessions
+- **API**: JWT-based stateless authentication
+- **Tenant Context**: Automatically resolved from JWT claims or session
+
+### JWT Configuration
+```properties
+# JWT Settings
+jwt.secret=your-secret-key-here
+jwt.expiration=3600
+jwt.issuer=stockify-app
+jwt.audience=stockify-users
+```
 
 ### Security Headers
 ```java

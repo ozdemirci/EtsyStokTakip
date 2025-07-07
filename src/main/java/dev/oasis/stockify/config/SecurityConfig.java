@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -23,6 +24,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Slf4j
+@Order(2) // This will be processed after JwtSecurityConfig
 public class SecurityConfig {    
     private final AppUserDetailsService appUserDetailsService;
     private final TenantHeaderFilter tenantHeaderFilter;
@@ -44,9 +46,10 @@ public class SecurityConfig {
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.info("🔒 Configuring Security Filter Chain...");
+        log.info("🔒 Configuring Web Security Filter Chain...");
         
         http
+            .securityMatcher(request -> !request.getRequestURI().startsWith("/api"))  // Exclude API paths
             .addFilterBefore(tenantHeaderFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantSecurityFilter, TenantHeaderFilter.class)
             .authenticationProvider(authenticationProvider()) // AuthenticationProvider'ı açıkça belirt
@@ -83,7 +86,7 @@ public class SecurityConfig {
             )
             .headers(headers -> headers
                 .frameOptions(frameOptions -> frameOptions.sameOrigin())
-            );        log.info("✅ Security Filter Chain configured successfully");
+            );        log.info("✅ Web Security Filter Chain configured successfully");
         return http.build();
     }
 }
