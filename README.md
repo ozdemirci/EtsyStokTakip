@@ -31,6 +31,7 @@
 
 - **Multi-Tenant Architecture**: Schema-based isolation with PostgreSQL
 - **Role-Based Access Control**: SUPER_ADMIN, ADMIN, USER roles with fine-grained permissions
+- **Barcode/QR Code Scanning**: Integrated scanning support for mobile and USB devices
 - **Advanced Analytics**: Stock movement predictions and trend analysis
 - **Real-time Notifications**: Low stock alerts and system notifications
 - **Bulk Operations**: CSV import/export capabilities
@@ -43,6 +44,7 @@
 - **Product Management**: Full CRUD operations with categories, SKUs, and descriptions
 - **Stock Tracking**: Real-time stock levels with movement history
 - **Stock Movements**: IN, OUT, ADJUSTMENT, DAMAGED, EXPIRED movement types
+- **Barcode/QR Code Scanning**: Mobile and USB scanner support for product lookup and stock updates
 - **Low Stock Alerts**: Configurable threshold-based notifications
 - **Bulk Operations**: CSV import/export for products and stock movements
 
@@ -72,6 +74,16 @@
 - **Email Integration**: SMTP support for email notifications
 - **Real-time Updates**: In-app notification system
 - **Notification History**: Comprehensive notification tracking
+
+### 📱 Barcode/QR Code Scanning
+- **Multi-Device Support**: Compatible with mobile devices and USB barcode scanners
+- **Product Lookup**: Instant product information retrieval by scanning barcodes/QR codes
+- **Stock Updates**: Quick stock adjustments through scan-to-update workflow
+- **Web Interface**: Browser-based scanning using device camera
+- **Barcode Management**: Assign and manage barcodes/QR codes for products
+- **Scan Validation**: Verify barcode uniqueness and availability
+- **Tenant-Aware**: Full multi-tenant support for scanning operations
+- **REST API**: Programmable scanning endpoints for integration
 
 ## 🏗️ Architecture
 
@@ -221,6 +233,30 @@ Or use the tenant-aware URLs:
 - http://localhost:8080/admin/dashboard (auto-detects tenant)
 - http://localhost:8080/user/dashboard
 
+### Barcode/QR Code Scanning Usage
+
+#### Web Interface Scanning
+1. Navigate to **Admin > Products** page
+2. Click the **"Barcode Scanner"** button
+3. Allow camera access when prompted
+4. Point camera at barcode/QR code to scan
+5. Select action (Stock In, Stock Out, etc.)
+6. Enter quantity and optional notes
+7. Confirm the stock movement
+
+#### Product Barcode Management
+1. Navigate to **Admin > Products**
+2. Create or edit a product
+3. Enter barcode/QR code in respective fields
+4. Enable **"Scan Enabled"** checkbox
+5. Save the product
+
+#### Mobile Device Scanning
+- Access the web interface from any mobile browser
+- Camera scanning works on iOS Safari, Android Chrome
+- USB barcode scanners work with desktop browsers
+- Scan results appear instantly in the interface
+
 ## 🔧 API Documentation
 
 ### Authentication Endpoints
@@ -246,6 +282,14 @@ POST /admin/products           - Create product
 GET  /admin/users              - User management
 GET  /admin/stock-movements    - Stock movement management
 GET  /admin/notifications      - Notification management
+GET  /admin/barcode-scanner    - Barcode scanning interface
+```
+
+### Barcode/QR Code API Endpoints
+```
+POST /api/barcode/scan         - Scan barcode and update stock
+GET  /api/barcode/lookup/{code} - Lookup product by barcode/QR code
+GET  /api/barcode/check-availability/{code} - Check if barcode is available
 ```
 
 ### API Endpoints
@@ -298,6 +342,81 @@ Response:
   },
   "trends": [
     {
+      "date": "2024-01-01",
+      "quantity": 100,
+      "type": "IN"
+    }
+  ]
+}
+```
+
+### Barcode Scanning API Examples
+
+#### 1. Scan barcode and update stock
+```bash
+curl -X POST http://localhost:8080/api/barcode/scan \
+  -H "Content-Type: application/json" \
+  -H "X-TenantId: com" \
+  -d '{
+    "barcode": "1234567890123",
+    "action": "IN",
+    "quantity": 10,
+    "notes": "Stock replenishment"
+  }'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Stock updated successfully",
+  "product": {
+    "id": 1,
+    "name": "Sample Product",
+    "sku": "SP001",
+    "barcode": "1234567890123",
+    "currentStock": 110
+  },
+  "movementId": 123
+}
+```
+
+#### 2. Lookup product by barcode
+```bash
+curl -X GET http://localhost:8080/api/barcode/lookup/1234567890123 \
+  -H "X-TenantId: com"
+```
+
+Response:
+```json
+{
+  "found": true,
+  "product": {
+    "id": 1,
+    "name": "Sample Product",
+    "sku": "SP001",
+    "barcode": "1234567890123",
+    "qrCode": "QR123456",
+    "currentStock": 100,
+    "category": "Electronics",
+    "scanEnabled": true
+  }
+}
+```
+
+#### 3. Check barcode availability
+```bash
+curl -X GET http://localhost:8080/api/barcode/check-availability/1234567890123 \
+  -H "X-TenantId: com"
+```
+
+Response:
+```json
+{
+  "available": false,
+  "message": "Barcode already in use by product: Sample Product"
+}
+```
       "date": "2024-01-01",
       "quantity": 100,
       "type": "IN"
@@ -418,15 +537,22 @@ src/
 │   ├── java/dev/oasis/stockify/
 │   │   ├── config/           # Configuration classes
 │   │   ├── controller/       # REST and MVC controllers
+│   │   │   ├── BarcodeController.java      # Barcode scanning REST API
+│   │   │   └── BarcodeScannerController.java # Barcode scanner web interface
 │   │   ├── dto/             # Data Transfer Objects
+│   │   │   ├── BarcodeScanRequestDTO.java  # Barcode scan request
+│   │   │   └── BarcodeScanResponseDTO.java # Barcode scan response
 │   │   ├── model/           # JPA entities
 │   │   ├── repository/      # Data repositories
 │   │   ├── service/         # Business logic
+│   │   │   └── BarcodeService.java         # Barcode scanning logic
 │   │   └── util/            # Utility classes
 │   └── resources/
 │       ├── application.properties
 │       ├── db/migration/    # Flyway migrations
 │       ├── templates/       # Thymeleaf templates
+│       │   └── admin/
+│       │       └── barcode-scanner.html    # Barcode scanner interface
 │       └── static/          # CSS, JS, images
 └── test/                    # Unit and integration tests
 ```

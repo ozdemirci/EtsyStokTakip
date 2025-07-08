@@ -30,6 +30,9 @@ public class ProductMapper {
         product.setStockLevel(productCreateDTO.getStockLevel());
         product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());
         product.setEtsyProductId(productCreateDTO.getEtsyProductId());
+        product.setBarcode(productCreateDTO.getBarcode());
+        product.setQrCode(productCreateDTO.getQrCode());
+        product.setScanEnabled(productCreateDTO.getScanEnabled() != null ? productCreateDTO.getScanEnabled() : true);
         product.setIsActive(productCreateDTO.getIsActive() != null ? productCreateDTO.getIsActive() : true);
         product.setIsFeatured(productCreateDTO.getIsFeatured() != null ? productCreateDTO.getIsFeatured() : false);
         
@@ -57,6 +60,9 @@ public class ProductMapper {
         product.setPrice(productCreateDTO.getPrice());
         product.setStockLevel(productCreateDTO.getStockLevel());
         product.setLowStockThreshold(productCreateDTO.getLowStockThreshold());
+        product.setBarcode(productCreateDTO.getBarcode());
+        product.setQrCode(productCreateDTO.getQrCode());
+        product.setScanEnabled(productCreateDTO.getScanEnabled());
           // Update isActive and isFeatured if provided
         if (productCreateDTO.getIsActive() != null) {
             product.setIsActive(productCreateDTO.getIsActive());
@@ -99,6 +105,9 @@ public class ProductMapper {
         productResponseDTO.setSku(product.getSku());
         productResponseDTO.setCategory(product.getCategory());        productResponseDTO.setPrice(product.getPrice());
         productResponseDTO.setStockLevel(product.getStockLevel());        productResponseDTO.setLowStockThreshold(product.getLowStockThreshold());        productResponseDTO.setEtsyProductId(product.getEtsyProductId());
+        productResponseDTO.setBarcode(product.getBarcode());
+        productResponseDTO.setQrCode(product.getQrCode());
+        productResponseDTO.setScanEnabled(product.getScanEnabled());
         productResponseDTO.setIsActive(product.getIsActive());
         productResponseDTO.setIsFeatured(product.getIsFeatured());
         

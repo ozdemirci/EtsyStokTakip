@@ -51,6 +51,16 @@ public class ProductCreateDTO {
     private int lowStockThreshold = 5;
     
     private String etsyProductId;
+    
+    // Barcode/QR Code fields for inventory management
+    @Size(max = 100, message = "Barcode cannot exceed 100 characters")
+    private String barcode;
+    
+    @Size(max = 500, message = "QR code cannot exceed 500 characters")
+    private String qrCode;
+    
+    @Builder.Default
+    private Boolean scanEnabled = true;
       @Builder.Default
     private Boolean isActive = true; 
     

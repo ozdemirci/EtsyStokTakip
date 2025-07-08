@@ -40,4 +40,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     @Query("SELECT COALESCE(SUM(p.price * p.stockLevel), 0) FROM Product p")
     Double calculateTotalInventoryValue();
+    
+    // Barcode and QR Code related methods
+    Optional<Product> findByBarcode(String barcode);
+    
+    Optional<Product> findByQrCode(String qrCode);
+    
+    Optional<Product> findByBarcodeAndScanEnabledTrue(String barcode);
+    
+    Optional<Product> findByQrCodeAndScanEnabledTrue(String qrCode);
+    
+    Optional<Product> findByBarcodeAndIdNot(String barcode, Long id);
+    
+    Optional<Product> findByQrCodeAndIdNot(String qrCode, Long id);
+    
+    @Query("SELECT p FROM Product p WHERE (p.barcode = :scanCode OR p.qrCode = :scanCode) AND p.scanEnabled = true")
+    Optional<Product> findByScanCodeAndScanEnabledTrue(@Param("scanCode") String scanCode);
 }

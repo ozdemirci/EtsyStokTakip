@@ -623,8 +623,8 @@
               </div>
 
               <div class="plan-selector" onclick="selectPlan('trial')"
-                th:class="${selectedPlan == 'trial'} ? 'plan-selector selected' : 'plan-selector'">
-                <input type="radio" name="plan" value="trial" th:checked="${selectedPlan == 'trial'}" />
+                th:class="${selectedPlan == 'trial' || selectedPlan == null || selectedPlan == ''} ? 'plan-selector selected' : 'plan-selector'">
+                <input type="radio" name="plan" value="trial" th:checked="${selectedPlan == 'trial' || selectedPlan == null || selectedPlan == ''}" />
                 <div class="plan-header">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
@@ -917,9 +917,18 @@
         const confirmPassword =
           document.getElementById("confirmPassword").value;
         const acceptTerms = document.getElementById("acceptTerms").checked;
+        const selectedPlan = document.getElementById("selectedPlanInput").value;
         const submitBtn = document.getElementById("submitBtn");
 
         // Client-side validation
+        if (!selectedPlan) {
+          e.preventDefault();
+          alert("Lütfen bir plan seçiniz!");
+          // Scroll to plans section
+          document.querySelector('.plan-selector').scrollIntoView({ behavior: 'smooth' });
+          return false;
+        }
+
         if (password !== confirmPassword) {
           e.preventDefault();
           alert("Şifreler eşleşmiyor!");
@@ -1145,6 +1154,14 @@
           this.style.transform = 'translateY(0)';
         }
       });
+    });
+
+    // Set default plan to trial if none selected
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectedPlanInput = document.getElementById("selectedPlanInput");
+      if (!selectedPlanInput.value) {
+        selectPlan('trial');
+      }
     });
   </script>
 </body>

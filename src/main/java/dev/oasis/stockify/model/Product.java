@@ -37,7 +37,17 @@ public class Product {
     private Integer lowStockThreshold;    
     
     @Column(name = "etsy_product_id")
-    private String etsyProductId;    // Tenant information will be added after database migration
+    private String etsyProductId;
+    
+    // Barcode/QR Code fields for inventory management
+    @Column(name = "barcode", unique = true)
+    private String barcode;
+    
+    @Column(name = "qr_code", unique = true)
+    private String qrCode;
+    
+    @Column(name = "scan_enabled")
+    private Boolean scanEnabled = true;    // Tenant information will be added after database migration
 
     // Audit fields
     @Column(name = "created_at")

@@ -186,6 +186,37 @@
                                         <input type="text" class="form-control" id="etsyProductId" th:field="*{etsyProductId}" 
                                                placeholder="Enter Etsy product ID (optional)">
                                         <div class="form-text">Link to Etsy marketplace (if applicable)</div>
+                                    </div>
+
+                                    <!-- Barcode/QR Code Section -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="barcode" class="form-label">
+                                                <i class="bi bi-upc-scan"></i> Barcode
+                                            </label>
+                                            <input type="text" class="form-control" id="barcode" th:field="*{barcode}" 
+                                                   placeholder="Enter barcode (optional)">
+                                            <div class="form-text">Product barcode for inventory scanning</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="qrCode" class="form-label">
+                                                <i class="bi bi-qr-code-scan"></i> QR Code
+                                            </label>
+                                            <input type="text" class="form-control" id="qrCode" th:field="*{qrCode}" 
+                                                   placeholder="Enter QR code (optional)">
+                                            <div class="form-text">Product QR code for inventory scanning</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="scanEnabled" name="scanEnabled" th:checked="${product.scanEnabled}" value="true">
+                                            <input type="hidden" name="_scanEnabled" value="on">
+                                            <label class="form-check-label" for="scanEnabled">
+                                                <i class="bi bi-camera"></i> Enable Scanning
+                                            </label>
+                                            <div class="form-text">Allow this product to be found via barcode/QR scanning</div>
+                                        </div>
                                     </div>                                    <div class="row mb-4">
                                         <div class="col-md-6">
                                             <div class="form-check form-switch">

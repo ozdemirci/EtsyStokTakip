@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -58,7 +59,10 @@ public class TenantManagementService {
             // Set tenant context for data operations
             serviceTenantUtil.setCurrentTenant(tenantId);
             
-            // Create initial admin user (this will trigger JPA table creation)
+            // Initialize tenant configuration to trigger table creation
+            initializeTenantConfiguration(tenantId);
+            
+            // Create initial admin user (tables are now ready)
             createTenantAdmin(createDTO);
             
             log.info("✅ Successfully created tenant: {}", tenantId);
@@ -213,6 +217,236 @@ public class TenantManagementService {
             // Create schema - JPA will automatically create tables when accessed
             statement.execute(String.format("CREATE SCHEMA IF NOT EXISTS \"%s\"", schemaName));
             log.info("🏗️ Created schema: {} (tables will be auto-created by JPA)", schemaName);
+        }
+    }
+    
+    private void initializeTenantConfiguration(String tenantId) {
+        try {
+            // Create all required tables and sequences for the new tenant
+            try (Connection connection = dataSource.getConnection()) {
+                connection.setSchema(tenantId.toLowerCase());
+                
+                // Create sequences first
+                createSequences(connection);
+                
+                // Create all tables in the correct order (due to foreign key dependencies)
+                createTenantConfigTable(connection);
+                createAppUserTable(connection);
+                createProductCategoriesTable(connection);
+                createProductTable(connection);
+                createStockMovementTable(connection);
+                createStockNotificationTable(connection);
+                createContactMessagesTable(connection);
+                
+                // Insert default configuration
+                insertDefaultConfiguration(connection);
+                
+                log.info("✅ Initialized all tables and configuration for tenant: {}", tenantId);
+            }
+        } catch (Exception e) {
+            log.error("❌ Failed to initialize tenant configuration: {}", e.getMessage());
+            throw new RuntimeException("Failed to initialize tenant configuration", e);
+        }
+    }
+    
+    private void createSequences(Connection connection) throws SQLException {
+        String[] sequences = {
+            "CREATE SEQUENCE IF NOT EXISTS app_user_id_seq START 1 INCREMENT 1",
+            "CREATE SEQUENCE IF NOT EXISTS contact_messages_id_seq START 1 INCREMENT 1",
+            "CREATE SEQUENCE IF NOT EXISTS product_categories_id_seq START 1 INCREMENT 1",
+            "CREATE SEQUENCE IF NOT EXISTS product_id_seq START 1 INCREMENT 1",
+            "CREATE SEQUENCE IF NOT EXISTS stock_movement_id_seq START 1 INCREMENT 1",
+            "CREATE SEQUENCE IF NOT EXISTS stock_notification_id_seq START 1 INCREMENT 1"
+        };
+        
+        try (Statement stmt = connection.createStatement()) {
+            for (String sql : sequences) {
+                stmt.execute(sql);
+            }
+        }
+    }
+    
+    private void createTenantConfigTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS tenant_config (
+                config_key VARCHAR(255) NOT NULL,
+                config_value VARCHAR(255),
+                config_type VARCHAR(255),
+                description VARCHAR(255),
+                created_at TIMESTAMP(6),
+                updated_at TIMESTAMP(6),
+                CONSTRAINT tenant_config_pkey PRIMARY KEY (config_key)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void createAppUserTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS app_user (
+                id BIGINT DEFAULT nextval('app_user_id_seq') NOT NULL,
+                username VARCHAR(20) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(255) NOT NULL,
+                email VARCHAR(255),
+                can_manage_all_tenants BOOLEAN,
+                accessible_tenants VARCHAR(1000),
+                is_global_user BOOLEAN,
+                is_active BOOLEAN,
+                primary_tenant VARCHAR(50),
+                created_at TIMESTAMP(6),
+                updated_at TIMESTAMP(6),
+                last_login TIMESTAMP(6),
+                CONSTRAINT app_user_role_check CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'USER')),
+                CONSTRAINT app_user_pkey PRIMARY KEY (id),
+                CONSTRAINT app_user_username_key UNIQUE (username)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void createProductCategoriesTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS product_categories (
+                id BIGINT DEFAULT nextval('product_categories_id_seq') NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                description VARCHAR(500),
+                hex_color VARCHAR(20),
+                is_active BOOLEAN NOT NULL,
+                sort_order INTEGER NOT NULL,
+                created_at TIMESTAMP(6) NOT NULL,
+                updated_at TIMESTAMP(6) NOT NULL,
+                CONSTRAINT product_categories_pkey PRIMARY KEY (id)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void createProductTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS product (
+                id BIGINT DEFAULT nextval('product_id_seq') NOT NULL,
+                title VARCHAR(255),
+                description VARCHAR(255),
+                sku VARCHAR(255),
+                category VARCHAR(255),
+                price DECIMAL(38,2),
+                stock_level INTEGER,
+                low_stock_threshold INTEGER,
+                is_active BOOLEAN,
+                is_featured BOOLEAN,
+                etsy_product_id VARCHAR(255),
+                barcode VARCHAR(100),
+                qr_code VARCHAR(500),
+                scan_enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP(6),
+                updated_at TIMESTAMP(6),
+                created_by BIGINT,
+                updated_by BIGINT,
+                CONSTRAINT product_pkey PRIMARY KEY (id),
+                CONSTRAINT product_sku_key UNIQUE (sku),
+                CONSTRAINT product_barcode_key UNIQUE (barcode),
+                CONSTRAINT product_qr_code_key UNIQUE (qr_code)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void createStockMovementTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS stock_movement (
+                id BIGINT DEFAULT nextval('stock_movement_id_seq') NOT NULL,
+                product_id BIGINT NOT NULL,
+                movement_type VARCHAR(255) NOT NULL,
+                quantity INTEGER NOT NULL,
+                previous_stock INTEGER NOT NULL,
+                new_stock INTEGER NOT NULL,
+                notes VARCHAR(255),
+                reference_id VARCHAR(255),
+                created_at TIMESTAMP(6),
+                created_by BIGINT,
+                CONSTRAINT stock_movement_movement_type_check CHECK (movement_type IN ('IN', 'OUT', 'ADJUSTMENT', 'RETURN', 'TRANSFER', 'DAMAGED', 'EXPIRED')),
+                CONSTRAINT stock_movement_pkey PRIMARY KEY (id),
+                CONSTRAINT stock_movement_product_id_fkey FOREIGN KEY (product_id) REFERENCES product(id)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void createStockNotificationTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS stock_notification (
+                id BIGINT DEFAULT nextval('stock_notification_id_seq') NOT NULL,
+                product_id BIGINT NOT NULL,
+                notification_type VARCHAR(255),
+                message VARCHAR(255),
+                priority VARCHAR(255),
+                category VARCHAR(255),
+                is_read BOOLEAN,
+                read_at TIMESTAMP(6),
+                read_by BIGINT,
+                created_at TIMESTAMP(6),
+                CONSTRAINT stock_notification_pkey PRIMARY KEY (id),
+                CONSTRAINT stock_notification_product_id_fkey FOREIGN KEY (product_id) REFERENCES product(id)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void createContactMessagesTable(Connection connection) throws SQLException {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS contact_messages (
+                id BIGINT DEFAULT nextval('contact_messages_id_seq') NOT NULL,
+                first_name VARCHAR(100) NOT NULL,
+                last_name VARCHAR(100) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                subject VARCHAR(100) NOT NULL,
+                message TEXT NOT NULL,
+                phone VARCHAR(20),
+                company VARCHAR(255),
+                is_read BOOLEAN NOT NULL,
+                responded BOOLEAN NOT NULL,
+                created_at TIMESTAMP(6) NOT NULL,
+                responded_at TIMESTAMP(6),
+                responded_by BIGINT,
+                ip_address VARCHAR(45),
+                user_agent VARCHAR(500),
+                CONSTRAINT contact_messages_pkey PRIMARY KEY (id)
+            )
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private void insertDefaultConfiguration(Connection connection) throws SQLException {
+        String sql = """
+            INSERT INTO tenant_config (config_key, config_value, config_type, description, created_at, updated_at) 
+            VALUES 
+                ('subscription_plan', 'trial', 'STRING', 'Current subscription plan', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('max_users', '5', 'INTEGER', 'Maximum number of users', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('max_products', '100', 'INTEGER', 'Maximum number of products', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('trial_active', 'true', 'BOOLEAN', 'Whether trial is active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('trial_expiry', ?, 'DATETIME', 'Trial expiry date', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (config_key) DO NOTHING
+            """;
+            
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            // Set trial expiry to 30 days from now
+            pstmt.setString(1, LocalDateTime.now().plusDays(30).toString());
+            pstmt.executeUpdate();
         }
     }
     

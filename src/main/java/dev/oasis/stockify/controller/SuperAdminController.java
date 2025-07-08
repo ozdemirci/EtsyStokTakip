@@ -46,8 +46,7 @@ public class SuperAdminController {
             Set<String> availableTenants = superAdminService.getAvailableTenants();
             
             // Get contact message statistics - providing default values if null
-            Map<String, Object> contactStats = null; 
-            // TODO: Implement superAdminService.getContactMessageStatistics();
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
             
             // Provide default values for contactStats to prevent null pointer exceptions
             if (contactStats == null) {
@@ -347,8 +346,7 @@ public class SuperAdminController {
         try {
            //TODO: getContactMessageStatistics
             // Get contact message statistics
-            Map<String, Object> contactStats=null ; 
-            //superAdminService.getContactMessageStatistics();
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
             
             // Get contact messages across all tenants
             Map<String, List<ContactMessage>> tenantContactMessages = superAdminService.getAllContactMessagesAcrossAllTenants();
@@ -382,8 +380,7 @@ public class SuperAdminController {
             Map<String, Map<String, Object>> stats = superAdminService.getTenantStatistics();
             //TODO: getContactMessageStatistics
             // Get contact message statistics
-            Map<String, Object> contactStats=null ; 
-            //superAdminService.getContactMessageStatistics();
+            Map<String, Object> contactStats = superAdminService.getContactMessageStatistics();
             
             return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -411,10 +408,7 @@ public class SuperAdminController {
         log.info("💳 Super Admin '{}' accessing subscription management", principal.getName());
         
         try {
-            //TODO: getAllTenantSubscriptionPlans()
-            Map<String, String> tenantPlans = null;
-            
-            //superAdminService.getAllTenantSubscriptionPlans();
+            Map<String, String> tenantPlans = superAdminService.getAllTenantSubscriptionPlans();
             
             // Convert to subscription objects for the template
             List<Map<String, Object>> subscriptions = new ArrayList<>();
@@ -467,7 +461,7 @@ public class SuperAdminController {
         try {
 
             //TODO: updateTenantSubscriptionPlan()
-            //superAdminService.updateTenantSubscriptionPlan(tenant, subscriptionPlan);
+            superAdminService.updateTenantSubscriptionPlan(tenant, subscriptionPlan);
             
             redirectAttributes.addFlashAttribute("message", 
                 "Subscription plan for tenant '" + tenant + "' updated to " + subscriptionPlan + " successfully!");

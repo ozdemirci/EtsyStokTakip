@@ -19,27 +19,27 @@ import org.springframework.stereotype.Component;
 public class SubscriptionLimitAspect {
     
     private final SubscriptionService subscriptionService;
-    
-    /**
+      /**
      * Check user creation limits
-     * Excludes DataLoader from subscription limits
+     * Excludes DataLoader and TenantManagementService from subscription limits
      */
-    @Around("execution(* dev.oasis.stockify.service.AppUserService.saveUser(..)) && !within(dev.oasis.stockify.config.DataLoader)")
+    @Around("execution(* dev.oasis.stockify.service.AppUserService.saveUser(..)) && !within(dev.oasis.stockify.config.DataLoader) && !within(dev.oasis.stockify.service.TenantManagementService)")
     public Object checkUserLimit(ProceedingJoinPoint joinPoint) throws Throwable {
-        // Check if call is coming from DataLoader via stack trace as backup
+        // Check if call is coming from DataLoader or TenantManagementService via stack trace as backup
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement element : stackTrace) {
-            if (element.getClassName().contains("DataLoader")) {
-                log.debug("🔧 DataLoader detected - bypassing user creation limit");
+            if (element.getClassName().contains("DataLoader") || 
+                element.getClassName().contains("TenantManagementService")) {
+                log.debug("🔧 DataLoader/TenantManagementService detected - bypassing user creation limit");
                 return joinPoint.proceed();
             }
         }
-        
+
         if (!subscriptionService.canCreateUser()) {
             log.warn("❌ User creation blocked - subscription limit reached");
             throw new RuntimeException("Kullanıcı oluşturma limiti aşıldı. Aboneliğinizi yükseltin.");
         }
-        
+
         log.debug("✅ User creation allowed");
         return joinPoint.proceed();
     }

@@ -28,6 +28,9 @@ public class ProductResponseDTO {
     private Integer stockLevel;
     private Integer lowStockThreshold;
     private String etsyProductId;
+    private String barcode;
+    private String qrCode;
+    private Boolean scanEnabled;
     private Boolean isActive;
     private Boolean isFeatured;
 

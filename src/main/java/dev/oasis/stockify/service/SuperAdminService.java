@@ -41,6 +41,7 @@ public class SuperAdminService {
     private final DataSource dataSource;
     private final ServiceTenantUtil serviceTenantUtil;
     private final UserMapper userMapper;
+    private final SubscriptionService subscriptionService;
     
     /**
      * Get all tenant schemas from database - includes dynamically created tenants
@@ -452,13 +453,14 @@ public class SuperAdminService {
                 message.setIsRead(isRead);
                 contactMessageRepository.save(message);
                 
-                log.info("✅ Successfully marked contact message {} as {} in tenant '{}'", 
-                        messageId, isRead ? "read" : "unread", targetTenant);
+                log.info("✅ Successfully {} contact message '{}' in tenant '{}'", 
+                        isRead ? "marked as read" : "marked as unread", messageId, targetTenant);
                 return null;
             });
         } catch (Exception e) {
-            log.error("❌ Failed to mark contact message as read in tenant '{}': {}", targetTenant, e.getMessage());
-            throw new RuntimeException("Failed to mark contact message as read in tenant " + targetTenant, e);
+            log.error("❌ Failed to mark contact message as {} in tenant '{}': {}", 
+                    isRead ? "read" : "unread", targetTenant, e.getMessage());
+            throw new RuntimeException("Failed to mark contact message as " + (isRead ? "read" : "unread") + " in tenant " + targetTenant, e);
         }
     }
 
@@ -486,5 +488,126 @@ public class SuperAdminService {
      */
     public void clearTenantContext() {
         serviceTenantUtil.clearCurrentTenant();
+    }
+
+    /**
+     * Get all tenant subscription plans (SUPER_ADMIN only)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, String> getAllTenantSubscriptionPlans() {
+        log.info("💳 Super Admin: Fetching subscription plans for all tenants");
+        
+        Map<String, String> tenantPlans = new HashMap<>();
+        
+        for (String tenant : getAllTenants()) {
+            try {
+                String plan = serviceTenantUtil.executeInTenant(tenant, () -> {
+                    // Get subscription plan from tenant config
+                    try (Connection connection = dataSource.getConnection()) {
+                        connection.setSchema(tenant.toLowerCase());
+                        
+                        String sql = "SELECT config_value FROM tenant_config WHERE config_key = ?";
+                        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                            stmt.setString(1, "subscription_plan");
+                            try (ResultSet rs = stmt.executeQuery()) {
+                                if (rs.next()) {
+                                    return rs.getString("config_value");
+                                }
+                            }
+                        }
+                    } catch (SQLException e) {
+                        log.warn("⚠️ Could not get subscription plan for tenant '{}': {}", tenant, e.getMessage());
+                    }
+                    return "TRIAL"; // Default fallback
+                });
+                
+                tenantPlans.put(tenant, plan != null ? plan.toUpperCase() : "TRIAL");
+                log.debug("📊 Tenant '{}': Plan = '{}'", tenant, plan);
+                
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to fetch subscription plan for tenant '{}': {}", tenant, e.getMessage());
+                tenantPlans.put(tenant, "TRIAL"); // Default fallback
+            }
+        }
+        
+        log.info("✅ Successfully retrieved subscription plans for {} tenants", tenantPlans.size());
+        return tenantPlans;
+    }
+
+    /**
+     * Update tenant subscription plan (SUPER_ADMIN only)
+     */
+    @Transactional
+    public void updateTenantSubscriptionPlan(String targetTenant, String subscriptionPlan) {
+        log.info("🔄 Super Admin: Updating subscription plan for tenant '{}' to '{}'", 
+                targetTenant, subscriptionPlan);
+        
+        try {
+            serviceTenantUtil.executeInTenant(targetTenant, () -> {
+                // Use SubscriptionService to update the plan which handles all the configuration
+                subscriptionService.setTenantPlan(targetTenant, subscriptionPlan);
+                return null;
+            });
+            
+            log.info("✅ Successfully updated subscription plan for tenant '{}' to '{}'", 
+                    targetTenant, subscriptionPlan);
+            
+        } catch (Exception e) {
+            log.error("❌ Failed to update subscription plan for tenant '{}': {}", targetTenant, e.getMessage());
+            throw new RuntimeException("Failed to update subscription plan for tenant " + targetTenant, e);
+        }
+    }
+
+    /**
+     * Get contact message statistics across all tenants (SUPER_ADMIN only)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getContactMessageStatistics() {
+        log.info("📊 Super Admin: Fetching contact message statistics across all tenants");
+        
+        Map<String, Object> stats = new HashMap<>();
+        int totalMessages = 0;
+        int unreadMessages = 0;
+        int readMessages = 0;
+        int respondedMessages = 0;
+        
+        for (String tenant : getAllTenants()) {
+            try {
+                Map<String, Integer> tenantStats = serviceTenantUtil.executeInTenant(tenant, () -> {
+                    List<ContactMessage> messages = contactMessageRepository.findAll();
+                    
+                    int total = messages.size();
+                    int unread = (int) messages.stream().filter(msg -> !msg.getIsRead()).count();
+                    int read = (int) messages.stream().filter(ContactMessage::getIsRead).count();
+                    int responded = (int) messages.stream().filter(ContactMessage::getResponded).count();
+                    
+                    Map<String, Integer> tenantStat = new HashMap<>();
+                    tenantStat.put("total", total);
+                    tenantStat.put("unread", unread);
+                    tenantStat.put("read", read);
+                    tenantStat.put("responded", responded);
+                    
+                    return tenantStat;
+                });
+                
+                totalMessages += tenantStats.get("total");
+                unreadMessages += tenantStats.get("unread");
+                readMessages += tenantStats.get("read");
+                respondedMessages += tenantStats.get("responded");
+                
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to fetch contact message stats for tenant '{}': {}", tenant, e.getMessage());
+            }
+        }
+        
+        stats.put("totalMessages", totalMessages);
+        stats.put("unreadMessages", unreadMessages);
+        stats.put("readMessages", readMessages);
+        stats.put("respondedMessages", respondedMessages);
+        
+        log.info("✅ Contact message statistics: Total={}, Unread={}, Read={}, Responded={}", 
+                totalMessages, unreadMessages, readMessages, respondedMessages);
+        
+        return stats;
     }
 }

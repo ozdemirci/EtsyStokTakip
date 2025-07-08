@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner - Stockify</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .scan-container {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        .scan-input {
+            font-size: 1.2rem;
+            padding: 1rem;
+            text-align: center;
+            border: 3px solid #007bff;
+            border-radius: 10px;
+        }
+        .scan-input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        .scan-result {
+            margin-top: 2rem;
+        }
+        .product-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+        .scan-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .scan-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .scan-entry:last-child {
+            border-bottom: none;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .quantity-controls button {
+            width: 40px;
+            height: 40px;
+        }
+        .quantity-controls input {
+            width: 80px;
+            text-align: center;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .action-buttons button {
+            flex: 1;
+            min-width: 120px;
+        }
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-upc-scan me-2"></i>
+                        Barcode Scanner
+                    </h1>
+                </div>
+
+                <div class="scan-container">
+                    <!-- Scanner Interface -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-camera me-2"></i>Scan Product</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="scanInput" class="form-label">Scan or Enter Code</label>
+                                <input type="text" id="scanInput" class="form-control scan-input" 
+                                       placeholder="Scan barcode or QR code here..." 
+                                       autocomplete="off" autofocus>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Focus this field and scan with your device or USB scanner
+                                </div>
+                            </div>
+
+                            <!-- Scan Action Selection -->
+                            <div class="mb-3">
+                                <label class="form-label">Action</label>
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-primary action-btn" data-action="LOOKUP">
+                                        <i class="bi bi-search me-1"></i>Lookup
+                                    </button>
+                                    <button type="button" class="btn btn-success action-btn" data-action="STOCK_IN">
+                                        <i class="bi bi-plus-circle me-1"></i>Stock In
+                                    </button>
+                                    <button type="button" class="btn btn-warning action-btn" data-action="STOCK_OUT">
+                                        <i class="bi bi-dash-circle me-1"></i>Stock Out
+                                    </button>
+                                    <button type="button" class="btn btn-info action-btn" data-action="ADJUSTMENT">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Adjust
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Quantity Input for Stock Operations -->
+                            <div id="quantitySection" class="mb-3" style="display: none;">
+                                <label for="quantityInput" class="form-label">Quantity</label>
+                                <div class="quantity-controls">
+                                    <button type="button" class="btn btn-outline-secondary" id="decreaseQty">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <input type="number" id="quantityInput" class="form-control" value="1" min="1">
+                                    <button type="button" class="btn btn-outline-secondary" id="increaseQty">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="mb-3">
+                                <label for="notesInput" class="form-label">Notes (Optional)</label>
+                                <input type="text" id="notesInput" class="form-control" placeholder="Additional notes...">
+                            </div>
+
+                            <!-- Manual Process Button -->
+                            <button type="button" id="processScan" class="btn btn-primary btn-lg w-100" disabled>
+                                <i class="bi bi-play-circle me-2"></i>Process Scan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scan Result -->
+                    <div id="scanResult" class="scan-result" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Scan Result</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="resultContent"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Scans -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clock-history me-2"></i>Recent Scans
+                                <button type="button" class="btn btn-sm btn-outline-secondary float-end" id="clearHistory">
+                                    <i class="bi bi-trash me-1"></i>Clear
+                                </button>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="scanHistory" class="scan-history">
+                                <div class="text-muted text-center py-3">
+                                    <i class="bi bi-clock me-2"></i>No recent scans
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/common.js}"></script>
+    
+    <script>
+        class BarcodeScanner {
+            constructor() {
+                this.currentAction = 'LOOKUP';
+                this.scanHistory = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+                this.initializeEventListeners();
+                this.renderScanHistory();
+                this.updateActionButtons();
+            }
+
+            initializeEventListeners() {
+                // Scan input handling
+                const scanInput = document.getElementById('scanInput');
+                scanInput.addEventListener('input', this.handleScanInput.bind(this));
+                scanInput.addEventListener('keypress', this.handleKeyPress.bind(this));
+
+                // Action buttons
+                document.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.setAction(e.target.dataset.action);
+                    });
+                });
+
+                // Quantity controls
+                document.getElementById('decreaseQty').addEventListener('click', this.decreaseQuantity.bind(this));
+                document.getElementById('increaseQty').addEventListener('click', this.increaseQuantity.bind(this));
+
+                // Process scan button
+                document.getElementById('processScan').addEventListener('click', this.processScan.bind(this));
+
+                // Clear history
+                document.getElementById('clearHistory').addEventListener('click', this.clearHistory.bind(this));
+
+                // Auto-focus scan input
+                scanInput.focus();
+            }
+
+            handleScanInput(event) {
+                const value = event.target.value.trim();
+                const processBtn = document.getElementById('processScan');
+                processBtn.disabled = !value;
+            }
+
+            handleKeyPress(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    this.processScan();
+                }
+            }
+
+            setAction(action) {
+                this.currentAction = action;
+                this.updateActionButtons();
+                this.updateQuantitySection();
+            }
+
+            updateActionButtons() {
+                document.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.action === this.currentAction) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            updateQuantitySection() {
+                const quantitySection = document.getElementById('quantitySection');
+                const requiresQuantity = ['STOCK_IN', 'STOCK_OUT', 'ADJUSTMENT'].includes(this.currentAction);
+                quantitySection.style.display = requiresQuantity ? 'block' : 'none';
+            }
+
+            decreaseQuantity() {
+                const input = document.getElementById('quantityInput');
+                const currentValue = parseInt(input.value) || 1;
+                if (currentValue > 1) {
+                    input.value = currentValue - 1;
+                }
+            }
+
+            increaseQuantity() {
+                const input = document.getElementById('quantityInput');
+                const currentValue = parseInt(input.value) || 1;
+                input.value = currentValue + 1;
+            }
+
+            async processScan() {
+                const scanCode = document.getElementById('scanInput').value.trim();
+                if (!scanCode) return;
+
+                this.showLoading();
+
+                try {
+                    if (this.currentAction === 'LOOKUP') {
+                        await this.performLookup(scanCode);
+                    } else {
+                        await this.performStockOperation(scanCode);
+                    }
+                } catch (error) {
+                    this.showError('Error processing scan: ' + error.message);
+                } finally {
+                    this.clearScanInput();
+                }
+            }
+
+            async performLookup(scanCode) {
+                const response = await fetch(`/api/barcode/lookup?scanCode=${encodeURIComponent(scanCode)}&scanType=BARCODE`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+                this.displayResult(result);
+                this.addToHistory('LOOKUP', scanCode, result);
+            }
+
+            async performStockOperation(scanCode) {
+                const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
+                const notes = document.getElementById('notesInput').value.trim();
+
+                const requestData = {
+                    scanCode: scanCode,
+                    scanType: 'BARCODE',
+                    action: this.currentAction,
+                    quantity: quantity,
+                    notes: notes
+                };
+
+                const response = await fetch('/api/barcode/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+                this.displayResult(result);
+                this.addToHistory(this.currentAction, scanCode, result);
+            }
+
+            displayResult(result) {
+                const resultDiv = document.getElementById('scanResult');
+                const contentDiv = document.getElementById('resultContent');
+
+                if (result.success) {
+                    contentDiv.innerHTML = this.renderSuccessResult(result);
+                    resultDiv.className = 'scan-result alert alert-success';
+                } else {
+                    contentDiv.innerHTML = this.renderErrorResult(result);
+                    resultDiv.className = 'scan-result alert alert-danger';
+                }
+
+                resultDiv.style.display = 'block';
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            renderSuccessResult(result) {
+                let html = `<div class="mb-2"><strong>${result.message}</strong></div>`;
+
+                if (result.product) {
+                    html += `
+                        <div class="product-card">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">${result.product.title}</h6>
+                                    <p class="mb-1"><strong>SKU:</strong> ${result.product.sku || 'N/A'}</p>
+                                    <p class="mb-1"><strong>Category:</strong> ${result.product.category || 'N/A'}</p>
+                                    <p class="mb-1"><strong>Price:</strong> $${result.product.price || '0.00'}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-end">
+                                        <div class="badge bg-${result.product.stockLevel > 0 ? 'success' : 'danger'} fs-6">
+                                            Stock: ${result.product.stockLevel}
+                                        </div>
+                                        ${result.product.barcode ? `<div class="mt-1 small">Barcode: ${result.product.barcode}</div>` : ''}
+                                        ${result.product.qrCode ? `<div class="mt-1 small">QR: ${result.product.qrCode}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (result.previousStock !== undefined && result.newStock !== undefined) {
+                    html += `
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <strong>Stock Change:</strong> ${result.previousStock} → ${result.newStock}
+                            ${result.quantity ? ` (${result.quantity > 0 ? '+' : ''}${result.quantity})` : ''}
+                        </div>
+                    `;
+                }
+
+                return html;
+            }
+
+            renderErrorResult(result) {
+                return `
+                    <div class="text-center">
+                        <i class="bi bi-exclamation-triangle fs-1 text-warning mb-3"></i>
+                        <p class="mb-0">${result.message}</p>
+                    </div>
+                `;
+            }
+
+            addToHistory(action, scanCode, result) {
+                const entry = {
+                    timestamp: new Date().toISOString(),
+                    action: action,
+                    scanCode: scanCode,
+                    success: result.success,
+                    message: result.message,
+                    productTitle: result.product ? result.product.title : null
+                };
+
+                this.scanHistory.unshift(entry);
+                if (this.scanHistory.length > 20) {
+                    this.scanHistory = this.scanHistory.slice(0, 20);
+                }
+
+                localStorage.setItem('scanHistory', JSON.stringify(this.scanHistory));
+                this.renderScanHistory();
+            }
+
+            renderScanHistory() {
+                const historyDiv = document.getElementById('scanHistory');
+
+                if (this.scanHistory.length === 0) {
+                    historyDiv.innerHTML = `
+                        <div class="text-muted text-center py-3">
+                            <i class="bi bi-clock me-2"></i>No recent scans
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                this.scanHistory.forEach(entry => {
+                    const time = new Date(entry.timestamp).toLocaleTimeString();
+                    const icon = entry.success ? 'bi-check-circle text-success' : 'bi-x-circle text-danger';
+                    
+                    html += `
+                        <div class="scan-entry">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <i class="bi ${icon} me-2"></i>
+                                    <strong>${entry.action}</strong> - ${entry.scanCode}
+                                    ${entry.productTitle ? `<br><small class="text-muted ms-3">${entry.productTitle}</small>` : ''}
+                                </div>
+                                <small class="text-muted">${time}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                historyDiv.innerHTML = html;
+            }
+
+            clearHistory() {
+                this.scanHistory = [];
+                localStorage.removeItem('scanHistory');
+                this.renderScanHistory();
+            }
+
+            clearScanInput() {
+                document.getElementById('scanInput').value = '';
+                document.getElementById('notesInput').value = '';
+                document.getElementById('processScan').disabled = true;
+                document.getElementById('scanInput').focus();
+            }
+
+            showLoading() {
+                const resultDiv = document.getElementById('scanResult');
+                const contentDiv = document.getElementById('resultContent');
+                
+                contentDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-primary me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        Processing scan...
+                    </div>
+                `;
+                
+                resultDiv.className = 'scan-result alert alert-info';
+                resultDiv.style.display = 'block';
+            }
+
+            showError(message) {
+                const result = { success: false, message: message };
+                this.displayResult(result);
+            }
+        }
+
+        // Initialize the barcode scanner when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            new BarcodeScanner();
+        });
+    </script>
+</body>
+</html>
