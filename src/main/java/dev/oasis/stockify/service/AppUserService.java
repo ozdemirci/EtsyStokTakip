@@ -227,96 +227,26 @@ public class AppUserService {
     }
 
     /**
-     * Toggle user active status
+     * Update user password
      *
-     * @param id the user ID
+     * @param username the username to update
+     * @param newPassword the new password
      */
-    public void toggleUserStatus(Long id) {
-        AppUser user = appUserRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + id));
-        user.setIsActive(!user.getIsActive());
-        appUserRepository.save(user);
-    }
-
-    /**
-     * Delete user (soft delete by setting inactive)
-     *
-     * @param id the user ID
-     */
-    public void deleteUser(Long id) {
-        AppUser user = appUserRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: " + id));
-        user.setIsActive(false);
-        appUserRepository.save(user);
-    }
-
-    /**
-     * Bulk activate users
-     *
-     * @param userIds list of user IDs to activate
-     */
-    public void bulkActivateUsers(List<Long> userIds) {
-        List<AppUser> users = appUserRepository.findAllById(userIds);
-        users.forEach(user -> user.setIsActive(true));
-        appUserRepository.saveAll(users);
-    }
-
-    /**
-     * Bulk deactivate users
-     *
-     * @param userIds list of user IDs to deactivate
-     */
-    public void bulkDeactivateUsers(List<Long> userIds) {
-        List<AppUser> users = appUserRepository.findAllById(userIds);
-        users.forEach(user -> user.setIsActive(false));
-        appUserRepository.saveAll(users);
-    }
-
-    /**
-     * Bulk delete users (soft delete)
-     *
-     * @param userIds list of user IDs to delete
-     */
-    public void bulkDeleteUsers(List<Long> userIds) {
-        List<AppUser> users = appUserRepository.findAllById(userIds);
-        users.forEach(user -> user.setIsActive(false));
-        appUserRepository.saveAll(users);
-    }
-
-    /**
-     * Count active users in current tenant
-     */
-    public long countActiveUsers() {
+    public void updateUserPassword(String username, String newPassword) {
         String currentTenant = serviceTenantUtil.getCurrentTenant();
-        if (currentTenant != null && !currentTenant.isEmpty()) {
-            return appUserRepository.countByPrimaryTenantAndIsActive(currentTenant, true);
+        log.debug("🔑 Updating password for user: {} in tenant: {}", username, currentTenant);
+        
+        try {
+            AppUser user = appUserRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            
+            user.setPassword(passwordEncoder.encode(newPassword));
+            appUserRepository.save(user);
+            log.info("✅ Password updated for user: {} in tenant: {}", username, currentTenant);
+        } catch (Exception e) {
+            log.error("❌ Error updating password for user: {} in tenant: {}", username, currentTenant, e);
+            throw new RuntimeException("Failed to update password for user: " + username, e);
         }
-        return appUserRepository.countByIsActive(true);
-    }
-
-    /**
-     * Count users by role in current tenant
-     */
-    public long countUsersByRole(Role role) {
-        String currentTenant = serviceTenantUtil.getCurrentTenant();
-        if (currentTenant != null && !currentTenant.isEmpty()) {
-            return appUserRepository.countByPrimaryTenantAndRole(currentTenant, role);
-        }
-        return appUserRepository.countByRole(role);
-    }
-
-    /**
-     * Count admin users in current tenant
-     */
-    public long countAdminUsers() {
-        return countUsersByRole(Role.ADMIN);
-    }
-
-    /**
-     * Count regular users in current tenant
-     */
-    public long countRegularUsers() {
-        return countUsersByRole(Role.USER);
     }
 
     /**

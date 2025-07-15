@@ -272,7 +272,9 @@ public class DatabaseInitializationService implements CommandLineRunner {
             DatabaseMetaData metaData = connection.getMetaData();
             try (ResultSet rs = metaData.getTables(null, schema, "app_user", new String[]{"TABLE"})) {
                 if (rs.next()) {
-                    log.info("✓ Tables already exist in schema: {}", schema);
+                    log.info("✓ Tables already exist in schema: {}, checking for missing columns...", schema);
+                    // Check and add missing columns to existing tables
+                    addMissingColumnsToProductTable(connection, schema);
                     return;
                 }
             }
@@ -336,6 +338,9 @@ public class DatabaseInitializationService implements CommandLineRunner {
                 "    is_active boolean," +
                 "    is_featured boolean," +
                 "    etsy_product_id varchar(255)," +
+                "    barcode varchar(100) UNIQUE," +
+                "    qr_code varchar(500) UNIQUE," +
+                "    scan_enabled boolean DEFAULT TRUE," +
                 "    created_at timestamp(6)," +
                 "    updated_at timestamp(6)," +
                 "    created_by bigint," +
@@ -433,6 +438,53 @@ public class DatabaseInitializationService implements CommandLineRunner {
             log.info("👤 Created USER: {} for tenant: {}", userUsername, tenant);
         } else {
             log.info("👤 USER already exists for tenant: {}", tenant);
+        }
+    }
+
+    /**
+     * Add missing columns to the product table if they don't exist
+     */
+    private void addMissingColumnsToProductTable(Connection connection, String schema) {
+        try {
+            // Check if barcode column exists
+            DatabaseMetaData metaData = connection.getMetaData();
+            try (ResultSet rs = metaData.getColumns(null, schema, "product", "barcode")) {
+                if (!rs.next()) {
+                    log.info("🔧 Adding missing barcode column to product table in schema: {}", schema);
+                    String sql = "ALTER TABLE " + schema + ".product ADD COLUMN barcode varchar(100) UNIQUE";
+                    try (Statement stmt = connection.createStatement()) {
+                        stmt.execute(sql);
+                    }
+                }
+            }
+            
+            // Check if qr_code column exists
+            try (ResultSet rs = metaData.getColumns(null, schema, "product", "qr_code")) {
+                if (!rs.next()) {
+                    log.info("🔧 Adding missing qr_code column to product table in schema: {}", schema);
+                    String sql = "ALTER TABLE " + schema + ".product ADD COLUMN qr_code varchar(500) UNIQUE";
+                    try (Statement stmt = connection.createStatement()) {
+                        stmt.execute(sql);
+                    }
+                }
+            }
+            
+            // Check if scan_enabled column exists
+            try (ResultSet rs = metaData.getColumns(null, schema, "product", "scan_enabled")) {
+                if (!rs.next()) {
+                    log.info("🔧 Adding missing scan_enabled column to product table in schema: {}", schema);
+                    String sql = "ALTER TABLE " + schema + ".product ADD COLUMN scan_enabled boolean DEFAULT TRUE";
+                    try (Statement stmt = connection.createStatement()) {
+                        stmt.execute(sql);
+                    }
+                }
+            }
+            
+            log.info("✅ Product table schema updated in schema: {}", schema);
+            
+        } catch (Exception e) {
+            log.error("❌ Error adding missing columns to product table in schema {}: {}", schema, e.getMessage());
+            throw new RuntimeException("Failed to add missing columns to product table in schema: " + schema, e);
         }
     }
 }

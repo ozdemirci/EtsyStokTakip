@@ -2,6 +2,7 @@ package dev.oasis.stockify.config;
 
 import dev.oasis.stockify.dto.ProductCreateDTO;
 import dev.oasis.stockify.dto.UserCreateDTO;
+import dev.oasis.stockify.model.AppUser;
 import dev.oasis.stockify.model.Product;
 import dev.oasis.stockify.model.Role;
 import dev.oasis.stockify.model.StockMovement;
@@ -25,10 +26,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Slf4j
-@Configuration  // Re-enabled for data loading
+@Configuration  
 @RequiredArgsConstructor
 @Order(2)
 public class DataLoader implements CommandLineRunner {
@@ -59,6 +61,13 @@ public class DataLoader implements CommandLineRunner {
 
             log.info("✅ Multi-Tenant Data Loader completed successfully!");
             log.warn("⚠️ Remember to change default passwords in production!");
+            log.info("🔑 Default login credentials:");
+            log.info("   - admin_com / admin123");
+            log.info("   - manager_com / manager123"); 
+            log.info("   - operator_com / operator123");
+            log.info("   - admin_rezonans / admin123");
+            log.info("   - manager_rezonans / manager123");
+            log.info("   - operator_rezonans / operator123");
 
         } catch (Exception e) {
             log.error("❌ Error during data loading: {}", e.getMessage(), e);
@@ -155,22 +164,28 @@ public class DataLoader implements CommandLineRunner {
     private void createSampleUsers(String tenantId) {
         // Create 3 sample users per tenant
         String[] usernames = { "admin", "manager", "operator" };
+        String[] passwords = { "admin123", "manager123", "operator123" }; // Explicit passwords for clarity
         Role[] roles = { Role.ADMIN, Role.USER, Role.USER };
 
         for (int i = 0; i < 3; i++) {
             String username = "public".equals(tenantId) ? usernames[i] : usernames[i] + "_" + tenantId;
 
-            if (appUserRepository.findByUsername(username).isEmpty()) {
-                UserCreateDTO dto = new UserCreateDTO();
-                dto.setUsername(username);
-                dto.setPassword(usernames[i] + "123");
-                dto.setRole(roles[i]);
-                dto.setPrimaryTenant(tenantId);
-                dto.setAccessibleTenants(tenantId);
-
-                appUserService.saveUser(dto);
-                log.info("✅ Created user: {} for tenant: {}", username, tenantId);
+            // Delete existing user if exists and recreate with correct password
+            Optional<AppUser> existingUser = appUserRepository.findByUsername(username);
+            if (existingUser.isPresent()) {
+                appUserRepository.delete(existingUser.get());
+                log.info("🗑️ Deleted existing user: {} in tenant: {}", username, tenantId);
             }
+
+            UserCreateDTO dto = new UserCreateDTO();
+            dto.setUsername(username);
+            dto.setPassword(passwords[i]); // Use explicit password
+            dto.setRole(roles[i]);
+            dto.setPrimaryTenant(tenantId);
+            dto.setAccessibleTenants(tenantId);
+
+            appUserService.saveUser(dto);
+            log.info("✅ Created user: {} for tenant: {} with password: {}", username, tenantId, passwords[i]);
         }
         
     }
